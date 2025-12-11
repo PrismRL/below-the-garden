@@ -24,6 +24,11 @@ function GameLevelState:__new(display)
 
    -- Place the player character at a starting location
    builder:addActor(prism.actors.Player(), 12, 12)
+   builder:addActor(prism.actors.Sqeeto(), 13, 12)
+   builder:addActor(prism.actors.Sqeeto(), 13, 17)
+   builder:addActor(prism.actors.Sqeeto(), 12, 13)
+   builder:addActor(prism.actors.Sqeeto(), 10, 12)
+   builder:addActor(prism.actors.Sqeeto(), 9, 9)
 
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem())
@@ -90,6 +95,7 @@ function GameLevelState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
+   love.graphics.scale(3, 3)
    self.display:draw()
 
    -- custom love2d drawing goes here!

@@ -6,7 +6,7 @@ prism.registerActor("Player", function()
       prism.components.Collider(),
       prism.components.PlayerController(),
       prism.components.Senses(),
-      prism.components.Sight { range = 64, fov = true },
+      prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
    }
 end)
