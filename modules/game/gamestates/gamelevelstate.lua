@@ -30,6 +30,9 @@ function GameLevelState:__new(display)
    builder:addActor(prism.actors.Sqeeto(), 10, 12)
    builder:addActor(prism.actors.Sqeeto(), 9, 9)
 
+   local camp = prism.LevelBuilder.fromLz4("camp.lz4")
+   builder:blit(camp, 16, 16)
+
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem())
 
@@ -83,7 +86,6 @@ function GameLevelState:draw()
       -- Render the level using the player’s senses
       self.display:beginCamera()
       self.display:putSenses(primary, secondary, self.level)
-      self.display:put(position.x, position.y + 1, 255, prism.Color4.BLUE, nil, 1)
       self.display:endCamera()
    end
 

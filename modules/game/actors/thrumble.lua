@@ -1,0 +1,22 @@
+local Animation = spectrum.Animation
+spectrum.registerAnimation("Thrumble", function()
+   local animation = Animation(Animation.buildFrames { range = "269-270", color = prism.Color4.RED }, { 3, 0.2 })
+   animation:update(love.math.random())
+   return animation
+end)
+
+prism.registerActor("Thrumble", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("Thrumble"),
+      prism.components.IdleAnimation("Thrumble"),
+      prism.components.Drawable {
+         index = 269,
+         color = prism.Color4.RED,
+         background = prism.Color4.BLACK,
+         layer = 3,
+      },
+      prism.components.Mover { "walk" },
+      prism.components.Position(),
+      prism.components.Collider(),
+   }
+end)
