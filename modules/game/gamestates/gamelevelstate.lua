@@ -69,6 +69,7 @@ function GameLevelState:draw()
 
    local player = self.level:query(prism.components.PlayerController):first()
 
+   love.graphics.scale(3, 3)
    if not player then
       -- You would normally transition to a game over state
       self.display:putLevel(self.level)
@@ -82,20 +83,17 @@ function GameLevelState:draw()
       -- Render the level using the player’s senses
       self.display:beginCamera()
       self.display:putSenses(primary, secondary, self.level)
+      self.display:put(position.x, position.y + 1, 255, prism.Color4.BLUE, nil, 1)
       self.display:endCamera()
    end
 
    -- custom terminal drawing goes here!
-
-   -- Say hello!
-   self.display:print(1, 1, "Hello prism!")
 
    -- Actually render the terminal out and present it to the screen.
    -- You could use love2d to translate and say center a smaller terminal or
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
-   love.graphics.scale(3, 3)
    self.display:draw()
 
    -- custom love2d drawing goes here!

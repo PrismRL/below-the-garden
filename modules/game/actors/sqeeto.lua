@@ -4,6 +4,8 @@ prism.registerActor("Sqeeto", function()
       prism.components.Drawable {
          index = 257,
          color = prism.Color4.YELLOW,
+         background = prism.Color4.BLACK,
+         layer = 3,
       },
       prism.components.SqeetoController(),
       prism.components.Mover { "fly" },

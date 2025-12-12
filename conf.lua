@@ -4,5 +4,6 @@ function love.conf(t)
    t.window.width = 1200
    t.window.height = 720
    t.window.usedpiscale = false
+   t.window.title = "Below the Garden"
    -- Other configurations...
 end
