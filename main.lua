@@ -4,11 +4,14 @@ require "prism"
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
+prism.loadModule("prism/extra/inventory")
+prism.loadModule("modules/equipment")
+prism.loadModule("prism/extra/condition")
+prism.loadModule("prism/extra/log")
 prism.loadModule("modules/base")
 prism.loadModule("modules/game")
 
--- Used by Geometer for new maps
-prism.defaultCell = prism.cells.Pit
+prism.logger.setOptions { level = "debug" }
 
 -- Load a sprite atlas and configure the terminal-style display,
 love.graphics.setDefaultFilter("nearest", "nearest")

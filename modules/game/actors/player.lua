@@ -8,5 +8,6 @@ prism.registerActor("Player", function()
       prism.components.Senses(),
       prism.components.Sight { range = 8, fov = true },
       prism.components.Mover { "walk" },
+      prism.components.Health(5),
    }
 end)

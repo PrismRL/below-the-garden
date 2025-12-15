@@ -18,5 +18,12 @@ prism.registerActor("Thrumble", function()
       prism.components.Mover { "walk" },
       prism.components.Position(),
       prism.components.Collider(),
+      prism.components.Senses(),
+      prism.components.Sight { fov = true, range = 4 },
+      prism.components.Inventory { limitCount = 1 },
+      prism.components.Equipper { "weapon" },
+      prism.components.ThrumbleController(),
+      prism.components.Attacker(1),
+      prism.components.Health(6),
    }
 end)

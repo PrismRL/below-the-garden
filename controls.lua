@@ -16,7 +16,8 @@ return spectrum.Input.Controls {
       move_downright = { "c", "n" },
       wait           = "x",
       newgame        = "n",
-      quit           = "q"
+      quit           = "q",
+      restart        = "r"
    },
    -- Pairs are controls that map to either 4 or 8 directions.
    -- With only 4 directions, the order is up, left, right, down.

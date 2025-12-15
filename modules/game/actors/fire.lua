@@ -23,5 +23,6 @@ prism.registerActor("Fire", function()
       },
       prism.components.Position(),
       prism.components.IdleAnimation("Fire"),
+      prism.components.Camp(),
    }
 end)

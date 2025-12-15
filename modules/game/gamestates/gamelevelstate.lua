@@ -39,11 +39,24 @@ function GameLevelState:__new(display)
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display)
+   print(self.level:query(prism.components.Camp):first())
+   self.level:query(prism.components.Inventory):each(function(thrumble)
+      if thrumble:getName() == "Thrumble" then
+         local campFire = thrumble:expect(prism.components.Senses):query(self.level, prism.components.Camp):first()
+         if campFire then
+            print("found camp")
+            thrumble:addRelation(prism.relations.Home, campFire)
+         end
+      end
+   end)
 end
 
 function GameLevelState:handleMessage(message)
    self.super.handleMessage(self, message)
 
+   if prism.messages.LoseMessage:is(message) then
+      self.manager:enter(spectrum.gamestates.GameOverState(self.display))
+   end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
    -- here.
@@ -79,8 +92,8 @@ function GameLevelState:draw()
    else
       local position = player:expectPosition()
 
-      local x, y = self.display:getCenterOffset(position:decompose())
-      self.display:setCamera(x, y)
+      -- local x, y = self.display:getCenterOffset(position:decompose())
+      -- self.display:setCamera(x, y)
 
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses
