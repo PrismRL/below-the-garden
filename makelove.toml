@@ -1,4 +1,4 @@
-name = "prism-template"
+name = "below-the-garden"
 default_targets = ["win32", "win64", "appimage", "lovejs"]
 build_directory = "makelove-build"
 

@@ -14,6 +14,7 @@ return spectrum.Input.Controls {
       move_downleft  = { "z", "b" },
       move_down      = { "s", "j", "axis:lefty-" },
       move_downright = { "c", "n" },
+      pickup         = "p",
       wait           = "x",
       newgame        = "n",
       quit           = "q",
