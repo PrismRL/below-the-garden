@@ -24,6 +24,7 @@ function GameLevelState:__new(display, overlay)
 
    -- Place the player character at a starting location
    builder:addActor(prism.actors.Player(), 12, 12)
+   builder:addActor(prism.actors.Snip(), 10, 10)
    builder:addActor(prism.actors.Prism(), 12, 13)
    builder:addActor(prism.actors.Sqeeto(), 13, 12)
    builder:addActor(prism.actors.Sqeeto(), 13, 17)
@@ -53,7 +54,7 @@ function GameLevelState:handleMessage(message)
    self.super.handleMessage(self, message)
 
    if prism.messages.LoseMessage:is(message) then
-      self.manager:enter(spectrum.gamestates.GameOverState(self.display))
+      self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
    end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
@@ -65,6 +66,12 @@ end
 
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
+   local inventory = owner:expect(prism.components.Inventory)
+   local item = inventory:query():first()
+   if item and item:has(prism.components.IdleAnimation) then
+      item:expect(prism.components.IdleAnimation).animation:update(dt)
+   end
+
    -- Controls need to be updated each frame.
    controls:update()
 
@@ -85,7 +92,8 @@ function GameLevelState:updateDecision(dt, owner, decision)
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
 end
 
-local borderConfig = { color = prism.Color4.DARKGREY, cornerColor = prism.Color4.PURPLE }
+local windowBorder = { color = prism.Color4.DARKGREY, cornerColor = prism.Color4.LAVENDER }
+local containerBorder = { color = prism.Color4.LAVENDER }
 function GameLevelState:draw()
    self.display:clear()
    self.overlay:clear()
@@ -109,11 +117,20 @@ function GameLevelState:draw()
 
       local inventory = player:expect(prism.components.Inventory)
       local item = inventory:query():first()
-      if item then self.overlay:putActor(2, self.overlay.height - 1, item) end
-   end
+      self.overlay:border(1, 1, self.overlay.width, self.overlay.height, windowBorder)
+      self.overlay:border(1, self.overlay.height - 2, 3, 3, containerBorder)
+      self.overlay:put(2, self.overlay.height - 1, 157, prism.Color4.DARKGREY)
+      self.overlay:border(4, self.overlay.height - 2, 3, 3, containerBorder)
+      self.overlay:put(5, self.overlay.height - 1, 158, prism.Color4.DARKGREY)
+      self.overlay:border(7, self.overlay.height - 2, 3, 3, containerBorder)
+      self.overlay:put(8, self.overlay.height - 1, 160, prism.Color4.DARKGREY)
 
-   self.overlay:border(1, 1, self.overlay.width, self.overlay.height, borderConfig)
-   self.overlay:border(1, self.overlay.height - 2, 3, 3, borderConfig)
+      if item and item:has(prism.components.IdleAnimation) then
+         item:expect(prism.components.IdleAnimation).animation:draw(self.overlay, 8, self.overlay.height - 1)
+      elseif item then
+         self.overlay:putActor(8, self.overlay.height - 1, item)
+      end
+   end
 
    -- custom terminal drawing goes here!
 
