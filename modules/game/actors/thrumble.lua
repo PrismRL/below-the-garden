@@ -20,7 +20,7 @@ prism.registerActor("Thrumble", function()
       prism.components.Collider(),
       prism.components.Senses(),
       prism.components.Sight { fov = true, range = 4 },
-      prism.components.Inventory { limitCount = 1 },
+      prism.components.Inventory { limitCount = 1, limitWeight = 1, limitVolume = 1 },
       prism.components.Equipper { "weapon" },
       prism.components.ThrumbleController(),
       prism.components.Attacker(1),

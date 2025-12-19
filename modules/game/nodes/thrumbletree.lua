@@ -18,7 +18,7 @@ ThrumbleTree.children = {
          },
          BT.Sequence {
             prism.nodes.FindWeaponBehavior,
-            prism.nodes.PerformOnBehavior(prism.actions.Pickup),
+            prism.nodes.PerformOnBehavior(prism.actions.Equip),
             prism.nodes.MoveTowardTargetBehavior,
          },
       },

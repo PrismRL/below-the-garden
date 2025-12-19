@@ -89,11 +89,41 @@ function GameLevelState:updateDecision(dt, owner, decision)
       if self:setAction(pickup) then return end
    end
 
+   if controls.use.pressed then
+      local eat = prism.actions.Eat(owner, item)
+      if self:setAction(eat) then return end
+   end
+
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
 end
 
 local windowBorder = { color = prism.Color4.DARKGREY, cornerColor = prism.Color4.LAVENDER }
 local containerBorder = { color = prism.Color4.LAVENDER }
+
+--- @param player Actor
+function GameLevelState:putHUD(player)
+   local inventory = player:expect(prism.components.Inventory)
+   local item = inventory:query():first()
+   self.overlay:border(1, 1, self.overlay.width, self.overlay.height, windowBorder)
+   local hp = player:expect(prism.components.Health).hp
+
+   self.overlay:border(1, self.overlay.height - 2, 5, 3, containerBorder)
+   self.overlay:put(2, self.overlay.height - 1, 20, prism.Color4.RED)
+   self.overlay:print(3, self.overlay.height - 1, (hp < 10 and "0" or "") .. tostring(hp), prism.Color4.RED)
+   self.overlay:border(6, self.overlay.height - 2, 3, 3, containerBorder)
+   self.overlay:put(7, self.overlay.height - 1, 157, prism.Color4.DARKGREY)
+   self.overlay:border(9, self.overlay.height - 2, 3, 3, containerBorder)
+   self.overlay:put(10, self.overlay.height - 1, 158, prism.Color4.DARKGREY)
+   self.overlay:border(12, self.overlay.height - 2, 3, 3, containerBorder)
+   self.overlay:put(13, self.overlay.height - 1, 160, prism.Color4.DARKGREY)
+
+   if item and item:has(prism.components.IdleAnimation) then
+      item:expect(prism.components.IdleAnimation).animation:draw(self.overlay, 13, self.overlay.height - 1)
+   elseif item then
+      self.overlay:putActor(13, self.overlay.height - 1, item)
+   end
+end
+
 function GameLevelState:draw()
    self.display:clear()
    self.overlay:clear()
@@ -104,8 +134,6 @@ function GameLevelState:draw()
       -- You would normally transition to a game over state
       self.display:putLevel(self.level)
    else
-      local position = player:expectPosition()
-
       -- local x, y = self.display:getCenterOffset(position:decompose())
       -- self.display:setCamera(x, y)
 
@@ -115,21 +143,7 @@ function GameLevelState:draw()
       self.display:putSenses(primary, secondary, self.level)
       self.display:endCamera()
 
-      local inventory = player:expect(prism.components.Inventory)
-      local item = inventory:query():first()
-      self.overlay:border(1, 1, self.overlay.width, self.overlay.height, windowBorder)
-      self.overlay:border(1, self.overlay.height - 2, 3, 3, containerBorder)
-      self.overlay:put(2, self.overlay.height - 1, 157, prism.Color4.DARKGREY)
-      self.overlay:border(4, self.overlay.height - 2, 3, 3, containerBorder)
-      self.overlay:put(5, self.overlay.height - 1, 158, prism.Color4.DARKGREY)
-      self.overlay:border(7, self.overlay.height - 2, 3, 3, containerBorder)
-      self.overlay:put(8, self.overlay.height - 1, 160, prism.Color4.DARKGREY)
-
-      if item and item:has(prism.components.IdleAnimation) then
-         item:expect(prism.components.IdleAnimation).animation:draw(self.overlay, 8, self.overlay.height - 1)
-      elseif item then
-         self.overlay:putActor(8, self.overlay.height - 1, item)
-      end
+      self:putHUD(player)
    end
 
    -- custom terminal drawing goes here!

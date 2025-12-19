@@ -14,7 +14,8 @@ end
 spectrum.registerAnimation("FrogTongue", function(...)
    return spectrum.Animation(
       { { index = 263 }, { index = 379 }, tongueFrame2, tongueFrame3, tongueFrame2, { index = 379 } },
-      { 1, 0.05, 0.05, 0.5, 0.05, 0.05 }
+      { 1, 0.05, 0.05, 0.5, 0.05, 0.05 },
+      "pauseAtEnd"
    )
 end)
 
@@ -26,10 +27,12 @@ prism.registerActor("Frog", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Frog"),
       prism.components.Drawable { index = 224, layer = 3 },
-      prism.components.IdleAnimation("FrogTongue"),
+      prism.components.IdleAnimation("FrogIdle"),
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Mover { "walk" },
-      prism.components.SqeetoController(),
+      prism.components.Senses(),
+      prism.components.Sight { range = 6, fov = true },
+      prism.components.FrogController(),
    }
 end)
