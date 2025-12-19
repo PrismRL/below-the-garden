@@ -4,7 +4,7 @@ require "prism"
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
-prism.loadModule("prism/extra/inventory")
+prism.loadModule("modules/inventory")
 prism.loadModule("modules/equipment")
 prism.loadModule("prism/extra/condition")
 prism.loadModule("prism/extra/log")

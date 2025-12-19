@@ -28,8 +28,9 @@ end
 
 --- Checks if the given equipment can be equipped with current available slots.
 --- @param equipment Equipment|Actor The equipment to test.
+--- @param ifEmpty? boolean
 --- @return boolean -- True if the equipment can be equipped, false otherwise.
-function Equipper:canEquip(equipment)
+function Equipper:canEquip(equipment, ifEmpty)
    if prism.Actor:is(equipment) then
       equipment = equipment:get(prism.components.Equipment)
       if not equipment then return false end
@@ -38,9 +39,7 @@ function Equipper:canEquip(equipment)
    local counts = {}
 
    for i, slot in ipairs(self.slots) do
-      if not self.equipped[slot.name] then
-         counts[slot.category] = (counts[slot.category] or 0) + 1
-      end
+      if not self.equipped[slot.name] or ifEmpty then counts[slot.category] = (counts[slot.category] or 0) + 1 end
    end
 
    for category, count in pairs(equipment.requiredCategories) do

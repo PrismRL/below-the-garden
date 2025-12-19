@@ -67,9 +67,19 @@ end
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
    local inventory = owner:expect(prism.components.Inventory)
-   local item = inventory:query():first()
-   if item and item:has(prism.components.IdleAnimation) then
-      item:expect(prism.components.IdleAnimation).animation:update(dt)
+   local idle
+   local held
+   for slot, equipped in pairs(owner:expect(prism.components.Equipper).equipped) do
+      if equipped then
+         idle = equipped:get(prism.components.IdleAnimation)
+         if idle then idle.animation:update(dt) end
+      end
+      if slot == "held" then held = equipped end
+   end
+   local pocket = inventory:query():first()
+   if pocket then
+      idle = pocket:get(prism.components.IdleAnimation)
+      if idle then idle.animation:update(dt) end
    end
 
    -- Controls need to be updated each frame.
@@ -90,11 +100,25 @@ function GameLevelState:updateDecision(dt, owner, decision)
    end
 
    if controls.use.pressed then
-      local eat = prism.actions.Eat(owner, item)
+      local eat = prism.actions.Eat(owner, held)
       if self:setAction(eat) then return end
    end
 
+   if controls.swap.pressed then
+      local swap = prism.actions.Swap(owner, pocket)
+      if self:setAction(swap) then return end
+   end
+
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
+end
+
+--- @param item? Actor
+function GameLevelState:putItem(item, x, y)
+   if item and item:has(prism.components.IdleAnimation) then
+      item:expect(prism.components.IdleAnimation).animation:draw(self.overlay, x, y)
+   elseif item then
+      self.overlay:putActor(x, y, item)
+   end
 end
 
 local windowBorder = { color = prism.Color4.DARKGREY, cornerColor = prism.Color4.LAVENDER }
@@ -103,7 +127,7 @@ local containerBorder = { color = prism.Color4.LAVENDER }
 --- @param player Actor
 function GameLevelState:putHUD(player)
    local inventory = player:expect(prism.components.Inventory)
-   local item = inventory:query():first()
+   local equipper = player:expect(prism.components.Equipper)
    self.overlay:border(1, 1, self.overlay.width, self.overlay.height, windowBorder)
    local hp = player:expect(prism.components.Health).hp
 
@@ -111,17 +135,22 @@ function GameLevelState:putHUD(player)
    self.overlay:put(2, self.overlay.height - 1, 20, prism.Color4.RED)
    self.overlay:print(3, self.overlay.height - 1, (hp < 10 and "0" or "") .. tostring(hp), prism.Color4.RED)
    self.overlay:border(6, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(7, self.overlay.height - 1, 157, prism.Color4.DARKGREY)
+   self.overlay:put(7, self.overlay.height - 1, 28, prism.Color4.DARKGREY)
    self.overlay:border(9, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(10, self.overlay.height - 1, 158, prism.Color4.DARKGREY)
+   self.overlay:put(10, self.overlay.height - 1, 266, prism.Color4.DARKGREY)
    self.overlay:border(12, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(13, self.overlay.height - 1, 160, prism.Color4.DARKGREY)
+   self.overlay:put(13, self.overlay.height - 1, 157, prism.Color4.DARKGREY)
+   self.overlay:border(15, self.overlay.height - 2, 3, 3, containerBorder)
+   self.overlay:put(16, self.overlay.height - 1, 158, prism.Color4.DARKGREY)
 
-   if item and item:has(prism.components.IdleAnimation) then
-      item:expect(prism.components.IdleAnimation).animation:draw(self.overlay, 13, self.overlay.height - 1)
-   elseif item then
-      self.overlay:putActor(13, self.overlay.height - 1, item)
-   end
+   local held = equipper:get("held")
+   local weapon = equipper:get("weapon")
+   local amulet = equipper:get("amulet")
+   local pocket = inventory:query():first()
+   self:putItem(held, 7, self.overlay.height - 1)
+   self:putItem(pocket, 10, self.overlay.height - 1)
+   self:putItem(weapon, 13, self.overlay.height - 1)
+   self:putItem(amulet, 16, self.overlay.height - 1)
 end
 
 function GameLevelState:draw()

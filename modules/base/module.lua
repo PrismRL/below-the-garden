@@ -14,3 +14,9 @@ function Display:border(x, y, width, height, config)
    self:put(x, y1, 289, config.cornerColor or config.color)
    self:put(x1, y1, 314, config.cornerColor or config.color)
 end
+
+--- @class QuickAction : Action
+local QuickAction = prism.Action:extend "QuickAction"
+QuickAction.abstract = true
+
+prism.register(QuickAction)

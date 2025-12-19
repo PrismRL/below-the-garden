@@ -5,10 +5,11 @@ local Name = prism.components.Name
 -- and can be equipped by the acting entity.
 -- stylua: ignore
 local EquipTarget = prism.Target(prism.components.Equipment)
+   :outsideLevel()
    :filter(function(level, owner, target)
       local equipper = owner:expect(prism.components.Equipper)
       return equipper:canEquip(target)
-   end):range(0)
+   end)
 
 --- @class Equip : Action
 --- Action that equips an item from the actor's inventory into the appropriate slot(s).
@@ -38,22 +39,14 @@ function Equip:perform(level, actor)
       end
    end
 
-   level:removeActor(actor)
+   if level:hasActor(actor) then level:removeActor(actor) end
 
    local conditions = self.owner:get(prism.components.ConditionHolder)
-   if conditions and equipment.condition then
-      equipper.statusMap[actor] = conditions:add(equipment.condition)
-   end
+   if conditions and equipment.condition then equipper.statusMap[actor] = conditions:add(equipment.condition) end
 
    if Log then
       Log.addMessage(self.owner, "You equip the %s.", Name.get(actor))
-      Log.addMessageSensed(
-         level,
-         self,
-         "The %s equips the %s.",
-         Name.get(self.owner),
-         Name.get(actor)
-      )
+      Log.addMessageSensed(level, self, "The %s equips the %s.", Name.get(self.owner), Name.get(actor))
    end
 end
 

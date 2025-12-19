@@ -2,7 +2,7 @@
 --- @overload fun(owner: Actor, ...): Eat
 local Eat = prism.Action:extend "Eat"
 Eat.requiredComponents = { prism.components.Health }
-Eat.targets = { prism.targets.InventoryTarget(prism.components.Eatable) }
+Eat.targets = { prism.targets.EquippedTarget("held", prism.components.Eatable) }
 
 --- @param level Level
 function Eat:canPerform(level, eatable)
@@ -14,7 +14,7 @@ end
 function Eat:perform(level, eatable)
    local healing = eatable:expect(prism.components.Eatable).healing
    self.owner:expect(prism.components.Health):heal(healing)
-   self.owner:expect(prism.components.Inventory):removeItem(eatable)
+   level:perform(prism.actions.Unequip(self.owner, eatable))
    level:yield(prism.messages.AnimationMessage {
       actor = self.owner,
       y = -1,

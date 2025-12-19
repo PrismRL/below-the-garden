@@ -13,7 +13,12 @@
         "geometer"
     ],
     "Lua.workspace.library": [
-        "prism"
+        "prism/engine",
+        "prism/spectrum",
+        "prism/geometer",
+        "prism/extra/sight",
+        "prism/extra/condition",
+        "definitions"
     ],
     "completion.autoRequire": false,
     "type.weakUnionCheck": true

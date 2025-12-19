@@ -20,6 +20,7 @@ prism.registerActor("Snip", function()
       prism.components.Collider { allowedMovetypes = { "walk", "fly" } },
       prism.components.Position(),
       prism.components.Item(),
+      prism.components.Equipment("held"),
       prism.components.Senses(),
       prism.components.Sight { range = 5, fov = true },
       prism.components.Eatable(1),
