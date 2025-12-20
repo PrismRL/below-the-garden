@@ -93,7 +93,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
    end
 
    if controls.pickup.pressed then
-      local target = self.level:query(prism.components.Item):at(owner:getPosition():decompose()):first()
+      local target = self.level:query(prism.components.Equipment):at(owner:getPosition():decompose()):first()
 
       local pickup = prism.actions.Pickup(owner, target)
       if self:setAction(pickup) then return end

@@ -17,7 +17,6 @@ Move.requiredComponents = {
 --- @param destination Vector2
 function Move:canPerform(level, destination)
    local mover = self.owner:expect(prism.components.Mover)
-   print(mover.mask)
    return level:getCellPassableByActor(destination.x, destination.y, self.owner, mover.mask)
 end
 

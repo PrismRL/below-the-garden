@@ -43,7 +43,7 @@ function Equipper:canEquip(equipment, ifEmpty)
    end
 
    for category, count in pairs(equipment.requiredCategories) do
-      if counts[category] and counts[category] < count then return false end
+      if (not counts[category]) or (counts[category] and counts[category] < count) then return false end
    end
 
    return true
