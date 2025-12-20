@@ -22,8 +22,9 @@ function GameLevelState:__new(display, overlay)
    -- Add a small block of walls within the map
    builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
 
+   local player = prism.actors.Player()
    -- Place the player character at a starting location
-   builder:addActor(prism.actors.Player(), 12, 12)
+   builder:addActor(player, 12, 12)
    builder:addActor(prism.actors.Snip(), 10, 10)
    builder:addActor(prism.actors.Prism(), 12, 13)
    builder:addActor(prism.actors.Sqeeto(), 13, 12)
@@ -36,7 +37,13 @@ function GameLevelState:__new(display, overlay)
    -- builder:blit(camp, 13, 13)
 
    -- Add systems
-   builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem())
+   --- @type LightSystem
+   self.lightSystem = prism.systems.LightSystem()
+   builder:addSystems(prism.systems.SensesSystem(), prism.systems.LightSightSystem(), self.lightSystem)
+   --- @param drawable Drawable
+   self.lightPass = function(actor, x, y, drawable)
+      drawable.color = self.lightSystem:getRTValuePerspective(x, y, player) or drawable.color
+   end
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
@@ -66,6 +73,7 @@ end
 
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
+   self.lightSystem:update()
    local inventory = owner:expect(prism.components.Inventory)
    local idle
    local held
@@ -143,13 +151,13 @@ function GameLevelState:putHUD(player)
    self.overlay:put(2, self.overlay.height - 1, 20, prism.Color4.RED)
    self.overlay:print(3, self.overlay.height - 1, (hp < 10 and "0" or "") .. tostring(hp), prism.Color4.RED)
    self.overlay:border(6, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(7, self.overlay.height - 1, 28, prism.Color4.DARKGREY)
+   self.overlay:put(8, self.overlay.height, 28, prism.Color4.DARKGREY)
    self.overlay:border(9, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(10, self.overlay.height - 1, 266, prism.Color4.DARKGREY)
+   self.overlay:put(11, self.overlay.height, 266, prism.Color4.DARKGREY)
    self.overlay:border(12, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(13, self.overlay.height - 1, 157, prism.Color4.DARKGREY)
+   self.overlay:put(14, self.overlay.height, 157, prism.Color4.DARKGREY)
    self.overlay:border(15, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(16, self.overlay.height - 1, 158, prism.Color4.DARKGREY)
+   self.overlay:put(17, self.overlay.height, 158, prism.Color4.DARKGREY)
 
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
@@ -160,7 +168,7 @@ function GameLevelState:putHUD(player)
    self:putItem(weapon, 13, self.overlay.height - 1)
    self:putItem(amulet, 16, self.overlay.height - 1)
 end
-
+local dummy = prism.Color4()
 function GameLevelState:draw()
    self.display:clear()
    self.overlay:clear()
@@ -177,7 +185,52 @@ function GameLevelState:draw()
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses
       self.display:beginCamera()
+      self.display:pushModifier(self.lightPass)
+      self.display:pushModifier(function(entity, x, y, drawable)
+         local sight = self.decision.actor:get(prism.components.Sight)
+         local darkvision = sight and sight.darkvision or 0
+
+         local light = self.lightSystem:getRTValuePerspective(x, y, self.decision.actor)
+         light = light or dummy
+
+         -- Preserve original color
+         local base = drawable.color:copy()
+
+         -- Apply lighting normally
+         if prism.Actor:is(entity) then
+            local value = math.min(light:average() * 2, 1)
+            drawable.color = drawable.color * value
+         else
+            drawable.color.r = drawable.color.r * light.r
+            drawable.color.g = drawable.color.g * light.g
+            drawable.color.b = drawable.color.b * light.b
+         end
+
+         -- Linear darkness (no perceptual luminance)
+         local brightness = drawable.color:average()
+         local darkness = math.min(math.max(1 - brightness, 0), 1)
+         darkness = math.max(darkness - darkvision, 0)
+
+         -- Knee at 0.25: everything below stays bright
+         if darkness <= 0.6 then
+            darkness = 0
+         else
+            -- Remap [0.25 .. 1] → [0 .. 1]
+            darkness = (darkness - 0.6) / 0.4
+         end
+
+         -- Shape the curve (optional but recommended)
+         local restore = math.pow(darkness, 1.5)
+         local alphaLoss = darkness * 0.70
+
+         -- Lerp back toward base color
+         drawable.color = drawable.color:lerp(base, restore)
+
+         -- Fade opacity as darkness increases
+         drawable.color.a = base.a * (1 - alphaLoss)
+      end)
       self.display:putSenses(primary, secondary, self.level)
+      self.display:popModifier()
       self.display:endCamera()
 
       self:putHUD(player)

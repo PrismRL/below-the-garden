@@ -18,6 +18,7 @@
         "prism/geometer",
         "prism/extra/sight",
         "prism/extra/condition",
+        "prism/extra/lighting",
         "definitions"
     ],
     "completion.autoRequire": false,
