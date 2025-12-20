@@ -33,7 +33,7 @@ function GameLevelState:__new(display, overlay)
    builder:addActor(prism.actors.Sqeeto(), 9, 9)
 
    local camp = prism.LevelBuilder.fromLz4("camp.lz4")
-   builder:blit(camp, 13, 13)
+   -- builder:blit(camp, 13, 13)
 
    -- Add systems
    builder:addSystems(prism.systems.SensesSystem(), prism.systems.SightSystem())
@@ -107,6 +107,14 @@ function GameLevelState:updateDecision(dt, owner, decision)
    if controls.swap.pressed then
       local swap = prism.actions.Swap(owner, pocket)
       if self:setAction(swap) then return end
+   end
+
+   if controls.throw.pressed then
+      self.targets = {}
+      self.selectedAction = prism.actions.Throw
+      self.manager:push(
+         spectrum.gamestates.GeneralTargetHandler(self.overlay, self, self.targets, self.selectedAction:getTarget(1))
+      )
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
@@ -194,6 +202,13 @@ end
 function GameLevelState:resume()
    -- Run senses when we resume from e.g. Geometer.
    self.level:getSystem(prism.systems.SensesSystem):postInitialize(self.level)
+
+   if self.targets then
+      local action = self.selectedAction(self.decision.actor, unpack(self.targets))
+      local success, err = self:setAction(action)
+      if not success then prism.logger.info(err) end
+      self.targets = nil
+   end
 end
 
 return GameLevelState

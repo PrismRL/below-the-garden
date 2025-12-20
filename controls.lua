@@ -17,10 +17,15 @@ return spectrum.Input.Controls {
       pickup         = "p",
       use            = "p",
       swap           = { "lshift", "rshift" },
+      throw          = "t",
       wait           = "x",
       newgame        = "n",
       quit           = "q",
-      restart        = "r"
+      restart        = "r",
+      next           = "tab",
+      back           = "backspace",
+      select         = "return"
+
    },
    -- Pairs are controls that map to either 4 or 8 directions.
    -- With only 4 directions, the order is up, left, right, down.

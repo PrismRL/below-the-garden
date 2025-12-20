@@ -11,5 +11,7 @@ prism.registerActor("Player", function()
       prism.components.Health(5),
       prism.components.Inventory { limitCount = 1 },
       prism.components.Equipper { "weapon", "held", "amulet" },
+      prism.components.Thrower(5),
+      prism.components.ConditionHolder(),
    }
 end)
