@@ -198,7 +198,7 @@ function GameLevelState:draw()
 
          -- Apply lighting normally
          if prism.Actor:is(entity) then
-            local value = math.min(light:average() * 2, 1)
+            local value = math.min(light:average(), 1)
             drawable.color = drawable.color * value
          else
             drawable.color.r = drawable.color.r * light.r
