@@ -307,8 +307,15 @@ local function tryAccrete(builder, rng)
       builder:set(ax, ay, prism.cells.Floor())
 
       -- consume doors
-      builder:removeActor(anchor)
-      builder:removeActor(rdoor)
+      for _, door in ipairs(builder:query(prism.components.DoorProxy):at(ax, ay):gather()) do
+         builder:removeActor(door)
+      end
+
+      for _, door in ipairs(builder:query(prism.components.DoorProxy):at(ox, oy):gather()) do
+         builder:removeActor(door)
+      end
+
+      builder:addActor(prism.actors.Door(), ax, ay)
 
       return true
    end
@@ -337,6 +344,85 @@ local function randomFloor(builder, rng)
    return floors[rng:random(1, #floors)]
 end
 
+--- Turns isolated floor tiles into walls.
+--- Any floor with >= wallThreshold surrounding wall/nil neighbors is filled.
+--- @param builder LevelBuilder
+--- @param wallThreshold integer
+local function collapseIsolatedFloors(builder, wallThreshold)
+   wallThreshold = wallThreshold or 5
+
+   local toFill = {}
+
+   for x = 1, boundsx do
+      for y = 1, boundsy do
+         if builder:get(x, y) then -- floor
+            local walls = 0
+
+            for _, offset in ipairs(prism.Vector2.neighborhood4) do
+               local n = builder:get(x + offset.x, y + offset.y)
+               if not n then
+                  walls = walls + 1
+               end
+            end
+
+            if walls >= wallThreshold then
+               table.insert(toFill, { x = x, y = y })
+            end
+         end
+      end
+   end
+
+   for _, p in ipairs(toFill) do
+      builder:set(p.x, p.y, prism.cells.Wall())
+   end
+end
+
+--- Removes thin / isolated wall tiles (probabilistic).
+--- Assumes: nil = wall, non-nil = floor
+--- @param rng RNG
+--- @param builder LevelBuilder
+local function collapseThinWalls(rng, builder)
+   local toCarve = {}
+
+   for x = 1, boundsx do
+      for y = 1, boundsy do
+         if not builder:get(x, y) then -- wall (nil)
+            local n = builder:get(x, y - 1)
+            local s = builder:get(x, y + 1)
+            local w = builder:get(x - 1, y)
+            local e = builder:get(x + 1, y)
+
+            local floors = 0
+            if n then floors = floors + 1 end
+            if s then floors = floors + 1 end
+            if w then floors = floors + 1 end
+            if e then floors = floors + 1 end
+
+            local chance = 0
+
+            -- Strong case: sandwiched wall
+            if (n and s) or (w and e) then
+               chance = 0.4
+
+            -- Weaker case: wall nub
+            elseif floors == 3 then
+               chance = 0.1
+            elseif floors == 4 then
+               chance = 0.2
+            end
+
+            if chance > 0 and rng:random() < chance then
+               table.insert(toCarve, { x = x, y = y })
+            end
+         end
+      end
+   end
+
+   for _, p in ipairs(toCarve) do
+      builder:set(p.x, p.y, prism.cells.Floor())
+   end
+end
+
 --- @param seed any
 --- @return LevelBuilder
 return function(seed, player)
@@ -363,6 +449,8 @@ return function(seed, player)
       tryAccrete(builder, rng) 
    end
 
+   collapseIsolatedFloors(builder, 3)
+   collapseThinWalls(rng, builder)
       -- place player
    local p = randomFloor(builder, rng)
    builder:addActor(player, p.x, p.y)
@@ -377,7 +465,7 @@ return function(seed, player)
 
    local doorCandidates = builder:query(prism.components.DoorProxy):gather()
    for _, doorCandidate in ipairs(doorCandidates) do
-      builder:removeActor(doorCandidate)
+      --builder:removeActor(doorCandidate)
    end
    
    return builder
