@@ -23,7 +23,12 @@ function GameLevelState:__new(display, overlay)
    -- Add systems
    --- @type LightSystem
    self.lightSystem = prism.systems.LightSystem()
-   builder:addSystems(prism.systems.SensesSystem(), prism.systems.LightSightSystem(), self.lightSystem)
+   builder:addSystems(
+      prism.systems.SensesSystem(),
+      prism.systems.LightSightSystem(),
+      self.lightSystem,
+      prism.systems.ModulateLightSystem()
+   )
    --- @param drawable Drawable
    self.lightPass = function(actor, x, y, drawable)
       drawable.color = self.lightSystem:getRTValuePerspective(x, y, player) or drawable.color
