@@ -14,5 +14,6 @@ prism.registerActor("Player", function()
       prism.components.ConditionHolder(),
       prism.components.Light(prism.Color4(1, 0.5, 0.2), 8, prism.lighteffects.Flicker()),
       prism.components.LightSight { range = 8, fov = true, darkvision = 2/16},
+      prism.components.WarmBlooded(),
    }
 end)

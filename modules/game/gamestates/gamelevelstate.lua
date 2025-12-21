@@ -1,4 +1,5 @@
 local controls = require "controls"
+local generator = require "generation"
 
 --- @class GameLevelState : LevelState
 --- A custom game level state responsible for initializing the level map,
@@ -14,27 +15,9 @@ function GameLevelState:__new(display, overlay)
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    self.overlay = overlay
-   local builder = prism.LevelBuilder()
-
-   builder:rectangle("line", 0, 0, display.width - 1, display.height - 1, prism.cells.Wall)
-   -- Fill the interior with floor tiles
-   builder:rectangle("fill", 1, 1, display.width - 2, display.height - 2, prism.cells.Floor)
-   -- Add a small block of walls within the map
-   builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
 
    local player = prism.actors.Player()
-   -- Place the player character at a starting location
-   builder:addActor(player, 12, 12)
-   builder:addActor(prism.actors.Snip(), 10, 10)
-   builder:addActor(prism.actors.Prism(), 12, 13)
-   builder:addActor(prism.actors.Sqeeto(), 13, 12)
-   builder:addActor(prism.actors.Sqeeto(), 13, 17)
-   builder:addActor(prism.actors.Sqeeto(), 12, 13)
-   builder:addActor(prism.actors.Sqeeto(), 10, 12)
-   builder:addActor(prism.actors.Sqeeto(), 9, 9)
-
-   local camp = prism.LevelBuilder.fromLz4("camp.lz4")
-   -- builder:blit(camp, 13, 13)
+   local builder = generator(love.timer.getTime(), player)
 
    -- Add systems
    --- @type LightSystem
