@@ -13,5 +13,6 @@ prism.registerActor("Sqeeto", function()
       prism.components.Mover { "fly" },
       prism.components.Position(),
       prism.components.Collider(),
+      prism.components.Health(3),
    }
 end)

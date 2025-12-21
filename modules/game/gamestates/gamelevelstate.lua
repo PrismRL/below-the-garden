@@ -82,6 +82,10 @@ function GameLevelState:updateDecision(dt, owner, decision)
       local destination = owner:getPosition() + controls.move.vector
       local move = prism.actions.Move(owner, destination)
       if self:setAction(move) then return end
+
+      local target = self.level:query(prism.components.Health):at(destination:decompose()):first()
+      local attack = prism.actions.Attack(owner, target)
+      if self:setAction(attack) then return end
    end
 
    if controls.pickup.pressed then
