@@ -1,5 +1,5 @@
-local boundsx = 60 -- 1..60
-local boundsy = 30 -- 1..30
+local boundsx = 56 -- 1..60
+local boundsy = 25 -- 1..30
 
 --- Finds valid door positions and spawns DoorProxy actors.
 --- Works for any carved room shape.
@@ -22,18 +22,14 @@ local function addDoors(builder, rng)
             for _, d in ipairs(prism.Vector2.neighborhood4) do
                local nx, ny = x + d.x, y + d.y
                local ncell = builder:get(nx, ny)
-               if ncell then
-                  count = count + 1
-               end
+               if ncell then count = count + 1 end
             end
 
-            if count == 1 then
-               table.insert(candidates, {
-                  x = x,
-                  y = y,
-               })
-            end
-         end    
+            if count == 1 then table.insert(candidates, {
+               x = x,
+               y = y,
+            }) end
+         end
       end
    end
 
@@ -45,11 +41,7 @@ local function addDoors(builder, rng)
       local idx = rng:random(1, #candidates)
       local d = table.remove(candidates, idx)
 
-      builder:addActor(
-         prism.actors.DoorProxy(),
-         d.x,
-         d.y
-      )
+      builder:addActor(prism.actors.DoorProxy(), d.x, d.y)
    end
 end
 
@@ -63,7 +55,7 @@ local function makeRoom(rng)
 
    addDoors(b, rng, {
       minDoors = 5,
-      maxDoors = 5
+      maxDoors = 5,
    })
 
    print("ROOM DOOR COUNT", #b:query(prism.components.DoorProxy):gather())
@@ -94,44 +86,16 @@ local function makeHallwayL(rng)
 
    if horizFirst then
       -- horizontal leg
-      b:rectangle(
-         "fill",
-         ox,
-         oy,
-         ox + lenA,
-         oy + t - 1,
-         prism.cells.Floor
-      )
+      b:rectangle("fill", ox, oy, ox + lenA, oy + t - 1, prism.cells.Floor)
 
       -- vertical leg
-      b:rectangle(
-         "fill",
-         ox + lenA - (t - 1),
-         oy,
-         ox + lenA,
-         oy + lenB,
-         prism.cells.Floor
-      )
+      b:rectangle("fill", ox + lenA - (t - 1), oy, ox + lenA, oy + lenB, prism.cells.Floor)
    else
       -- vertical leg
-      b:rectangle(
-         "fill",
-         ox,
-         oy,
-         ox + t - 1,
-         oy + lenA,
-         prism.cells.Floor
-      )
+      b:rectangle("fill", ox, oy, ox + t - 1, oy + lenA, prism.cells.Floor)
 
       -- horizontal leg
-      b:rectangle(
-         "fill",
-         ox,
-         oy + lenA - (t - 1),
-         ox + lenB,
-         oy + lenA,
-         prism.cells.Floor
-      )
+      b:rectangle("fill", ox, oy + lenA - (t - 1), ox + lenB, oy + lenA, prism.cells.Floor)
    end
 
    addDoors(b, rng)
@@ -152,14 +116,7 @@ local function makeCircleRoom(rng)
    local cx = r + 2
    local cy = r + 2
 
-   b:ellipse(
-      "fill",
-      cx,
-      cy,
-      r,
-      r,
-      prism.cells.Floor
-   )
+   b:ellipse("fill", cx, cy, r, r, prism.cells.Floor)
 
    addDoors(b, rng)
 
@@ -176,20 +133,12 @@ local function makeEllipseRoom(rng)
    local cx = rx + 2
    local cy = ry + 2
 
-   b:ellipse(
-      "fill",
-      cx,
-      cy,
-      rx,
-      ry,
-      prism.cells.Floor
-   )
+   b:ellipse("fill", cx, cy, rx, ry, prism.cells.Floor)
 
    addDoors(b, rng)
 
    return b
 end
-
 
 local function makeRandomRoom(rng)
    local roll = rng:random()
@@ -248,16 +197,12 @@ local function tryAccrete(builder, rng)
          hx = hx + normal.x
          hy = hy + normal.y
 
-         if hx < 1 or hx > boundsx or hy < 1 or hy > boundsy then
-            goto continue
-         end
+         if hx < 1 or hx > boundsx or hy < 1 or hy > boundsy then return false end
 
          for dx = -1, 1 do
             for dy = -1, 1 do
                if dx ~= 0 or dy ~= 0 then
-                  if builder:get(hx + dx, hy + dy) then
-                     goto continue
-                  end
+                  if builder:get(hx + dx, hy + dy) then return false end
                end
             end
          end
@@ -273,16 +218,12 @@ local function tryAccrete(builder, rng)
                local gx = ox + (x - rs.x)
                local gy = oy + (y - rs.y)
 
-               if gx < 1 or gx > boundsx or gy < 1 or gy > boundsy then
-                  goto continue
-               end
+               if gx < 1 or gx > boundsx or gy < 1 or gy > boundsy then return false end
 
                for dx = -1, 1 do
                   for dy = -1, 1 do
                      if dx ~= 0 or dy ~= 0 then
-                        if builder:get(gx + dx, gy + dy) then
-                           goto continue
-                        end
+                        if builder:get(gx + dx, gy + dy) then return false end
                      end
                   end
                end
@@ -320,7 +261,6 @@ local function tryAccrete(builder, rng)
       return true
    end
 
-   ::continue::
    return false
 end
 
@@ -331,15 +271,11 @@ local function randomFloor(builder, rng)
 
    for x = 1, boundsx do
       for y = 1, boundsy do
-         if builder:get(x, y) then
-            table.insert(floors, { x = x, y = y })
-         end
+         if builder:get(x, y) then table.insert(floors, { x = x, y = y }) end
       end
    end
 
-   if #floors == 0 then
-      error("No floor tiles to place player")
-   end
+   if #floors == 0 then error("No floor tiles to place player") end
 
    return floors[rng:random(1, #floors)]
 end
@@ -446,7 +382,7 @@ return function(seed, player)
 
    -- accrete
    for i = 1, 10000 do
-      tryAccrete(builder, rng) 
+      tryAccrete(builder, rng)
    end
 
    collapseIsolatedFloors(builder, 3)
@@ -457,9 +393,7 @@ return function(seed, player)
 
    for x = 1, boundsx do
       for y = 1, boundsy do
-         if not builder:get(x, y) then
-            builder:set(x, y, prism.cells.Wall())
-         end
+         if not builder:get(x, y) then builder:set(x, y, prism.cells.Wall()) end
       end
    end
 
@@ -467,6 +401,6 @@ return function(seed, player)
    for _, doorCandidate in ipairs(doorCandidates) do
       --builder:removeActor(doorCandidate)
    end
-   
+
    return builder
 end

@@ -1,4 +1,5 @@
 local controls = require "controls"
+local settings = require "settings"
 local generator = require "generation"
 
 --- @class GameLevelState : LevelState
@@ -226,8 +227,8 @@ function GameLevelState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
-   love.graphics.translate(32, 32)
-   love.graphics.scale(4, 4)
+   love.graphics.translate(8 * settings.scale, 8 * settings.scale)
+   love.graphics.scale(settings.scale, settings.scale)
    self.display:draw()
    love.graphics.translate(-8, -8)
    self.overlay:draw()
