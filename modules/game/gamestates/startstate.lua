@@ -1,3 +1,4 @@
+local settings = require "settings"
 local controls = require "controls"
 
 --- @class GameStartState : GameState
@@ -26,7 +27,7 @@ function GameStartState:draw()
 
    -- self.display:print(1, midpoint + 4 + i, "[q] to quit", nil, nil, nil, "center", self.display.width)
    -- stylua: ignore end
-   love.graphics.scale(4, 4)
+   love.graphics.scale(settings.scale, settings.scale)
    self.overlay:draw()
 end
 
