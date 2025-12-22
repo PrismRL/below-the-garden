@@ -41,34 +41,37 @@ function util.rollToWall(distanceField, x, y)
    local bestX, bestY = x, y
    local bestD = distanceField:get(x, y)
 
-   if not bestD then return nil end
+   if not bestD then
+      return nil
+   end
 
    while bestD > 1 do
-      local stepped = false
-
-      local nextX, nextY, nextD = nil, nil, bestD
+      local nextX, nextY
+      local nextD = bestD
 
       for _, d in ipairs(prism.Vector2.neighborhood8) do
          local nx, ny = bestX + d.x, bestY + d.y
          local nd = distanceField:get(nx, ny)
 
          if nd and nd < nextD then
-            nextX, nextY, nextD = nx, ny, nd
+            nextX, nextY = nx, ny
+            nextD = nd
          end
       end
 
-      if nextX then
-         bestX, bestY, bestD = nextX, nextY, nextD
-      else
+      -- no downhill step found → stuck
+      if not nextX then
          break
       end
 
-      if not stepped then break end
+      bestX, bestY, bestD = nextX, nextY, nextD
    end
 
    if bestD == 1 then
       return bestX, bestY
    end
+
+   return nil
 end
 
 --- @param builder LevelBuilder
@@ -195,15 +198,15 @@ function util.buildWallDistanceField(builder)
    local tl, br = builder:getBounds()
    
    local sources = {}
-   for x = tl.x, br.x do
-      for y = tl.y, br.y do
+   for x = tl.x - 1, br.x + 1 do
+      for y = tl.y - 1, br.y + 1 do
          if util.isWall(builder, x, y) then
             table.insert(sources, prism.Vector2(x, y))
          end
       end
    end
 
-   local distanceField = prism.djisktra(sources, function (x, y) return util.isFloor(builder, x, y) end)
+   local distanceField = prism.djisktra(sources, function (x, y) return util.isFloor(builder, x, y) end, prism.Vector2.neighborhood4)
    return distanceField
 end
 

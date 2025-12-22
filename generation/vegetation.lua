@@ -3,20 +3,6 @@ local vegetation = {}
 
 local neighbors4 = prism.Vector2.neighborhood4
 
---- Returns true if tile borders a wall.
---- @param builder LevelBuilder
---- @param x integer
---- @param y integer
-local function bordersWall(builder, x, y)
-   for _, d in ipairs(neighbors4) do
-      local nx, ny = x + d.x, y + d.y
-      if not util.isFloor(builder, nx, ny) then
-         return true
-      end
-   end
-   return false
-end
-
 --- Counts adjacent TallGrass tiles.
 --- @param builder LevelBuilder
 --- @param x integer
@@ -161,7 +147,47 @@ function vegetation.addTallGrass(builder, heatmap, distanceField, rng, opts)
    end
 end
 
---- Spawns GlowStalk actors adjacent to walls using wallDistanceField.
+
+--- Attempts to find a wall-adjacent placement by seeding far from walls.
+--- @param builder LevelBuilder
+--- @param heatmap SparseGrid
+--- @param wallDistanceField SparseGrid
+--- @param x integer
+--- @param y integer
+--- @param minSeedDistance integer
+--- @return integer?, integer?
+local function findGlowStalkSpot(builder, heatmap, wallDistanceField, x, y, minSeedDistance)
+   if not util.isFloor(builder, x, y) then
+      return nil
+   end
+
+   local d = wallDistanceField:get(x, y)
+   if not d or d < minSeedDistance then
+      return nil
+   end
+
+   local gx, gy = util.rollToWall(wallDistanceField, x, y)
+   if not gx then
+      print "FAILED TO FIND distanceField"
+      return nil
+   end
+
+   print "ROLLED TO WALL"
+
+   if (heatmap:get(gx, gy) or 0) ~= 0 then
+      return nil
+   end
+
+   print "PASSED HEATMAP"
+
+   if #builder:query():at(gx, gy):gather() ~= 0 then
+      return nil
+   end
+
+   return gx, gy
+end
+
+--- Spawns GlowStalk actors by seeding far from walls and rolling toward them.
 --- @param builder LevelBuilder
 --- @param heatmap SparseGrid
 --- @param wallDistanceField SparseGrid
@@ -169,31 +195,38 @@ end
 --- @param opts table?
 ---    opts.attempts integer?
 ---    opts.maxTotal integer?
+---    opts.minSeedDistance integer?
 function vegetation.addGlowStalks(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
-   local attempts = opts.attempts or 1000
+   local attempts = opts.attempts or 10000
    local maxTotal = opts.maxTotal or 12
+   local minSeedDistance = opts.minSeedDistance or 3
+
    local total = 0
 
    for i = 1, attempts do
-      if total >= maxTotal then return end
+      if total >= maxTotal then
+         return
+      end
 
       local x = rng:random(2, LEVELGENBOUNDSX - 1)
       local y = rng:random(2, LEVELGENBOUNDSY - 1)
 
-      if util.isFloor(builder, x, y) and #builder:query():at(x, y):gather() == 0 then
-         local d = wallDistanceField:get(x, y)
+      local gx, gy = findGlowStalkSpot(
+         builder,
+         heatmap,
+         wallDistanceField,
+         x,
+         y,
+         minSeedDistance
+      )
 
-         -- exactly one tile away from a wall
-         if d == 1 then
-            -- avoid doors / traffic
-            if (heatmap:get(x, y) or 0) == 0 then
-               builder:addActor(prism.actors.Glowstalk(), x, y)
-               total = total + 1
-            end
-         end
+      if gx then
+         builder:addActor(prism.actors.Glowstalk(), gx, gy)
+         total = total + 1
       end
    end
 end
+
 
 return vegetation
