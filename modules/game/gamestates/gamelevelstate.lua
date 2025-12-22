@@ -1,6 +1,6 @@
 local controls = require "controls"
 local settings = require "settings"
-local generator = require "generation"
+local generator = require "generation.generation"
 
 --- @class GameLevelState : LevelState
 --- A custom game level state responsible for initializing the level map,

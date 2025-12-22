@@ -2,7 +2,8 @@ prism.registerActor("Glowstalk", function()
    local baseLight = prism.components.Light(prism.Color4.LIME * 1.5, 3, prism.lighteffects.Sin())
    local offLight = baseLight:clone()
    --- @cast offLight Light
-   offLight.radius = 0
+   offLight.color = baseLight:getColor()/2
+   offLight.radius = 2
 
    return prism.Actor.fromComponents {
       prism.components.Name("Glowstalk"),
