@@ -341,5 +341,201 @@ function util.pruneMisalignedDoors(builder)
    end
 end
 
+--- Spawns spawnpoints in the most open sampled areas (furthest from walls),
+--- then keeps only the most mutually separated ones.
+--- @param builder LevelBuilder
+--- @param wallDistanceField SparseGrid
+--- @param rng RNG
+--- @param opts table?
+function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
+   opts = opts or {}
+
+   local finalCount = opts.count   or 15      -- FINAL spawnpoints
+   local samples    = opts.samples or 150     -- random probes
+   local poolSize   = opts.pool    or 100      -- candidates kept before separation
+
+   local candidates = {}
+
+   local function tryInsertCandidate(x, y, d)
+      if #candidates < poolSize then
+         candidates[#candidates + 1] = { x = x, y = y, d = d }
+         return
+      end
+
+      -- replace weakest wall-distance candidate
+      local weakest = 1
+      for i = 2, #candidates do
+         if candidates[i].d < candidates[weakest].d then
+            weakest = i
+         end
+      end
+
+      if d > candidates[weakest].d then
+         candidates[weakest] = { x = x, y = y, d = d }
+      end
+   end
+
+   -- Phase 1: sample good open spots
+   for i = 1, samples do
+      local x = rng:random(2, LEVELGENBOUNDSX - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+
+      if util.isWalkable(builder, x, y) then
+         local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
+         if rx
+            and util.isWalkable(builder, rx, ry)
+            and #builder:query():at(rx, ry):gather() == 0
+         then
+            local d = wallDistanceField:get(rx, ry)
+            if d then
+               tryInsertCandidate(rx, ry, d)
+            end
+         end
+      end
+   end
+
+   if #candidates == 0 then return end
+
+   -- Phase 2: maximize separation
+   table.sort(candidates, function(a, b)
+      return a.d > b.d -- start from most open
+   end)
+
+   local chosen = {}
+   chosen[1] = table.remove(candidates, 1)
+
+   local function minDistSqToChosen(c)
+      local min = math.huge
+      for _, s in ipairs(chosen) do
+         local dx = c.x - s.x
+         local dy = c.y - s.y
+         local d2 = dx * dx + dy * dy
+         if d2 < min then
+            min = d2
+         end
+      end
+      return min
+   end
+
+   while #chosen < finalCount and #candidates > 0 do
+      local bestIdx = 1
+      local bestScore = -1
+
+      for i, c in ipairs(candidates) do
+         local score = minDistSqToChosen(c)
+         if score > bestScore then
+            bestScore = score
+            bestIdx = i
+         end
+      end
+
+      print(#chosen, finalCount)
+      chosen[#chosen + 1] = table.remove(candidates, bestIdx)
+   end
+
+   -- Spawn
+   for _, c in ipairs(chosen) do
+      builder:addActor(prism.actors.Spawner(), c.x, c.y)
+   end
+end
+
+--- Returns the 3 most mutually distant spawnpoints using A* path distance.
+--- Distance is measured by walkable path length, not Euclidean distance.
+--- @param builder LevelBuilder
+--- @return Actor[] -- prism.actors.Spawner
+function util.getImportantSpawnpoints(builder)
+   local spawners = builder
+      :query(prism.components.Spawner)
+      :gather()
+
+   if #spawners <= 3 then
+      return spawners
+   end
+
+   -- Cache positions
+   local nodes = {}
+   for i, s in ipairs(spawners) do
+      local x, y = s:expectPosition():decompose()
+      nodes[i] = { actor = s, x = x, y = y }
+   end
+
+   -- Path distance cache
+   local dist = {}
+
+   local function pathDistance(a, b)
+      local path = prism.astar(
+         prism.Vector2(a.x, a.y),
+         prism.Vector2(b.x, b.y),
+         function(x, y)
+            return util.isWalkable(builder, x, y)
+         end
+      )
+
+      if not path then
+         return math.huge
+      end
+
+      return #path:getPath()
+   end
+
+   -- Precompute distances
+   for i = 1, #nodes do
+      dist[i] = {}
+      for j = i + 1, #nodes do
+         local d = pathDistance(nodes[i], nodes[j])
+         dist[i][j] = d
+         dist[j] = dist[j] or {}
+         dist[j][i] = d
+      end
+   end
+
+   -- Pick farthest pair
+   local a, b
+   local best = -1
+
+   for i = 1, #nodes do
+      for j = i + 1, #nodes do
+         local d = dist[i][j]
+         if d < math.huge and d > best then
+            best = d
+            a, b = i, j
+         end
+      end
+   end
+
+   if not a then
+      return { spawners[1], spawners[2], spawners[3] }
+   end
+
+   -- Pick third maximizing total distance to {a,b}
+   local c
+   local bestScore = -1
+
+   for i = 1, #nodes do
+      if i ~= a and i ~= b then
+         local d1 = dist[i][a] or math.huge
+         local d2 = dist[i][b] or math.huge
+
+         if d1 < math.huge and d2 < math.huge then
+            local score = (d1 ^ 2) * (d2 ^ 2)
+            if score > bestScore then
+               bestScore = score
+               c = i
+            end
+         end
+      end
+   end
+
+   if not c then
+      return { nodes[a].actor, nodes[b].actor }
+   end
+
+   return {
+      nodes[a].actor,
+      nodes[b].actor,
+      nodes[c].actor,
+   }
+end
+
 
 return util

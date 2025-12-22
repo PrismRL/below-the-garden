@@ -176,7 +176,7 @@ return function(seed, player)
    while true do
       if not tryAccrete(builder, rng) then
          failures = failures + 1
-         if failures > 100 then break end
+         if failures > 500 then break end
       else
          --util.pruneInvalidDoors(builder)
       end
@@ -196,7 +196,7 @@ return function(seed, player)
 
    local query = builder:query(prism.components.Light)
 
-   for i = 1, 5 do
+   for _ = 1, 5 do
       local lightDistanceField = util.buildDistanceField(builder,
          function (builder, x, y)
             query:at(x, y)
@@ -207,10 +207,20 @@ return function(seed, player)
       passive.addFireflies(builder, lightDistanceField, rng)
    end
 
+   local wallDistanceField = util.buildWallDistanceField(builder)
+   util.addSpawnpoints(builder, wallDistanceField, rng)
 
+   local importantSpawns = util.getImportantSpawnpoints(builder)
+   assert(#importantSpawns > 0)
    -- place player
-   local p = util.randomFloor(builder, rng)
+   local p = importantSpawns[1]:expectPosition()
    builder:addActor(player, p.x, p.y)
+   builder:addActor(prism.actors.Prism(), importantSpawns[2]:expectPosition():decompose())
+   builder:addActor(prism.actors.Stairs(), importantSpawns[3]:expectPosition():decompose())
+
+   builder:removeActor(importantSpawns[1])
+   builder:removeActor(importantSpawns[2])
+   builder:removeActor(importantSpawns[3])
 
    -- fill remaining nils with walls
    for x = 1, LEVELGENBOUNDSX do
@@ -233,6 +243,10 @@ return function(seed, player)
    end
 
    for _, actor in ipairs(builder:query(prism.components.DoorProxy):gather()) do
+      builder:removeActor(actor)
+   end
+
+   for _, actor in ipairs(builder:query(prism.components.Spawner):gather()) do
       builder:removeActor(actor)
    end
 
