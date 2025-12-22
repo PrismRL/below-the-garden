@@ -1,149 +1,66 @@
 local util = require "generation.util"
 local vegetation = {}
 
-local neighbors4 = prism.Vector2.neighborhood4
-
---- Counts adjacent TallGrass tiles.
---- @param builder LevelBuilder
---- @param x integer
---- @param y integer
-local function countAdjacentOpaque(builder, x, y)
-   local n = 0
-   for _, d in ipairs(neighbors4) do
-      local nx, ny = x + d.x, y + d.y
-      if util.isOpaque(builder, nx, ny) then
-         n = n + 1
-      end
-   end
-   return n
-end
-
-
---- Grows a blobby patch of tall grass from a seed.
+--- Spawns TallGrass by blitting circular patches near walls.
 --- @param builder LevelBuilder
 --- @param heatmap SparseGrid
---- @param rng RNG
---- @param sx integer
---- @param sy integer
---- @param maxCount integer
---- @return integer placedCount
-local function growTallGrassBlob(builder, heatmap, rng, sx, sy, maxCount)
-   local frontier = {}
-   local count = 0
-
-   local function canPlace(x, y)
-      if not util.isFloor(builder, x, y) then
-         return false
-      end
-
-      if (heatmap:get(x, y) or 0) ~= 0 then
-         return false
-      end
-
-      if countAdjacentOpaque(builder, x, y) < 2 then
-         return false
-      end
-
-      return true
-   end
-
-   if not canPlace(sx, sy) then
-      return 0
-   end
-
-   builder:set(sx, sy, prism.cells.TallGrass())
-   frontier[1] = { x = sx, y = sy }
-   count = 1
-
-   for i = 1, maxCount * 3 do
-      if count >= maxCount then
-         break
-      end
-
-      local fcount = #frontier
-      if fcount == 0 then
-         break
-      end
-
-      local p = frontier[rng:random(1, fcount)]
-
-      local bestAdj = -1
-      local bestX, bestY = nil, nil
-      local ties = 0
-
-      for _, d in ipairs(neighbors4) do
-         local nx = p.x + d.x
-         local ny = p.y + d.y
-
-         if canPlace(nx, ny) then
-            local adj = countAdjacentOpaque(builder, nx, ny)
-
-            if adj >= 2 then
-               if adj > bestAdj then
-                  bestAdj = adj
-                  bestX, bestY = nx, ny
-                  ties = 1
-               elseif adj == bestAdj then
-                  ties = ties + 1
-                  if rng:random(ties) == 1 then
-                     bestX, bestY = nx, ny
-                  end
-               end
-            end
-         end
-      end
-
-      if bestX then
-         builder:set(bestX, bestY, prism.cells.TallGrass())
-         frontier[#frontier + 1] = { x = bestX, y = bestY }
-         count = count + 1
-      end
-   end
-
-   return count
-end
-
---- Spawns TallGrass by seeding near walls and locally spreading.
---- @param builder LevelBuilder
---- @param heatmap SparseGrid
---- @param distanceField SparseGrid
+--- @param wallDistanceField SparseGrid
 --- @param rng RNG
 --- @param opts table?
 ---    opts.attempts integer?
-function vegetation.addTallGrass(builder, heatmap, distanceField, rng, opts)
+---    opts.maxTotal integer?
+---    opts.maxWallDistance integer?
+---    opts.radiusMin integer?
+---    opts.radiusMax integer?
+function vegetation.addTallGrass(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
-   local attempts = opts.attempts or 200
-   local totalMaxCount = 40
-   local totalCount = 0
+
+   local attempts        = opts.attempts or 200
+   local maxTotal        = opts.maxTotal or 4
+   local maxWallDistance = opts.maxWallDistance or 2
+   local radiusMin       = opts.radiusMin or 1
+   local radiusMax       = opts.radiusMax or 2
+
+   local total = 0
+
+   --- Attempts to place a single tall grass patch.
+   --- @return integer placed
+   local function tryPlace()
+      local x = rng:random(2, LEVELGENBOUNDSX - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+
+      if not util.isFloor(builder, x, y) then
+         return 0
+      end
+
+      local d = wallDistanceField:get(x, y)
+      if not d or d > maxWallDistance then
+         return 0
+      end
+
+      if (heatmap:get(x, y) or 0) ~= 0 then
+         return 0
+      end
+
+      local r = rng:random(radiusMin, radiusMax)
+      local grassBlob = prism.LevelBuilder()
+      grassBlob:ellipse("fill", x, y, r, r, prism.cells.TallGrass)
+
+      for x, y, cell in grassBlob:each() do
+         if util.isFloor(builder, x, y) and (heatmap:get(x, y) or 0) < 3 then
+            builder:set(x, y, prism.cells.TallGrass())
+         end
+      end
+
+      return 1
+   end
 
    for i = 1, attempts do
-      if totalCount >= totalMaxCount then
+      if total >= maxTotal then
          return
       end
 
-      local x = rng:random(1, LEVELGENBOUNDSX)
-      local y = rng:random(1, LEVELGENBOUNDSY)
-
-      if util.isFloor(builder, x, y) then
-         local sx, sy = util.rollToWall(distanceField, x, y)
-
-         if sx then
-            if (heatmap:get(sx, sy) or 0) == 0 then
-               local maxCount = rng:random(6, 10)
-
-               local placed = growTallGrassBlob(
-                  builder,
-                  heatmap,
-                  rng,
-                  sx,
-                  sy,
-                  maxCount
-               )
-
-               totalCount = totalCount + placed
-            end
-         end
-      end
+      total = total + tryPlace()
    end
 end
 
@@ -198,8 +115,8 @@ end
 ---    opts.minSeedDistance integer?
 function vegetation.addGlowStalks(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
-   local attempts = opts.attempts or 10000
-   local maxTotal = opts.maxTotal or 12
+   local attempts = opts.attempts or 1000
+   local maxTotal = opts.maxTotal or 30
    local minSeedDistance = opts.minSeedDistance or 3
 
    local total = 0
@@ -228,5 +145,121 @@ function vegetation.addGlowStalks(builder, heatmap, wallDistanceField, rng, opts
    end
 end
 
+--- Spawns a tall grass patch in the most open nearby area.
+--- @param builder LevelBuilder
+--- @param heatmap SparseGrid
+--- @param wallDistanceField SparseGrid
+--- @param rng RNG
+--- @param opts table?
+---    opts.samples integer?
+---    opts.radiusMin integer?
+---    opts.radiusMax integer?
+function vegetation.addGrassPatch(builder, heatmap, wallDistanceField, rng, opts)
+   opts = opts or {}
+
+   local samples   = opts.samples   or 40
+   local radiusMin = opts.radiusMin or 2
+   local radiusMax = opts.radiusMax or 4
+
+   local bestX, bestY
+   local bestD = -math.huge
+
+   for i = 1, samples do
+      local x = rng:random(2, LEVELGENBOUNDSX - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+
+      if util.isFloor(builder, x, y) then
+         local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
+         local d = wallDistanceField:get(rx, ry)
+
+         if d and d > bestD then
+            bestD = d
+            bestX, bestY = rx, ry
+         end
+      end
+   end
+
+   if not bestX then
+      return
+   end
+
+   local r = rng:random(radiusMin, math.min(radiusMax, bestD - 3) )
+
+   local blob = prism.LevelBuilder()
+   blob:ellipse("fill", bestX, bestY, r, r, prism.cells.TallGrass)
+
+   for x, y in blob:each() do
+      if util.isFloor(builder, x, y) then
+         builder:set(x, y, prism.cells.Grass())
+      end
+   end
+
+      -- Remove nearby light-emitting entities
+   local killRadius = r + radiusMax
+   local killR2 = killRadius * killRadius
+
+   local toRemove = {}
+
+   for x = bestX - killRadius, bestX + killRadius do
+      for y = bestY - killRadius, bestY + killRadius do
+         local dx = x - bestX
+         local dy = y - bestY
+
+         if dx*dx + dy*dy <= killR2 then
+            for _, a in ipairs(builder:query(prism.components.Light):at(x, y):gather()) do
+               toRemove[a] = true
+            end
+         end
+      end
+   end
+
+   for a in pairs(toRemove) do
+      builder:removeActor(a)
+   end
+
+   builder:addActor(prism.actors.Sunlight(), bestX, bestY)
+end
+
+--- Randomly kills ~50% of GlowStalks that touch another GlowStalk.
+--- Touching = 4-neighborhood by default.
+--- @param builder LevelBuilder
+--- @param rng RNG
+--- @param opts table?
+---    opts.diagonal boolean? -- include diagonals
+function vegetation.thinTouchingGlowStalks(builder, lightDistanceField, rng, opts)
+   opts = opts or {}
+   local includeDiagonal = opts.diagonal or false
+
+   local dirs = prism.Vector2.neighborhood4
+   if includeDiagonal then
+      dirs = prism.Vector2.neighborhood8
+   end
+
+   local stalks = builder:query(prism.components.Light):gather()
+   if #stalks == 0 then return end
+
+   local occupied = prism.SparseGrid()   -- fast position lookup
+   for _, a in ipairs(stalks) do
+      local x, y = a:expectPosition():decompose()
+      occupied:set(x, y, a)
+   end
+
+   local toKill = {}
+
+   for _, a in ipairs(stalks) do
+      local x, y = a:expectPosition():decompose()
+
+      for _, d in ipairs(dirs) do
+         local nx, ny = x + d.x, y + d.y
+         local other = occupied:get(nx, ny)
+
+         if other then toKill[a] = true end
+      end
+   end
+
+   for actor in pairs(toKill) do
+      builder:removeActor(actor)
+   end
+end
 
 return vegetation

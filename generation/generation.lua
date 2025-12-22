@@ -1,6 +1,7 @@
 local util = require "generation.util"
 local rooms = require "generation.rooms"
 local vegetation = require "generation.vegetation"
+local passive = require "generation.passivecreatures"
 
 LEVELGENBOUNDSX = 56 -- 1..60
 LEVELGENBOUNDSY = 25 -- 1..30
@@ -175,19 +176,37 @@ return function(seed, player)
    while true do
       if not tryAccrete(builder, rng) then
          failures = failures + 1
-         if failures > 50 then break end
+         if failures > 100 then break end
       else
-         util.pruneInvalidDoors(builder)
+         --util.pruneInvalidDoors(builder)
       end
    end
 
+   util.pruneMisalignedDoors(builder)
    util.collapseIsolatedFloors(builder, 3)
    util.collapseThinWalls(rng, builder)
+   util.pruneMisalignedDoors(builder)
 
    local heatmap = util.doorPathHeatmap(builder)
    local distanceField = util.buildWallDistanceField(builder)
    vegetation.addTallGrass(builder, heatmap, distanceField, rng)
    vegetation.addGlowStalks(builder, heatmap, distanceField, rng)
+   vegetation.addGrassPatch(builder, heatmap, distanceField, rng)
+   vegetation.thinTouchingGlowStalks(builder)
+
+   local query = builder:query(prism.components.Light)
+
+   for i = 1, 5 do
+      local lightDistanceField = util.buildDistanceField(builder,
+         function (builder, x, y)
+            query:at(x, y)
+            return query:first() ~= nil
+         end,
+         util.isFloor
+      )
+      passive.addFireflies(builder, lightDistanceField, rng)
+   end
+
 
    -- place player
    local p = util.randomFloor(builder, rng)
@@ -213,6 +232,9 @@ return function(seed, player)
       end
    end
 
+   for _, actor in ipairs(builder:query(prism.components.DoorProxy):gather()) do
+      builder:removeActor(actor)
+   end
 
    return builder
 end

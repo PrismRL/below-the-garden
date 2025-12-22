@@ -3,6 +3,6 @@ prism.registerCell("TallGrass", function()
       prism.components.Name("TallGrass"),
       prism.components.Collider{allowedMovetypes = {"walk", "fly"}},
       prism.components.Opaque(),
-      prism.components.Drawable{index = "V"}
+      prism.components.Drawable{index = ";"}
    }
 end)

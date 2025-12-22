@@ -37,6 +37,10 @@ function util.isFloor(builder, x, y)
    return util.isWalkable(builder, x, y) and not util.isOpaque(builder, x, y)
 end
 
+function util.isEmptyFloor(builder, x, y)
+ return util.isFloor(builder, x, y) and #builder:query():get(x, y):gather() == 0
+end
+
 function util.rollToWall(distanceField, x, y)
    local bestX, bestY = x, y
    local bestD = distanceField:get(x, y)
@@ -72,6 +76,45 @@ function util.rollToWall(distanceField, x, y)
    end
 
    return nil
+end
+
+--- Rolls uphill in a distance field, away from walls.
+--- Stops at a local maximum.
+--- @param distanceField SparseGrid
+--- @param x integer
+--- @param y integer
+--- @return integer?, integer?
+function util.rollAwayFromWall(distanceField, x, y)
+   local bestX, bestY = x, y
+   local bestD = distanceField:get(x, y)
+
+   if not bestD then
+      return nil
+   end
+
+   while true do
+      local nextX, nextY
+      local nextD = bestD
+
+      for _, d in ipairs(prism.Vector2.neighborhood8) do
+         local nx, ny = bestX + d.x, bestY + d.y
+         local nd = distanceField:get(nx, ny)
+
+         if nd and nd > nextD then
+            nextX, nextY = nx, ny
+            nextD = nd
+         end
+      end
+
+      -- no uphill step found → local maximum
+      if not nextX then
+         break
+      end
+
+      bestX, bestY, bestD = nextX, nextY, nextD
+   end
+
+   return bestX, bestY
 end
 
 --- @param builder LevelBuilder
@@ -195,20 +238,44 @@ function util.doorPathHeatmap(builder)
 end
 
 function util.buildWallDistanceField(builder)
+   return util.buildDistanceField(
+      builder,
+      util.isWall,
+      util.isFloor,
+      prism.Vector2.neighborhood4
+   )
+end
+
+
+--- Builds a distance field from source tiles defined by a predicate.
+--- @param builder LevelBuilder
+--- @param isSource fun(builder: LevelBuilder, x: integer, y: integer): boolean
+--- @param isPassable fun(builder: LevelBuilder, x: integer, y: integer): boolean
+--- @param neighborhood table? -- defaults to 4-neighborhood
+--- @return SparseGrid
+function util.buildDistanceField(builder, isSource, isPassable, neighborhood)
+   neighborhood = neighborhood or prism.Vector2.neighborhood4
+
    local tl, br = builder:getBounds()
-   
    local sources = {}
+
    for x = tl.x - 1, br.x + 1 do
       for y = tl.y - 1, br.y + 1 do
-         if util.isWall(builder, x, y) then
-            table.insert(sources, prism.Vector2(x, y))
+         if isSource(builder, x, y) then
+            sources[#sources + 1] = prism.Vector2(x, y)
          end
       end
    end
 
-   local distanceField = prism.djisktra(sources, function (x, y) return util.isFloor(builder, x, y) end, prism.Vector2.neighborhood4)
-   return distanceField
+   return prism.djisktra(
+      sources,
+      function(x, y)
+         return isPassable(builder, x, y)
+      end,
+      neighborhood
+   )
 end
+
 
 --- Removes doors that do not neighbor exactly one floor (cardinal only).
 --- A valid door must have exactly one adjacent floor in neighborhood4.
@@ -238,5 +305,41 @@ function util.pruneInvalidDoors(builder)
       builder:removeActor(door)
    end
 end
+
+--- Removes doors that do not have exactly two wall neighbors (cardinal).
+--- @param builder LevelBuilder
+function util.pruneMisalignedDoors(builder)
+   local toRemove = {}
+
+   --- @param x integer
+   --- @param y integer
+   local function isValidDoor(x, y)
+      local walls = 0
+
+      for _, d in ipairs(prism.Vector2.neighborhood4) do
+         if util.isWall(builder, x + d.x, y + d.y) then
+            walls = walls + 1
+            if walls > 2 then
+               return false
+            end
+         end
+      end
+
+      return walls == 2
+   end
+
+   for door in builder:query(prism.components.Door):iter() do
+      local x, y = door:expectPosition():decompose()
+
+      if not isValidDoor(x, y) then
+         toRemove[#toRemove + 1] = door
+      end
+   end
+
+   for _, door in ipairs(toRemove) do
+      builder:removeActor(door)
+   end
+end
+
 
 return util
