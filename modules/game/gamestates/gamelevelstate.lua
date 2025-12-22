@@ -180,10 +180,10 @@ function GameLevelState:draw()
       self.display:beginCamera()
       self.display:pushModifier(self.lightPass)
       self.display:pushModifier(function(entity, x, y, drawable)
-         local sight = self.decision.actor:get(prism.components.Sight)
+         local sight = player:get(prism.components.Sight)
          local darkvision = sight and sight.darkvision or 0
 
-         local light = self.lightSystem:getRTValuePerspective(x, y, self.decision.actor)
+         local light = self.lightSystem:getRTValuePerspective(x, y, player)
          light = light or dummy
 
          -- Preserve original color

@@ -17,6 +17,10 @@ function Thrower:__new(range)
    self.range = range
 end
 
+function Thrower:getRequirements()
+   return prism.components.ConditionHolder
+end
+
 function Thrower:getRange()
    local modifiers = prism.components.ConditionHolder.getActorModifiers(self.owner, ThrowRangeModifier)
 
@@ -26,6 +30,17 @@ function Thrower:getRange()
    end
 
    return modifiedMaxRange
+end
+
+function Thrower:getDamage()
+   local modifiers = prism.components.ConditionHolder.getActorModifiers(self.owner, prism.modifiers.ThrowDamageModifier)
+
+   local damage = 1
+   for _, modifier in ipairs(modifiers) do
+      damage = damage + modifier.damage
+   end
+
+   return damage
 end
 
 return Thrower

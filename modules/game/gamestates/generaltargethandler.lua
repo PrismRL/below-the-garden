@@ -97,7 +97,7 @@ function GeneralTargetHandler:draw()
    -- self.display:print(25, 23, entity:getName(), palette[22], palette[6], 2)
 
    love.graphics.push()
-   -- love.graphics.translate(16, 16)
+   love.graphics.translate(8, 8)
    self.display:draw()
    love.graphics.pop()
    -- self.display:print(self.selectorPosition.x, self.selectorPosition.y, "X", prism.Color4.RED)
