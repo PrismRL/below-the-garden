@@ -29,10 +29,7 @@ function GameLevelState:__new(display, overlay)
       self.lightSystem,
       prism.systems.ModulateLightSystem()
    )
-   --- @param drawable Drawable
-   self.lightPass = function(actor, x, y, drawable)
-      drawable.color = self.lightSystem:getRTValuePerspective(x, y, player) or drawable.color
-   end
+   builder:addTurnHandler(require "modules.base.quickturnhandler")
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.

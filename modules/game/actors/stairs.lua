@@ -1,7 +1,8 @@
 prism.registerActor("Stairs", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Stairs"),
-      prism.components.Drawable{index = ">"},
-      prism.components.Position()
+      prism.components.Drawable { index = 143 },
+      prism.components.Position(),
    }
 end)
+

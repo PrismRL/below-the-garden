@@ -1,3 +1,3 @@
 return {
-   scale = 3,
+   scale = 4,
 }

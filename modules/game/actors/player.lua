@@ -1,3 +1,4 @@
+local color = prism.Color4.fromHex(0x8aa1f6)
 prism.registerActor("Player", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Player"),
@@ -12,7 +13,7 @@ prism.registerActor("Player", function()
       prism.components.Inventory { limitCount = 1 },
       prism.components.Equipper { "weapon", "held", "amulet" },
       prism.components.Thrower(5),
-      prism.components.Light(prism.Color4(0.9, 0.5, 0.2), 8, prism.lighteffects.Flicker()),
+      prism.components.Light(color * 1.2, 8, prism.lighteffects.Flicker()),
       prism.components.LightSight { range = 15, fov = true, darkvision = 2 / 16 },
       prism.components.WarmBlooded(),
       prism.components.Attacker(1),
