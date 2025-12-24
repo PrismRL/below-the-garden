@@ -19,7 +19,8 @@
         "prism/extra/sight",
         "prism/extra/condition",
         "prism/extra/lighting",
-        "definitions"
+        "definitions",
+        "prism/lib"
     ],
     "completion.autoRequire": false,
     "type.weakUnionCheck": true

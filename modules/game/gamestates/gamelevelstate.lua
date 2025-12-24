@@ -9,6 +9,8 @@ local generator = require "generation.generation"
 --- @overload fun(display: Display, overlay: Display): GameLevelState
 local GameLevelState = spectrum.gamestates.LevelState:extend "GameLevelState"
 
+local hud = love.graphics.newImage("display/hud.png")
+
 --- @param display Display
 --- @param overlay Display
 function GameLevelState:__new(display, overlay)
@@ -16,6 +18,17 @@ function GameLevelState:__new(display, overlay)
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    self.overlay = overlay
+   self.hudPosition = prism.Vector2(self.overlay.width - 8, 0)
+   self.hudPositions = {
+      held = self.hudPosition + prism.Vector2(3, 6),
+      pocket = self.hudPosition + prism.Vector2(6, 6),
+      weapon = self.hudPosition + prism.Vector2(3, 11),
+      amulet = self.hudPosition + prism.Vector2(6, 11),
+      health = self.hudPosition + prism.Vector2(6, 2),
+      attack = self.hudPosition + prism.Vector2(6, 3),
+      shift = self.hudPosition + prism.Vector2(2, 4),
+      throw = self.hudPosition + prism.Vector2(2, 8),
+   }
 
    local player = prism.actors.Player()
    local builder = generator(love.timer.getTime(), player)
@@ -127,37 +140,63 @@ function GameLevelState:putItem(item, x, y)
    end
 end
 
-local windowBorder = { color = prism.Color4.DARKGREY, cornerColor = prism.Color4.LAVENDER }
-local containerBorder = { color = prism.Color4.LAVENDER }
+local windowBorder = { color = prism.Color4.DARK, cornerColor = prism.Color4.PURPLE }
 
 --- @param player Actor
 function GameLevelState:putHUD(player)
+   love.graphics.push()
+   love.graphics.scale(settings.scale, settings.scale)
+   love.graphics.draw(hud, (self.overlay.width - 8) * self.overlay.cellSize.x, 0)
+   love.graphics.pop()
+
+   self.overlay:border(1, 1, self.overlay.width - 8, self.overlay.height, windowBorder)
+
+   local positions = self.hudPositions
+
+   local hp = player:expect(prism.components.Health).hp
+   self.overlay:print(
+      positions.health.x,
+      positions.health.y,
+      (hp < 10 and "0" or "") .. tostring(hp),
+      prism.Color4.RED,
+      prism.Color4.BLACK
+   )
+
+   local attack = player:expect(prism.components.Attacker):getDamageAndKnockback()
+   self.overlay:print(
+      positions.attack.x,
+      positions.attack.y,
+      (attack < 10 and "0" or "") .. tostring(attack),
+      prism.Color4.GOLD,
+      prism.Color4.BLACK
+   )
+
    local inventory = player:expect(prism.components.Inventory)
    local equipper = player:expect(prism.components.Equipper)
-   self.overlay:border(1, 1, self.overlay.width, self.overlay.height, windowBorder)
-   local hp = player:expect(prism.components.Health).hp
-
-   self.overlay:border(1, self.overlay.height - 2, 5, 3, containerBorder)
-   self.overlay:put(2, self.overlay.height - 1, 20, prism.Color4.RED)
-   self.overlay:print(3, self.overlay.height - 1, (hp < 10 and "0" or "") .. tostring(hp), prism.Color4.RED)
-   self.overlay:border(6, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(8, self.overlay.height, 28, prism.Color4.DARKGREY)
-   self.overlay:border(9, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(11, self.overlay.height, 266, prism.Color4.DARKGREY)
-   self.overlay:border(12, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(14, self.overlay.height, 157, prism.Color4.DARKGREY)
-   self.overlay:border(15, self.overlay.height - 2, 3, 3, containerBorder)
-   self.overlay:put(17, self.overlay.height, 158, prism.Color4.DARKGREY)
 
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
    local amulet = equipper:get("amulet")
    local pocket = inventory:query():first()
-   self:putItem(held, 7, self.overlay.height - 1)
-   self:putItem(pocket, 10, self.overlay.height - 1)
-   self:putItem(weapon, 13, self.overlay.height - 1)
-   self:putItem(amulet, 16, self.overlay.height - 1)
+
+   self:putItem(held, positions.held:decompose())
+   self:putItem(pocket, positions.pocket:decompose())
+   self:putItem(weapon, positions.weapon:decompose())
+   self:putItem(amulet, positions.amulet:decompose())
+
+   if held or pocket then self.overlay:print(positions.shift.x, positions.shift.y, "SHFT", prism.Color4.CORNFLOWER) end
+   if held then
+      local extraAction = false
+      if prism.actions.Eat:validateTarget(1, self.level, player, held) then
+         self.overlay:print(positions.throw.x, positions.throw.y, "P", prism.Color4.CORNFLOWER)
+         self.overlay:print(positions.throw.x + 2, positions.throw.y, "eat", prism.Color4.TEXT)
+         extraAction = true
+      end
+      self.overlay:print(positions.throw.x, positions.throw.y + (extraAction and 1 or 0), "T", prism.Color4.CORNFLOWER)
+      self.overlay:print(positions.throw.x + 2, positions.throw.y + (extraAction and 1 or 0), "thrw", prism.Color4.TEXT)
+   end
 end
+
 local dummy = prism.Color4()
 function GameLevelState:draw()
    self.display:clear()

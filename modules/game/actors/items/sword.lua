@@ -5,6 +5,6 @@ prism.registerActor("Sword", function()
          index = 157,
          color = prism.Color4.WHITE,
       },
-      prism.components.Equipment("weapon"),
+      prism.components.Equipment("weapon", prism.condition.Condition(prism.modifiers.AttackModifier(2))),
    }
 end)

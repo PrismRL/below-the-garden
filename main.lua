@@ -1,6 +1,8 @@
 require "debugger"
 require "prism"
 
+love.graphics.setDefaultFilter("nearest", "nearest")
+
 prism.loadModule("prism/spectrum")
 prism.loadModule("prism/geometer")
 prism.loadModule("prism/extra/sight")
@@ -15,9 +17,8 @@ prism.loadModule("modules/game")
 prism.logger.setOptions { level = "debug" }
 
 -- Load a sprite atlas and configure the terminal-style display,
-love.graphics.setDefaultFilter("nearest", "nearest")
 local spriteAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/wanderlust_16x16.png", 8, 8)
-local display = spectrum.Display(58, 26, spriteAtlas, prism.Vector2(8, 8))
+local display = spectrum.Display(58 - 8, 26, spriteAtlas, prism.Vector2(8, 8))
 local overlay = spectrum.Display(60, 30, spriteAtlas, prism.Vector2(8, 8))
 
 -- spin up our state machine
