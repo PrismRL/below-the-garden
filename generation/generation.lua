@@ -4,8 +4,8 @@ local vegetation = require "generation.vegetation"
 local passive = require "generation.passivecreatures"
 local creatures = require "generation.creatures"
 
-LEVELGENBOUNDSX = 56 -- 1..60
-LEVELGENBOUNDSY = 25 -- 1..30
+LEVELGENBOUNDSX = 60 -- 1..60
+LEVELGENBOUNDSY = 30 -- 1..30
 
 ------------------------------------------------------------
 -- Door normal (cardinal only)
@@ -21,15 +21,7 @@ end
 ------------------------------------------------------------
 -- Attempt to attach a room via a specific door
 ------------------------------------------------------------
-local function tryDoor(
-   builder,
-   room,
-   rs, rf,
-   ax, ay,
-   normal,
-   rdoor,
-   rng
-)
+local function tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng)
    local rx, ry = rdoor:expectPosition():decompose()
 
    -- hallway length (0 = direct attach)
@@ -47,14 +39,10 @@ local function tryDoor(
       hx = hx + normal.x
       hy = hy + normal.y
 
-      if hx < 1 or hx > LEVELGENBOUNDSX or hy < 1 or hy > LEVELGENBOUNDSY then
-         return false
-      end
+      if hx < 1 or hx > LEVELGENBOUNDSX or hy < 1 or hy > LEVELGENBOUNDSY then return false end
 
       for _, d in ipairs(prism.Vector2.neighborhood8) do
-         if util.isFloor(builder, hx + d.x, hy + d.y) then
-            return false
-         end
+         if util.isFloor(builder, hx + d.x, hy + d.y) then return false end
       end
    end
 
@@ -67,14 +55,10 @@ local function tryDoor(
             local gx = ox + (x - rs.x)
             local gy = oy + (y - rs.y)
 
-            if gx <= 1 or gx >= LEVELGENBOUNDSX or gy <= 1 or gy >= LEVELGENBOUNDSY then
-               return false
-            end
+            if gx <= 1 or gx >= LEVELGENBOUNDSX or gy <= 1 or gy >= LEVELGENBOUNDSY then return false end
 
             for _, d in ipairs(prism.Vector2.neighborhood8) do
-               if util.isFloor(builder, gx + d.x, gy + d.y) then
-                  return false
-               end
+               if util.isFloor(builder, gx + d.x, gy + d.y) then return false end
             end
          end
       end
@@ -95,15 +79,11 @@ local function tryDoor(
    builder:set(ax, ay, prism.cells.Floor())
 
    -- remove consumed door proxies
-   for _, door in ipairs(
-      builder:query(prism.components.DoorProxy):at(ax, ay):gather()
-   ) do
+   for _, door in ipairs(builder:query(prism.components.DoorProxy):at(ax, ay):gather()) do
       builder:removeActor(door)
    end
 
-   for _, door in ipairs(
-      builder:query(prism.components.DoorProxy):at(ox, oy):gather()
-   ) do
+   for _, door in ipairs(builder:query(prism.components.DoorProxy):at(ox, oy):gather()) do
       builder:removeActor(door)
    end
 
@@ -130,24 +110,13 @@ local function tryAccrete(builder, rng)
 
       if normal then
          for rdoor in room:query(prism.components.DoorProxy):iter() do
-            if tryDoor(
-               builder,
-               room,
-               rs, rf,
-               ax, ay,
-               normal,
-               rdoor,
-               rng
-            ) then
-               return true
-            end
+            if tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng) then return true end
          end
       end
    end
 
    return false
 end
-
 
 ------------------------------------------------------------
 -- Level generator entry point
@@ -158,13 +127,7 @@ return function(seed, player)
 
    local rng = prism.RNG(seed)
 
-   builder:rectangle(
-      "line",
-      1, 1,
-      LEVELGENBOUNDSX,
-      LEVELGENBOUNDSY,
-      prism.cells.Wall
-   )
+   builder:rectangle("line", 1, 1, LEVELGENBOUNDSX, LEVELGENBOUNDSY, prism.cells.Wall)
 
    -- first room
    local first = rooms.makeRoom(rng)
@@ -216,9 +179,7 @@ return function(seed, player)
    -- fill remaining nils with walls
    for x = 1, LEVELGENBOUNDSX do
       for y = 1, LEVELGENBOUNDSY do
-         if not builder:get(x, y) then
-            builder:set(x, y, prism.cells.Wall())
-         end
+         if not builder:get(x, y) then builder:set(x, y, prism.cells.Wall()) end
       end
    end
 
@@ -226,10 +187,7 @@ return function(seed, player)
       local pos = actor:getPosition()
       if pos then
          local x, y = pos:decompose()
-         if x < 1 or x > LEVELGENBOUNDSX
-         or y < 1 or y > LEVELGENBOUNDSY then
-            builder:removeActor(actor)
-         end
+         if x < 1 or x > LEVELGENBOUNDSX or y < 1 or y > LEVELGENBOUNDSY then builder:removeActor(actor) end
       end
    end
 
@@ -243,13 +201,10 @@ return function(seed, player)
    end
 
    for _ = 1, 5 do
-      local lightDistanceField = util.buildDistanceField(builder,
-         function (builder, x, y)
-            query:at(x, y)
-            return query:first() ~= nil
-         end,
-         util.isFloor
-      )
+      local lightDistanceField = util.buildDistanceField(builder, function(builder, x, y)
+         query:at(x, y)
+         return query:first() ~= nil
+      end, util.isFloor)
       passive.addFireflies(builder, lightDistanceField, rng)
    end
 

@@ -30,6 +30,11 @@ function GameLevelState:__new(display, overlay)
       throw = self.hudPosition + prism.Vector2(2, 8),
    }
 
+   self.useActions = {
+      prism.actions.Eat,
+      prism.actions.Gaze,
+   }
+
    local player = prism.actors.Player()
    local builder = generator(love.timer.getTime(), player)
 
@@ -110,9 +115,10 @@ function GameLevelState:updateDecision(dt, owner, decision)
       if self:setAction(pickup) then return end
    end
 
-   if controls.use.pressed then
-      local eat = prism.actions.Eat(owner, held)
-      if self:setAction(eat) then return end
+   if controls.use.pressed and held then
+      for _, action in ipairs(self.useActions) do
+         if self:setAction(action(owner, held)) then return end
+      end
    end
 
    if controls.swap.pressed then
@@ -187,11 +193,15 @@ function GameLevelState:putHUD(player)
    if held or pocket then self.overlay:print(positions.shift.x, positions.shift.y, "SHFT", prism.Color4.CORNFLOWER) end
    if held then
       local extraAction = false
-      if prism.actions.Eat:validateTarget(1, self.level, player, held) then
-         self.overlay:print(positions.throw.x, positions.throw.y, "P", prism.Color4.CORNFLOWER)
-         self.overlay:print(positions.throw.x + 2, positions.throw.y, "eat", prism.Color4.TEXT)
-         extraAction = true
+      for _, action in ipairs(self.useActions) do
+         if action:validateTarget(1, self.level, player, held) then
+            self.overlay:print(positions.throw.x, positions.throw.y, "P", prism.Color4.CORNFLOWER)
+            self.overlay:print(positions.throw.x + 2, positions.throw.y, action.name, prism.Color4.TEXT)
+            extraAction = true
+            break
+         end
       end
+
       self.overlay:print(positions.throw.x, positions.throw.y + (extraAction and 1 or 0), "T", prism.Color4.CORNFLOWER)
       self.overlay:print(positions.throw.x + 2, positions.throw.y + (extraAction and 1 or 0), "thrw", prism.Color4.TEXT)
    end
@@ -213,6 +223,8 @@ function GameLevelState:draw()
 
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses
+      local x, y = self.display:getCenterOffset(player:expectPosition():decompose())
+      self.display:setCamera(x, y)
       self.display:beginCamera()
       self.display:pushModifier(self.lightPass)
       self.display:pushModifier(function(entity, x, y, drawable)

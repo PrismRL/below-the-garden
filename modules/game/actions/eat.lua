@@ -1,6 +1,7 @@
 --- @class Eat : Action
 --- @overload fun(owner: Actor, ...): Eat
 local Eat = prism.Action:extend "Eat"
+Eat.name = "eat"
 Eat.requiredComponents = { prism.components.Health }
 Eat.targets = { prism.targets.EquippedTarget("held", prism.components.Eatable) }
 
