@@ -197,17 +197,6 @@ return function(seed, player)
 
    local query = builder:query(prism.components.Light)
 
-   for _ = 1, 5 do
-      local lightDistanceField = util.buildDistanceField(builder,
-         function (builder, x, y)
-            query:at(x, y)
-            return query:first() ~= nil
-         end,
-         util.isFloor
-      )
-      passive.addFireflies(builder, lightDistanceField, rng)
-   end
-
    local wallDistanceField = util.buildWallDistanceField(builder)
    util.addSpawnpoints(builder, wallDistanceField, rng)
 
@@ -251,6 +240,17 @@ return function(seed, player)
    for _, actor in ipairs(builder:query(prism.components.Spawner):gather()) do
       builder:addActor(prism.actors.Sqeeto(), actor:expectPosition():decompose())
       builder:removeActor(actor)
+   end
+
+   for _ = 1, 5 do
+      local lightDistanceField = util.buildDistanceField(builder,
+         function (builder, x, y)
+            query:at(x, y)
+            return query:first() ~= nil
+         end,
+         util.isFloor
+      )
+      passive.addFireflies(builder, lightDistanceField, rng)
    end
 
    return builder

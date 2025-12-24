@@ -25,10 +25,22 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
 
       -- Hard cutoff: must be at least somewhat open
       if wallDist and wallDist >= MIN_WALL_DIST then
-         candidates[#candidates + 1] = {
-            sp = sp,
-            wallDist = wallDist,
-         }
+
+         local player = builder:query(prism.components.PlayerController):first()
+         local pp = player:expectPosition()
+
+         local astar = prism.astar(sp:expectPosition(), pp, function (x, y)
+            return util.isFloor(builder, x, y)
+         end)
+
+         if astar then
+            local pathLength = astar:length()
+            candidates[#candidates + 1] = {
+               sp = sp,
+               wallDist = wallDist,
+               pathLength = pathLength,
+            }
+         end
       end
    end
 
@@ -37,20 +49,14 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
       return false
    end
 
-   -- Sort by wall distance (openness)
+   -- Sort candidates by pathLength (ascending)
    table.sort(candidates, function(a, b)
-      return a.wallDist < b.wallDist
+      return a.pathLength < b.pathLength
    end)
 
-   -- Select median candidate directly
-   local chosen
-   if n % 2 == 1 then
-      chosen = candidates[math.floor((n + 1) / 2)]
-   else
-      -- for even counts, pick the upper median (slightly more open)
-      chosen = candidates[math.floor(n / 2) + 1]
-   end
-
+   -- Pick median path length (favoring the middle, not extremes)
+   local mid = math.floor(#candidates / 2)
+   local chosen = candidates[#candidates]
    local pos = chosen.sp:expectPosition()
    local cx, cy = pos:decompose()
 
