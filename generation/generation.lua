@@ -2,6 +2,7 @@ local util = require "generation.util"
 local rooms = require "generation.rooms"
 local vegetation = require "generation.vegetation"
 local passive = require "generation.passivecreatures"
+local creatures = require "generation.creatures"
 
 LEVELGENBOUNDSX = 56 -- 1..60
 LEVELGENBOUNDSY = 25 -- 1..30
@@ -167,8 +168,8 @@ return function(seed, player)
 
    -- first room
    local first = rooms.makeRoom(rng)
-   local x = rng:random(5, LEVELGENBOUNDSX - 10)
-   local y = rng:random(5, LEVELGENBOUNDSY - 10)
+   local x = rng:random(10, LEVELGENBOUNDSX - 10)
+   local y = rng:random(10, LEVELGENBOUNDSY - 10)
    builder:blit(first, x, y)
 
    -- accretion loop
@@ -176,7 +177,7 @@ return function(seed, player)
    while true do
       if not tryAccrete(builder, rng) then
          failures = failures + 1
-         if failures > 500 then break end
+         if failures > 4000 then break end
       else
          --util.pruneInvalidDoors(builder)
       end
@@ -211,7 +212,7 @@ return function(seed, player)
    util.addSpawnpoints(builder, wallDistanceField, rng)
 
    local importantSpawns = util.getImportantSpawnpoints(builder)
-   assert(#importantSpawns > 0)
+   assert(#importantSpawns >= 3)
    -- place player
    local p = importantSpawns[1]:expectPosition()
    builder:addActor(player, p.x, p.y)
@@ -222,6 +223,7 @@ return function(seed, player)
    builder:removeActor(importantSpawns[2])
    builder:removeActor(importantSpawns[3])
 
+   creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    -- fill remaining nils with walls
    for x = 1, LEVELGENBOUNDSX do
       for y = 1, LEVELGENBOUNDSY do
@@ -247,6 +249,7 @@ return function(seed, player)
    end
 
    for _, actor in ipairs(builder:query(prism.components.Spawner):gather()) do
+      builder:addActor(prism.actors.Sqeeto(), actor:expectPosition():decompose())
       builder:removeActor(actor)
    end
 

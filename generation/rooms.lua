@@ -36,7 +36,7 @@ function room.addDoors(builder, rng)
 
    if #candidates == 0 then return end
 
-   for _ = 1, 5 do
+   for _ = 1, 7 do
       local idx = rng:random(1, #candidates)
       local d = table.remove(candidates, idx)
       if d then

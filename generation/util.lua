@@ -38,7 +38,7 @@ function util.isFloor(builder, x, y)
 end
 
 function util.isEmptyFloor(builder, x, y)
- return util.isFloor(builder, x, y) and #builder:query():get(x, y):gather() == 0
+ return util.isFloor(builder, x, y) and #builder:query():at(x, y):gather() == 0
 end
 
 function util.rollToWall(distanceField, x, y)
@@ -376,7 +376,7 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
    end
 
    -- Phase 1: sample good open spots
-   for i = 1, samples do
+   for _ = 1, samples do
       local x = rng:random(2, LEVELGENBOUNDSX - 1)
       local y = rng:random(2, LEVELGENBOUNDSY - 1)
 
