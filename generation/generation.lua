@@ -148,7 +148,9 @@ local function tryAccrete(builder, rng)
    return false
 end
 
-
+local function spawnFeature(builder, heatmap, distanceField, rng)
+   vegetation.addGraveyard(builder, heatmap, distanceField, rng)
+end
 ------------------------------------------------------------
 -- Level generator entry point
 ------------------------------------------------------------
@@ -192,13 +194,14 @@ return function(seed, player)
    local distanceField = util.buildWallDistanceField(builder)
    vegetation.addTallGrass(builder, heatmap, distanceField, rng)
    vegetation.addGlowStalks(builder, heatmap, distanceField, rng)
-   vegetation.addGrassPatch(builder, heatmap, distanceField, rng)
+   spawnFeature(builder, heatmap, distanceField, rng)
    vegetation.thinTouchingGlowStalks(builder)
 
    local query = builder:query(prism.components.Light)
 
    local wallDistanceField = util.buildWallDistanceField(builder)
    util.addSpawnpoints(builder, wallDistanceField, rng)
+   util.addItemSpawns(builder, wallDistanceField, rng)
 
    local importantSpawns = util.getImportantSpawnpoints(builder)
    assert(#importantSpawns >= 3)
@@ -239,6 +242,18 @@ return function(seed, player)
 
    for _, actor in ipairs(builder:query(prism.components.Spawner):gather()) do
       builder:addActor(prism.actors.Sqeeto(), actor:expectPosition():decompose())
+      builder:removeActor(actor)
+   end
+
+   local lootTable = {
+      prism.actors.Sword,
+      prism.actors.Hammer,
+      prism.actors.Sling,
+      prism.actors.Snip
+   }
+   for _, actor in ipairs(builder:query(prism.components.ItemSpawner):gather()) do
+      local factory = lootTable[rng:random(#lootTable)]
+      builder:addActor(factory(), actor:expectPosition():decompose())
       builder:removeActor(actor)
    end
 

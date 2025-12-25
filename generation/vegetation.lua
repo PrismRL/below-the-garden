@@ -186,7 +186,7 @@ function vegetation.addGrassPatch(builder, heatmap, wallDistanceField, rng, opts
    local r = rng:random(radiusMin, math.min(radiusMax, bestD - 3) )
 
    local blob = prism.LevelBuilder()
-   blob:ellipse("fill", bestX, bestY, r, r, prism.cells.TallGrass)
+   blob:ellipse("fill", bestX, bestY, r, r, prism.cells.Grass)
 
    for x, y in blob:each() do
       if util.isFloor(builder, x, y) then
@@ -226,7 +226,7 @@ end
 --- @param rng RNG
 --- @param opts table?
 ---    opts.diagonal boolean? -- include diagonals
-function vegetation.thinTouchingGlowStalks(builder, lightDistanceField, rng, opts)
+function vegetation.thinTouchingGlowStalks(builder, opts)
    opts = opts or {}
    local includeDiagonal = opts.diagonal or false
 
@@ -261,5 +261,196 @@ function vegetation.thinTouchingGlowStalks(builder, lightDistanceField, rng, opt
       builder:removeActor(actor)
    end
 end
+
+--- Spawns a meadow (water patch) in the most open nearby area.
+--- @param builder LevelBuilder
+--- @param heatmap SparseGrid
+--- @param wallDistanceField SparseGrid
+--- @param rng RNG
+--- @param opts table?
+---    opts.samples integer?
+---    opts.radiusMin integer?
+---    opts.radiusMax integer?
+function vegetation.addMeadow(builder, heatmap, wallDistanceField, rng, opts)
+   opts = opts or {}
+
+   local samples   = opts.samples   or 40
+   local radiusMin = opts.radiusMin or 2
+   local radiusMax = opts.radiusMax or 4
+
+   local bestX, bestY
+   local bestD = -math.huge
+
+   for i = 1, samples do
+      local x = rng:random(2, LEVELGENBOUNDSX - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+
+      if util.isFloor(builder, x, y) then
+         local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
+         local d = wallDistanceField:get(rx, ry)
+
+         if d and d > bestD and d > radiusMin + 1 then
+            bestD = d
+            bestX, bestY = rx, ry
+         end
+      end
+   end
+
+   if not bestX then
+      return
+   end
+
+   local r = rng:random(radiusMin, math.min(radiusMax, bestD - 4))
+
+   local blob = prism.LevelBuilder()
+   blob:ellipse("fill", bestX, bestY, r, r, prism.cells.Water)
+
+   for x, y in blob:each() do
+      if util.isFloor(builder, x, y) then
+         builder:set(x, y, prism.cells.Water())
+      end
+   end
+
+   -- Spawn fireflies in the meadow
+   local count = rng:random(4, 7)
+
+   for i = 1, count do
+      local x = bestX + rng:random(-bestD, bestD)
+      local y = bestY + rng:random(-bestD, bestD)
+
+      if builder:get(x, y) == prism.cells.Water or util.isFloor(builder, x, y) then
+         builder:addActor(prism.actors.Firefly(), x, y)
+      end
+   end
+end
+
+--- Spawns a graveyard (tombstone cluster) in the most open nearby area.
+--- @param builder LevelBuilder
+--- @param heatmap SparseGrid
+--- @param wallDistanceField SparseGrid
+--- @param rng RNG
+--- @param opts table?
+function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
+   opts = opts or {}
+
+   local samples     = opts.samples     or 40
+   local countMin    = opts.countMin    or 4
+   local countMax    = opts.countMax    or 8
+   local minWallDist = opts.minWallDist or 3
+   local radiusMin   = opts.radiusMin   or 2
+   local radiusMax   = opts.radiusMax   or 4
+
+   --------------------------------------------------------------------------
+   -- Choose location (identical logic to grass patch)
+   --------------------------------------------------------------------------
+
+   local bestX, bestY
+   local bestD = -math.huge
+
+   for i = 1, samples do
+      local x = rng:random(2, LEVELGENBOUNDSX - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+
+      if util.isFloor(builder, x, y) then
+         local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
+         local d = wallDistanceField:get(rx, ry)
+
+         if d and d > bestD then
+            bestD = d
+            bestX, bestY = rx, ry
+         end
+      end
+   end
+
+   if not bestX then
+      return
+   end
+
+   --------------------------------------------------------------------------
+   -- Spawn tombstones
+   --------------------------------------------------------------------------
+
+   local count = rng:random(countMin, countMax)
+   local radius = rng:random(
+      radiusMin,
+      math.min(radiusMax, bestD - minWallDist)
+   )
+
+   print(radiusMin, radius)
+
+   local placed = {}
+   local attempts = count * 30
+
+   for i = 1, attempts do
+      print "ATTEMPT"
+      if #placed >= count then break end
+
+      local angle = rng:random() * math.pi * 2
+      local dist  = rng:random(radiusMin, radius)
+
+      local x = math.floor(bestX + math.cos(angle) * dist + 0.5)
+      local y = math.floor(bestY + math.sin(angle) * dist + 0.5)
+
+      if util.isFloor(builder, x, y) then
+         local wallD = wallDistanceField:get(x, y)
+
+         if wallD and wallD >= minWallDist then
+            -- Avoid placing stones too close to each other
+            local ok = true
+            for _, p in ipairs(placed) do
+               local dx = x - p.x
+               local dy = y - p.y
+               if math.sqrt(dx*dx + dy*dy) < 2 then
+                  ok = false
+                  break
+               end
+            end
+
+            if ok then
+               print "SUCCESS"
+               builder:addActor(prism.actors.Tombstone(), x, y)
+               table.insert(placed, { x = x, y = y })
+            end
+         end
+      end
+   end
+
+   local REMOVE_RADIUS = radius + 3
+   local REMOVE_RADIUS_SQ = REMOVE_RADIUS * REMOVE_RADIUS
+
+   for _, sp in ipairs(builder:query(prism.components.Spawner):gather()) do
+      local sx, sy = sp:expectPosition():decompose()
+
+      local dx = sx - bestX
+      local dy = sy - bestY
+
+      print("TRYING TO REMOVE")
+      if dx*dx + dy*dy <= REMOVE_RADIUS_SQ then
+         builder:removeActor(sp)
+      end
+   end
+
+   local wispCount = opts.wispCount or rng:random(2, 5)
+   local wispTries = opts.wispTries or 30
+
+   for i = 1, wispTries do
+      if wispCount <= 0 then break end
+
+      local x = rng:random(
+         math.max(2, bestX - radiusMax),
+         math.min(LEVELGENBOUNDSX - 1, bestX + radiusMax)
+      )
+      local y = rng:random(
+         math.max(2, bestY - radiusMax),
+         math.min(LEVELGENBOUNDSY - 1, bestY + radiusMax)
+      )
+
+      if util.isFloor(builder, x, y) then
+         builder:addActor(prism.actors.Wisp(), x, y)
+         wispCount = wispCount - 1
+      end
+   end
+end
+
 
 return vegetation

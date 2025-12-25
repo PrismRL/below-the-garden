@@ -7,7 +7,7 @@ SnipTree.children = {
    BT.Sequence {
       prism.nodes.FindEnemyBehavior,
       prism.nodes.PerformOnBehavior(prism.actions.Sing),
-      prism.nodes.MoveTowardTargetBehavior(1),
+      prism.nodes.MoveTowardTargetBehavior(0),
    },
    prism.nodes.RandomMoveBehavior,
    prism.nodes.WaitBehavior,

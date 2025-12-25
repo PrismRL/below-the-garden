@@ -1,11 +1,13 @@
 local util = {}
 
+
 --- @param builder LevelBuilder
 ---@param x integer
 ---@param y integer
 function util.isWall(builder, x, y)
    if not builder:get(x, y) then return true end
    if builder:get(x, y):getCollisionMask() == 0 then return true end
+   if builder:query(prism.components.Collider):at(x, y):first() then print "COLLIDER" return true end
 
    return false
 end
@@ -537,5 +539,145 @@ function util.getImportantSpawnpoints(builder)
    }
 end
 
+--- Spawns item spawners in open areas, biased away from existing spawnpoints.
+--- @param builder LevelBuilder
+--- @param wallDistanceField SparseGrid
+--- @param rng RNG
+--- @param opts table?
+---    opts.count integer?        -- final item spawns
+---    opts.samples integer?      -- random probes
+---    opts.pool integer?         -- candidate pool
+---    opts.wallWeight number?    -- weight for wall distance
+---    opts.spawnWeight number?   -- weight for spawnpoint distance
+function util.addItemSpawns(builder, wallDistanceField, rng, opts)
+   opts = opts or {}
+
+   local finalCount  = opts.count        or 5
+   local samples     = opts.samples      or 150
+   local poolSize    = opts.pool         or 100
+   local wallWeight  = opts.wallWeight   or 1.0
+   local spawnWeight = opts.spawnWeight  or 2
+
+   --------------------------------------------------------------------------
+   -- Build distance field from existing spawnpoints
+   --------------------------------------------------------------------------
+
+   local spawnDistanceField = util.buildDistanceField(
+      builder,
+      function(builder, x, y)
+         return builder:query(prism.components.Spawner):at(x, y):first() ~= nil
+      end,
+      function(builder, x, y)
+         return util.isWalkable(builder, x, y)
+      end
+   )
+
+   local candidates = {}
+
+   local function tryInsertCandidate(x, y, score, wallD, spawnD)
+      if #candidates < poolSize then
+         candidates[#candidates + 1] = {
+            x = x, y = y,
+            score = score,
+            wallD = wallD,
+            spawnD = spawnD,
+         }
+         return
+      end
+
+      local weakest = 1
+      for i = 2, #candidates do
+         if candidates[i].score < candidates[weakest].score then
+            weakest = i
+         end
+      end
+
+      if score > candidates[weakest].score then
+         candidates[weakest] = {
+            x = x, y = y,
+            score = score,
+            wallD = wallD,
+            spawnD = spawnD,
+         }
+      end
+   end
+
+   --------------------------------------------------------------------------
+   -- Phase 1: sample good candidates
+   --------------------------------------------------------------------------
+
+   for _ = 1, samples do
+      local x = rng:random(2, LEVELGENBOUNDSX - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+
+      if util.isWalkable(builder, x, y) then
+         local rx, ry = x, y
+         if rx
+            and util.isWalkable(builder, rx, ry)
+            and #builder:query():at(rx, ry):gather() == 0
+         then
+            local wallD  = wallDistanceField:get(rx, ry)
+            local spawnD = spawnDistanceField:get(rx, ry)
+
+            if wallD and spawnD then
+               local score =
+                  wallD  * wallWeight +
+                  spawnD * spawnWeight
+
+               tryInsertCandidate(rx, ry, score, wallD, spawnD)
+            end
+         end
+      end
+   end
+
+   if #candidates == 0 then return end
+
+   --------------------------------------------------------------------------
+   -- Phase 2: maximize mutual separation (same as spawnpoints)
+   --------------------------------------------------------------------------
+
+   table.sort(candidates, function(a, b)
+      return a.score > b.score
+   end)
+
+   local chosen = {}
+   chosen[1] = table.remove(candidates, 1)
+
+   local function minDistSqToChosen(c)
+      local min = math.huge
+      for _, s in ipairs(chosen) do
+         local dx = c.x - s.x
+         local dy = c.y - s.y
+         local d2 = dx * dx + dy * dy
+         if d2 < min then
+            min = d2
+         end
+      end
+      return min
+   end
+
+   while #chosen < finalCount and #candidates > 0 do
+      local bestIdx = 1
+      local bestScore = -1
+
+      for i, c in ipairs(candidates) do
+         local sep = minDistSqToChosen(c)
+         if sep > bestScore then
+            bestScore = sep
+            bestIdx = i
+         end
+      end
+
+      chosen[#chosen + 1] = table.remove(candidates, bestIdx)
+   end
+
+   --------------------------------------------------------------------------
+   -- Spawn item spawners
+   --------------------------------------------------------------------------
+
+   for _, c in ipairs(chosen) do
+      builder:addActor(prism.actors.ItemSpawner(), c.x, c.y)
+   end
+end
 
 return util

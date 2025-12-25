@@ -1,4 +1,4 @@
-local color = prism.Color4.fromHex(0x8aa1f6)
+local color = (prism.Color4.ORANGE + prism.Color4.ORANGE)/2
 prism.registerActor("Player", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Player"),

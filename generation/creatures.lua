@@ -104,9 +104,9 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    ----------------------------------------------------------------
    local swordSpots = {}
 
-   for dx = -2, 2 do
-      for dy = -2, 2 do
-         if not (dx == 0 and dy == 0) and (dx * dx + dy * dy <= 4) then
+   for dx = -3, 3 do
+      for dy = -3, 3 do
+         if not (dx == 0 and dy == 0) and not (math.abs(dx) == 1 or math.abs(dy) == 1) and (dx * dx + dy * dy <= 4) then
             local x = cx + dx
             local y = cy + dy
             if util.isEmptyFloor(builder, x, y) then

@@ -6,5 +6,6 @@ prism.registerActor("Hammer", function()
          color = prism.Color4.WHITE,
       },
       prism.components.Equipment("weapon", prism.condition.Condition(prism.modifiers.AttackModifier(1, 1))),
+      prism.components.Position(),
    }
 end)
