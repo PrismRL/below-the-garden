@@ -1,6 +1,7 @@
 --- @class Throw : Action
 --- @overload fun(owner: Actor, ...): Throw
 local Throw = prism.Action:extend "Throw"
+Throw.name = "thrw"
 Throw.requiredComponents = { prism.components.Equipper, prism.components.Thrower }
 
 local throwMask = prism.Collision.createBitmaskFromMovetypes { "fly" }
