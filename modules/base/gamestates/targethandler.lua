@@ -16,6 +16,7 @@ local TargetHandler = spectrum.GameState:extend("TargetHandler")
 function TargetHandler:__new(display, levelState, targetList, target, owner)
    self.display = display
    self.levelState = levelState
+   self.camera = levelState.display.camera
    self.owner = owner or self.levelState.decision.actor
    self.level = self.levelState.level
    self.targetList = targetList

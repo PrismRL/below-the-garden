@@ -84,10 +84,10 @@ function GeneralTargetHandler:draw()
    self.display:clear()
 
    local x, y = self.selectorPosition:decompose()
-   self.display:put(x, y, 11)
+   self.display:put(x + self.camera.x, y + self.camera.y, 11)
 
    if not self.curTarget or prism.Vector2:is(self.curTarget) and self.curTarget ~= self.selectorPosition then
-      self.display:put(x, y, 163)
+      self.display:put(x + self.camera.x, y + self.camera.y, 163)
    end
    --- @type Entity
    local entity = self.level:getCell(x, y)
