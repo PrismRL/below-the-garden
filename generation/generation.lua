@@ -143,7 +143,7 @@ return function(seed, player)
    while true do
       if not tryAccrete(builder, rng) then
          failures = failures + 1
-         if failures > 4000 then break end
+         if failures > 500 then break end
       else
          --util.pruneInvalidDoors(builder)
       end
