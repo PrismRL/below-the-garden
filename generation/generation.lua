@@ -172,6 +172,7 @@ return function(seed, player)
    -- place player
    local p = importantSpawns[1]:expectPosition()
    builder:addActor(player, p.x, p.y)
+   builder:addActor(prism.actors.Torch(), p.x, p.y)
    builder:addActor(prism.actors.Prism(), importantSpawns[2]:expectPosition():decompose())
    builder:addActor(prism.actors.Stairs(), importantSpawns[3]:expectPosition():decompose())
 

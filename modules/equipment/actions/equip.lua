@@ -39,8 +39,10 @@ function Equip:perform(level, actor)
       end
    end
 
-   if level:hasActor(actor) then level:removeActor(actor) end
-
+   print "REMOVING + RELATION"
+   actor:remove(prism.components.Position)
+   self.owner:addRelation(prism.relations.LitByRelation, actor)
+   
    local conditions = self.owner:get(prism.components.ConditionHolder)
    if conditions and equipment.condition then equipper.statusMap[actor] = conditions:add(equipment.condition) end
 

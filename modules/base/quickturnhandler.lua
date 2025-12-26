@@ -2,6 +2,7 @@
 local QuickTurnHandler = prism.TurnHandler:extend "QuickTurnHandler"
 
 function QuickTurnHandler:handleTurn(level, actor, controller)
+   if not actor:getPosition() then return end
    local decision = controller:decide(level, actor, prism.decisions.ActionDecision(actor))
    local action = decision.action
 

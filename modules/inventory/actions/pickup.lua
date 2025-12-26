@@ -22,9 +22,12 @@ function Pickup:perform(level, item)
 
    local slot, _ = next(equipment.requiredCategories)
    local equipped = equipper:get(slot)
-   level:removeActor(item)
+
+   item:remove(prism.components.Position)
+   self.owner:removeRelation(prism.relations.LitByRelation, item)
+
    level:tryPerform(prism.actions.Unequip(self.owner, equipped))
-   if equipped then level:addActor(equipped, self.owner:expectPosition():decompose()) end
+   if equipped then equipped:give(prism.components.Position(self.owner:expectPosition())) end
    level:perform(prism.actions.Equip(self.owner, item))
 
    if prism.components.Log then

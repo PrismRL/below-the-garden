@@ -387,7 +387,7 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
       if dx * dx + dy * dy <= REMOVE_RADIUS_SQ then builder:removeActor(sp) end
    end
 
-   local wispCount = opts.wispCount or rng:random(2, 5)
+   local wispCount = opts.wispCount or rng:random(3, 4)
    local wispTries = opts.wispTries or 30
 
    for i = 1, wispTries do

@@ -14,13 +14,13 @@ prism.registerActor("Wisp", function()
          layer = 3,
       },
       prism.components.Senses(),
-      prism.components.LightSight { range = 1, fov = true },
+      prism.components.LightSight { range = 3, fov = true },
       prism.components.Mover { "fly" },
       prism.components.Position(),
       prism.components.Collider(),
-      prism.components.Health(1),
-      prism.components.Light(prism.Color4.BLUE, 2, prism.lighteffects.Heartbeat()),
+      prism.components.Light(prism.Color4.BLUE, 4, prism.lighteffects.Heartbeat()),
       prism.components.IdleAnimation("WispIdle"),
       prism.components.FireflyController(),
+      prism.components.Item(),
    }
 end)

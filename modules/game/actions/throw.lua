@@ -35,8 +35,10 @@ function Throw:perform(level, object)
       actor = held,
       blocking = true,
    })
+   
    local damage = self.owner:expect(prism.components.Thrower):getDamage()
    level:tryPerform(prism.actions.Damage(object, damage))
+   held:give(prism.components.Position(position))
    level:addActor(held, position:decompose())
 end
 

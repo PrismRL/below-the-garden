@@ -26,6 +26,10 @@ function Unequip:perform(level, actor)
 
    local status = self.owner:get(prism.components.ConditionHolder)
    if status and equipper.statusMap[actor] then status:remove(equipper.statusMap[actor]) end
+   self.owner:removeRelation(prism.relations.LitByRelation, actor)
+
+   local lighting = level:getSystem(prism.systems.LightSystem)
+   lighting:setDirty(actor)
 
    if Log then
       Log.addMessage(self.owner, "You unequip the %s.", Name.get(actor))

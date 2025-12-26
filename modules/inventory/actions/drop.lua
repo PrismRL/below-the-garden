@@ -27,7 +27,6 @@ function Drop:perform(level, actor, quantity)
 
    local removedActor = inventory:removeQuantity(actor, quantity or item.stackCount or 1)
    removedActor:give(prism.components.Position(self.owner:getPosition()))
-   level:addActor(removedActor)
 
    if prism.components.Log then
       Log = prism.components.Log
