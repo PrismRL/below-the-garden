@@ -13,7 +13,7 @@ local hud = love.graphics.newImage("display/hud.png")
 
 --- @param display Display
 --- @param overlay Display
-function GameLevelState:__new(display, overlay)
+function GameLevelState:__new(display, overlay, testing)
    -- Construct a simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
@@ -31,6 +31,7 @@ function GameLevelState:__new(display, overlay)
       upon = self.hudPosition + prism.Vector2(3, 16),
       pickup = self.hudPosition + prism.Vector2(2, 14),
       pickupSlot = self.hudPosition + prism.Vector2(7, 17),
+      pickupSwap = self.hudPosition + prism.Vector2(6, 16),
    }
 
    self.useActions = {
@@ -39,7 +40,21 @@ function GameLevelState:__new(display, overlay)
    }
 
    local player = prism.actors.Player()
-   local builder = generator(love.timer.getTime(), player)
+   local builder
+   if testing then
+      builder = prism.LevelBuilder()
+      builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
+      -- Fill the interior with floor tiles
+      builder:rectangle("fill", 1, 1, 31, 31, prism.cells.Floor)
+      -- Add a small block of walls within the map
+      builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
+      -- Add a pit area to the southeast
+      builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
+      builder:addActor(prism.actors.Player(), 16, 16)
+      builder:addActor(prism.actors.Torch(), 12, 12)
+   else
+      builder = generator(love.timer.getTime(), player)
+   end
 
    -- Add systems
    --- @type LightSystem
@@ -199,6 +214,7 @@ function GameLevelState:putHUD(player)
       self.overlay:print(positions.pickup.x, positions.pickup.y, "P", prism.Color4.CORNFLOWER)
       local slot = next(upon:get(prism.components.Equipment).requiredCategories)
       self.overlay:put(positions.pickupSlot.x, positions.pickupSlot.y, slot, prism.Color4.TEXT)
+      self:putItem(equipper:get(slot), positions.pickupSwap:decompose())
    end
 
    if held or pocket then self.overlay:print(positions.shift.x, positions.shift.y, "SHFT", prism.Color4.CORNFLOWER) end
