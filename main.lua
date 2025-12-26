@@ -33,8 +33,13 @@ love.keyboard.setKeyRepeat(true)
 
 -- we put out levelstate on top here, but you could create a main menu
 --- @diagnostic disable-next-line
-function love.load()
-   manager:push(spectrum.gamestates.GameStartState(display, overlay))
+function love.load(args)
+   local testing = not not args[1]
+   if testing then
+      manager:push(spectrum.gamestates.GameLevelState(display, overlay, testing))
+   else
+      manager:push(spectrum.gamestates.GameStartState(display, overlay))
+   end
    manager:hook()
    spectrum.Input:hook()
 end
