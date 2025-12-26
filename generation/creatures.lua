@@ -63,6 +63,7 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    end
 
    builder:addActor(prism.actors.Fire(), cx, cy)
+   builder:addActor(prism.actors.Log(), cx, cy + 1)
    builder:removeActor(chosen.sp)
 
    ----------------------------------------------------------------
