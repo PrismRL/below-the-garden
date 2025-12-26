@@ -7,8 +7,6 @@ function EmitSpores:canPerform(level, actor)
 end
 
 --- @param level Level
-function EmitSpores:perform(level, actor)
-   
-end
+function EmitSpores:perform(level, actor) end
 
 return EmitSpores

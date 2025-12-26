@@ -13,10 +13,11 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern vec4 tint;
     extern number strength;
     vec4 effect(vec4 color, Image texture, vec2 tc, vec2 _) {
@@ -25,28 +26,28 @@ return function(moonshine)
       return mix(color, tint * luma, strength);
     }]]
 
-  local setters = {}
+   local setters = {}
 
-  setters.tint = function(c)
-    assert(type(c) == "table" and #c == 3, "Invalid value for `tint'")
-    shader:send("tint", {
-      (tonumber(c[1]) or 0) / 255,
-      (tonumber(c[2]) or 0) / 255,
-      (tonumber(c[3]) or 0) / 255,
-      1
-    })
-  end
+   setters.tint = function(c)
+      assert(type(c) == "table" and #c == 3, "Invalid value for `tint'")
+      shader:send("tint", {
+         (tonumber(c[1]) or 0) / 255,
+         (tonumber(c[2]) or 0) / 255,
+         (tonumber(c[3]) or 0) / 255,
+         1,
+      })
+   end
 
-  setters.strength = function(v)
-    shader:send("strength", math.max(0, math.min(1, tonumber(v) or 0)))
-  end
+   setters.strength = function(v)
+      shader:send("strength", math.max(0, math.min(1, tonumber(v) or 0)))
+   end
 
-  local defaults = {tint = {255,255,255}, strength = 0.5}
+   local defaults = { tint = { 255, 255, 255 }, strength = 0.5 }
 
-  return moonshine.Effect{
-    name = "desaturate",
-    shader = shader,
-    setters = setters,
-    defaults = defaults
-  }
+   return moonshine.Effect {
+      name = "desaturate",
+      shader = shader,
+      setters = setters,
+      defaults = defaults,
+   }
 end

@@ -16,10 +16,11 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern number num_bands;
     vec3 rgb2hsv(vec3 c)
     {
@@ -46,14 +47,14 @@ return function(moonshine)
       return vec4(hsv2rgb(hsv), color.a);
     }]]
 
-  return moonshine.Effect{
-    name = "posterize",
-    shader = shader,
-    setters = {
-      num_bands = function(v)
-        shader:send("num_bands", math.max(1, tonumber(v) or 1))
-      end
-    },
-    defaults = {num_bands = 3}
-  }
+   return moonshine.Effect {
+      name = "posterize",
+      shader = shader,
+      setters = {
+         num_bands = function(v)
+            shader:send("num_bands", math.max(1, tonumber(v) or 1))
+         end,
+      },
+      defaults = { num_bands = 3 },
+   }
 end

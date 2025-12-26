@@ -8,14 +8,12 @@ local NOISE_SCALE = 0.15
 
 --- @param level Level
 function ModulateLight:perform(level)
-   local owner    = self.owner
+   local owner = self.owner
    local modulate = owner:expect(prism.components.LightModulate)
 
    -- Advance base timer
    modulate.timer = modulate.timer + 1
-   if modulate.timer >= modulate.max then
-      modulate.timer = 0
-   end
+   if modulate.timer >= modulate.max then modulate.timer = 0 end
 
    -- Spatial noise offset
    local pos = owner:expectPosition()
@@ -29,9 +27,7 @@ function ModulateLight:perform(level)
    local phase = (modulate.timer + offset) % modulate.max
 
    local light = modulate.lights[phase]
-   if light then
-      owner:give(light)
-   end
+   if light then owner:give(light) end
 end
 
 return ModulateLight

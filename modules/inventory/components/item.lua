@@ -47,10 +47,7 @@ function Item:split(count)
    if count == 1 and not self.stackable then return self.owner end
 
    assert(self.stackable, "Can't split a non-stackable item")
-   assert(
-      count >= 1 and count < self.stackCount,
-      "Split count must be less than current stackCount"
-   )
+   assert(count >= 1 and count < self.stackCount, "Split count must be less than current stackCount")
 
    self.stackCount = self.stackCount - count
 

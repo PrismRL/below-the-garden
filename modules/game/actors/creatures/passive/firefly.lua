@@ -17,10 +17,10 @@ prism.registerActor("Firefly", function()
       prism.components.LightSight { range = 1, fov = true },
       prism.components.Mover { "fly" },
       prism.components.Position(),
-      prism.components.Collider(),
-      prism.components.Health(1),
       prism.components.Light(prism.Color4.YELLOW, 2, prism.lighteffects.Flicker()),
       prism.components.IdleAnimation("FireflyIdle"),
       prism.components.FireflyController(),
+      prism.components.Item(),
+      prism.components.Equipment("held"),
    }
 end)

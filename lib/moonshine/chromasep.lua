@@ -13,10 +13,11 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern vec2 direction;
     vec4 effect(vec4 color, Image texture, vec2 tc, vec2 _)
     {
@@ -27,23 +28,27 @@ return function(moonshine)
         1.0);
     }]]
 
-  local angle, radius = 0, 0
-  local setters = {
-    angle  = function(v) angle  = tonumber(v) or 0 end,
-    radius = function(v) radius = tonumber(v) or 0 end
-  }
+   local angle, radius = 0, 0
+   local setters = {
+      angle = function(v)
+         angle = tonumber(v) or 0
+      end,
+      radius = function(v)
+         radius = tonumber(v) or 0
+      end,
+   }
 
-  local draw = function(buffer, effect)
-    local dx = math.cos(angle) * radius / love.graphics.getWidth()
-    local dy = math.sin(angle) * radius / love.graphics.getHeight()
-    shader:send("direction", {dx,dy})
-    moonshine.draw_shader(buffer, shader)
-  end
+   local draw = function(buffer, effect)
+      local dx = math.cos(angle) * radius / love.graphics.getWidth()
+      local dy = math.sin(angle) * radius / love.graphics.getHeight()
+      shader:send("direction", { dx, dy })
+      moonshine.draw_shader(buffer, shader)
+   end
 
-  return moonshine.Effect{
-    name = "chromasep",
-    draw = draw,
-    setters = setters,
-    defaults = {angle = 0, radius = 0}
-  }
+   return moonshine.Effect {
+      name = "chromasep",
+      draw = draw,
+      setters = setters,
+      defaults = { angle = 0, radius = 0 },
+   }
 end
