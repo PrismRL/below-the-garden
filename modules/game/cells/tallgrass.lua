@@ -6,4 +6,3 @@ prism.registerCell("TallGrass", function()
       prism.components.Drawable { index = ";", color = prism.Color4.GREEN },
    }
 end)
-

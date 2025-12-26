@@ -13,17 +13,18 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local noisetex = love.image.newImageData(256,256)
-  noisetex:mapPixel(function()
-    local l = love.math.random() * 255
-    return l,l,l,l
-  end)
-  noisetex = love.graphics.newImage(noisetex)
+   local noisetex = love.image.newImageData(256, 256)
+   noisetex:mapPixel(function()
+      local l = love.math.random() * 255
+      return l, l, l, l
+   end)
+   noisetex = love.graphics.newImage(noisetex)
 
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern number opacity;
     extern number size;
     extern vec2 noise;
@@ -38,26 +39,30 @@ return function(moonshine)
       return color * Texel(texture, tc) * mix(1.0, rand(tc+vec2(noise)), opacity);
     }]]
 
-  shader:send("noisetex", noisetex)
-  shader:send("tex_ratio", {love.graphics.getWidth() / noisetex:getWidth(),
-                            love.graphics.getHeight() / noisetex:getHeight()})
+   shader:send("noisetex", noisetex)
+   shader:send(
+      "tex_ratio",
+      { love.graphics.getWidth() / noisetex:getWidth(), love.graphics.getHeight() / noisetex:getHeight() }
+   )
 
-  local setters = {}
-  for _,k in ipairs{"opacity", "size"} do
-    setters[k] = function(v) shader:send(k, math.max(0, tonumber(v) or 0)) end
-  end
+   local setters = {}
+   for _, k in ipairs { "opacity", "size" } do
+      setters[k] = function(v)
+         shader:send(k, math.max(0, tonumber(v) or 0))
+      end
+   end
 
-  local defaults = {opacity = .3, size = 1}
+   local defaults = { opacity = 0.3, size = 1 }
 
-  local draw = function(buffer)
-    shader:send("noise", {love.math.random(), love.math.random()})
-    moonshine.draw_shader(buffer, shader)
-  end
+   local draw = function(buffer)
+      shader:send("noise", { love.math.random(), love.math.random() })
+      moonshine.draw_shader(buffer, shader)
+   end
 
-  return moonshine.Effect{
-    name = "filmgrain",
-    draw = draw,
-    setters = setters,
-    defaults = defaults
-  }
+   return moonshine.Effect {
+      name = "filmgrain",
+      draw = draw,
+      setters = setters,
+      defaults = defaults,
+   }
 end

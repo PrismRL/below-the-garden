@@ -9,9 +9,7 @@ local creatures = {}
 --- @return boolean
 function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    local player = builder:query(prism.components.PlayerController):first()
-   if not player then
-      return false
-   end
+   if not player then return false end
 
    local spawnpoints = builder:query(prism.components.Spawner):gather()
    local candidates = {}
@@ -25,11 +23,10 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
 
       -- Hard cutoff: must be at least somewhat open
       if wallDist and wallDist >= MIN_WALL_DIST then
-
          local player = builder:query(prism.components.PlayerController):first()
          local pp = player:expectPosition()
 
-         local astar = prism.astar(sp:expectPosition(), pp, function (x, y)
+         local astar = prism.astar(sp:expectPosition(), pp, function(x, y)
             return util.isFloor(builder, x, y)
          end)
 
@@ -45,9 +42,7 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    end
 
    local n = #candidates
-   if n == 0 then
-      return false
-   end
+   if n == 0 then return false end
 
    -- Sort candidates by pathLength (ascending)
    table.sort(candidates, function(a, b)
@@ -80,9 +75,7 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
          if not (dx == 0 and dy == 0) then
             local x = cx + dx
             local y = cy + dy
-            if util.isEmptyFloor(builder, x, y) then
-               thrumbleSpots[#thrumbleSpots + 1] = { x = x, y = y }
-            end
+            if util.isEmptyFloor(builder, x, y) then thrumbleSpots[#thrumbleSpots + 1] = { x = x, y = y } end
          end
       end
    end
@@ -109,9 +102,7 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
          if not (dx == 0 and dy == 0) and not (math.abs(dx) == 1 or math.abs(dy) == 1) and (dx * dx + dy * dy <= 4) then
             local x = cx + dx
             local y = cy + dy
-            if util.isEmptyFloor(builder, x, y) then
-               swordSpots[#swordSpots + 1] = { x = x, y = y }
-            end
+            if util.isEmptyFloor(builder, x, y) then swordSpots[#swordSpots + 1] = { x = x, y = y } end
          end
       end
    end
@@ -129,8 +120,6 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    end
 
    return true
-
 end
-
 
 return creatures

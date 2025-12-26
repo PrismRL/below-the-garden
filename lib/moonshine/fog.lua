@@ -3,7 +3,8 @@ Animated 2D Fog (procedural)
 Originally for Godot Engine by Gonkee https://www.youtube.com/watch?v=QEaTsz_0o44&t=6s
 
 Translated for löve by Brandon Blanker Lim-it @flamendless
-]]--
+]]
+--
 
 --[[
 SAMPLE USAGE:
@@ -38,12 +39,12 @@ end
 ]]
 
 return function(moonshine)
-	local fog_color
-	local octaves
-	local speed
-	local time
+   local fog_color
+   local octaves
+   local speed
+   local time
 
-	local shader = love.graphics.newShader([[
+   local shader = love.graphics.newShader([[
 		extern vec3 fog_color = vec3(0.35, 0.48, 0.95);
 		extern int octaves = 4;
 		extern vec2 speed = vec2(0.0, 1.0);
@@ -88,42 +89,42 @@ return function(moonshine)
 		}
 	]])
 
-	local setters = {}
+   local setters = {}
 
-	setters.fog_color = function(t)
-		assert(type(t) == "table", "Passed argument to fog_color must be a table containing 3 color values")
-		fog_color = t
-		shader:send("fog_color", fog_color)
-	end
+   setters.fog_color = function(t)
+      assert(type(t) == "table", "Passed argument to fog_color must be a table containing 3 color values")
+      fog_color = t
+      shader:send("fog_color", fog_color)
+   end
 
-	setters.octaves = function(i)
-		assert(type(i) == "number", "Passed argument to octaves must be an integer")
-		octaves = i
-		shader:send("octaves", octaves)
-	end
+   setters.octaves = function(i)
+      assert(type(i) == "number", "Passed argument to octaves must be an integer")
+      octaves = i
+      shader:send("octaves", octaves)
+   end
 
-	setters.speed = function(t)
-		assert(type(t) == "table", "Passed argument to speed must be a table containing 2 values")
-		speed = t
-		shader:send("speed", speed)
-	end
+   setters.speed = function(t)
+      assert(type(t) == "table", "Passed argument to speed must be a table containing 2 values")
+      speed = t
+      shader:send("speed", speed)
+   end
 
-	setters.time = function(n)
-		assert(type(n) == "number", "Passed argument to time must be a number")
-		time = n
-		shader:send("time", time)
-	end
+   setters.time = function(n)
+      assert(type(n) == "number", "Passed argument to time must be a number")
+      time = n
+      shader:send("time", time)
+   end
 
-	local defaults = {
-		fog_color = {0.35, 0.48, 0.95},
-		octaves = 4,
-		speed = {0.5, 0.5},
-	}
+   local defaults = {
+      fog_color = { 0.35, 0.48, 0.95 },
+      octaves = 4,
+      speed = { 0.5, 0.5 },
+   }
 
-	return moonshine.Effect({
-		name = "fog",
-		shader = shader,
-		setters = setters,
-		defaults = defaults,
-	})
+   return moonshine.Effect({
+      name = "fog",
+      shader = shader,
+      setters = setters,
+      defaults = defaults,
+   })
 end

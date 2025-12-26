@@ -13,10 +13,11 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern vec2 size;
     extern number feedback;
     vec4 effect(vec4 color, Image tex, vec2 tc, vec2 _)
@@ -36,20 +37,20 @@ return function(moonshine)
     }
   ]]
 
-  local setters = {}
-  setters.size = function(v)
-    if type(v) == "number" then v = {v,v} end
-    assert(type(v) == "table" and #v == 2, "Invalid value for `size'")
-    shader:send("size", v)
-  end
-  setters.feedback = function(v)
-    shader:send("feedback", math.min(1, math.max(0, tonumber(v) or 0)))
-  end
+   local setters = {}
+   setters.size = function(v)
+      if type(v) == "number" then v = { v, v } end
+      assert(type(v) == "table" and #v == 2, "Invalid value for `size'")
+      shader:send("size", v)
+   end
+   setters.feedback = function(v)
+      shader:send("feedback", math.min(1, math.max(0, tonumber(v) or 0)))
+   end
 
-  return moonshine.Effect{
-    name = "pixelate",
-    shader = shader,
-    setters = setters,
-    defaults = {size = {5,5}, feedback = 0}
-  }
+   return moonshine.Effect {
+      name = "pixelate",
+      shader = shader,
+      setters = setters,
+      defaults = { size = { 5, 5 }, feedback = 0 },
+   }
 end

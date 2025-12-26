@@ -15,11 +15,11 @@ local vegetation = {}
 function vegetation.addTallGrass(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
 
-   local attempts        = opts.attempts or 200
-   local maxTotal        = opts.maxTotal or 4
+   local attempts = opts.attempts or 200
+   local maxTotal = opts.maxTotal or 4
    local maxWallDistance = opts.maxWallDistance or 2
-   local radiusMin       = opts.radiusMin or 1
-   local radiusMax       = opts.radiusMax or 2
+   local radiusMin = opts.radiusMin or 1
+   local radiusMax = opts.radiusMax or 2
 
    local total = 0
 
@@ -29,18 +29,12 @@ function vegetation.addTallGrass(builder, heatmap, wallDistanceField, rng, opts)
       local x = rng:random(2, LEVELGENBOUNDSX - 1)
       local y = rng:random(2, LEVELGENBOUNDSY - 1)
 
-      if not util.isFloor(builder, x, y) then
-         return 0
-      end
+      if not util.isFloor(builder, x, y) then return 0 end
 
       local d = wallDistanceField:get(x, y)
-      if not d or d > maxWallDistance then
-         return 0
-      end
+      if not d or d > maxWallDistance then return 0 end
 
-      if (heatmap:get(x, y) or 0) ~= 0 then
-         return 0
-      end
+      if (heatmap:get(x, y) or 0) ~= 0 then return 0 end
 
       local r = rng:random(radiusMin, radiusMax)
       local grassBlob = prism.LevelBuilder()
@@ -56,14 +50,11 @@ function vegetation.addTallGrass(builder, heatmap, wallDistanceField, rng, opts)
    end
 
    for i = 1, attempts do
-      if total >= maxTotal then
-         return
-      end
+      if total >= maxTotal then return end
 
       total = total + tryPlace()
    end
 end
-
 
 --- Attempts to find a wall-adjacent placement by seeding far from walls.
 --- @param builder LevelBuilder
@@ -74,14 +65,10 @@ end
 --- @param minSeedDistance integer
 --- @return integer?, integer?
 local function findGlowStalkSpot(builder, heatmap, wallDistanceField, x, y, minSeedDistance)
-   if not util.isFloor(builder, x, y) then
-      return nil
-   end
+   if not util.isFloor(builder, x, y) then return nil end
 
    local d = wallDistanceField:get(x, y)
-   if not d or d < minSeedDistance then
-      return nil
-   end
+   if not d or d < minSeedDistance then return nil end
 
    local gx, gy = util.rollToWall(wallDistanceField, x, y)
    if not gx then
@@ -91,15 +78,11 @@ local function findGlowStalkSpot(builder, heatmap, wallDistanceField, x, y, minS
 
    print "ROLLED TO WALL"
 
-   if (heatmap:get(gx, gy) or 0) ~= 0 then
-      return nil
-   end
+   if (heatmap:get(gx, gy) or 0) ~= 0 then return nil end
 
    print "PASSED HEATMAP"
 
-   if #builder:query():at(gx, gy):gather() ~= 0 then
-      return nil
-   end
+   if #builder:query():at(gx, gy):gather() ~= 0 then return nil end
 
    return gx, gy
 end
@@ -122,21 +105,12 @@ function vegetation.addGlowStalks(builder, heatmap, wallDistanceField, rng, opts
    local total = 0
 
    for i = 1, attempts do
-      if total >= maxTotal then
-         return
-      end
+      if total >= maxTotal then return end
 
       local x = rng:random(2, LEVELGENBOUNDSX - 1)
       local y = rng:random(2, LEVELGENBOUNDSY - 1)
 
-      local gx, gy = findGlowStalkSpot(
-         builder,
-         heatmap,
-         wallDistanceField,
-         x,
-         y,
-         minSeedDistance
-      )
+      local gx, gy = findGlowStalkSpot(builder, heatmap, wallDistanceField, x, y, minSeedDistance)
 
       if gx then
          builder:addActor(prism.actors.Glowstalk(), gx, gy)
@@ -157,7 +131,7 @@ end
 function vegetation.addGrassPatch(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
 
-   local samples   = opts.samples   or 40
+   local samples = opts.samples or 40
    local radiusMin = opts.radiusMin or 2
    local radiusMax = opts.radiusMax or 4
 
@@ -179,22 +153,18 @@ function vegetation.addGrassPatch(builder, heatmap, wallDistanceField, rng, opts
       end
    end
 
-   if not bestX then
-      return
-   end
+   if not bestX then return end
 
-   local r = rng:random(radiusMin, math.min(radiusMax, bestD - 3) )
+   local r = rng:random(radiusMin, math.min(radiusMax, bestD - 3))
 
    local blob = prism.LevelBuilder()
    blob:ellipse("fill", bestX, bestY, r, r, prism.cells.Grass)
 
    for x, y in blob:each() do
-      if util.isFloor(builder, x, y) then
-         builder:set(x, y, prism.cells.Grass())
-      end
+      if util.isFloor(builder, x, y) then builder:set(x, y, prism.cells.Grass()) end
    end
 
-      -- Remove nearby light-emitting entities
+   -- Remove nearby light-emitting entities
    local killRadius = r + radiusMax
    local killR2 = killRadius * killRadius
 
@@ -205,7 +175,7 @@ function vegetation.addGrassPatch(builder, heatmap, wallDistanceField, rng, opts
          local dx = x - bestX
          local dy = y - bestY
 
-         if dx*dx + dy*dy <= killR2 then
+         if dx * dx + dy * dy <= killR2 then
             for _, a in ipairs(builder:query(prism.components.Light):at(x, y):gather()) do
                toRemove[a] = true
             end
@@ -231,14 +201,12 @@ function vegetation.thinTouchingGlowStalks(builder, opts)
    local includeDiagonal = opts.diagonal or false
 
    local dirs = prism.Vector2.neighborhood4
-   if includeDiagonal then
-      dirs = prism.Vector2.neighborhood8
-   end
+   if includeDiagonal then dirs = prism.Vector2.neighborhood8 end
 
    local stalks = builder:query(prism.components.Light):gather()
    if #stalks == 0 then return end
 
-   local occupied = prism.SparseGrid()   -- fast position lookup
+   local occupied = prism.SparseGrid() -- fast position lookup
    for _, a in ipairs(stalks) do
       local x, y = a:expectPosition():decompose()
       occupied:set(x, y, a)
@@ -274,7 +242,7 @@ end
 function vegetation.addMeadow(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
 
-   local samples   = opts.samples   or 40
+   local samples = opts.samples or 40
    local radiusMin = opts.radiusMin or 2
    local radiusMax = opts.radiusMax or 4
 
@@ -296,9 +264,7 @@ function vegetation.addMeadow(builder, heatmap, wallDistanceField, rng, opts)
       end
    end
 
-   if not bestX then
-      return
-   end
+   if not bestX then return end
 
    local r = rng:random(radiusMin, math.min(radiusMax, bestD - 4))
 
@@ -306,9 +272,7 @@ function vegetation.addMeadow(builder, heatmap, wallDistanceField, rng, opts)
    blob:ellipse("fill", bestX, bestY, r, r, prism.cells.Water)
 
    for x, y in blob:each() do
-      if util.isFloor(builder, x, y) then
-         builder:set(x, y, prism.cells.Water())
-      end
+      if util.isFloor(builder, x, y) then builder:set(x, y, prism.cells.Water()) end
    end
 
    -- Spawn fireflies in the meadow
@@ -333,12 +297,12 @@ end
 function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
    opts = opts or {}
 
-   local samples     = opts.samples     or 40
-   local countMin    = opts.countMin    or 4
-   local countMax    = opts.countMax    or 8
+   local samples = opts.samples or 40
+   local countMin = opts.countMin or 4
+   local countMax = opts.countMax or 8
    local minWallDist = opts.minWallDist or 3
-   local radiusMin   = opts.radiusMin   or 2
-   local radiusMax   = opts.radiusMax   or 4
+   local radiusMin = opts.radiusMin or 2
+   local radiusMax = opts.radiusMax or 4
 
    --------------------------------------------------------------------------
    -- Choose location (identical logic to grass patch)
@@ -362,19 +326,14 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
       end
    end
 
-   if not bestX then
-      return
-   end
+   if not bestX then return end
 
    --------------------------------------------------------------------------
    -- Spawn tombstones
    --------------------------------------------------------------------------
 
    local count = rng:random(countMin, countMax)
-   local radius = rng:random(
-      radiusMin,
-      math.min(radiusMax, bestD - minWallDist)
-   )
+   local radius = rng:random(radiusMin, math.min(radiusMax, bestD - minWallDist))
 
    print(radiusMin, radius)
 
@@ -386,7 +345,7 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
       if #placed >= count then break end
 
       local angle = rng:random() * math.pi * 2
-      local dist  = rng:random(radiusMin, radius)
+      local dist = rng:random(radiusMin, radius)
 
       local x = math.floor(bestX + math.cos(angle) * dist + 0.5)
       local y = math.floor(bestY + math.sin(angle) * dist + 0.5)
@@ -400,7 +359,7 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
             for _, p in ipairs(placed) do
                local dx = x - p.x
                local dy = y - p.y
-               if math.sqrt(dx*dx + dy*dy) < 2 then
+               if math.sqrt(dx * dx + dy * dy) < 2 then
                   ok = false
                   break
                end
@@ -425,9 +384,7 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
       local dy = sy - bestY
 
       print("TRYING TO REMOVE")
-      if dx*dx + dy*dy <= REMOVE_RADIUS_SQ then
-         builder:removeActor(sp)
-      end
+      if dx * dx + dy * dy <= REMOVE_RADIUS_SQ then builder:removeActor(sp) end
    end
 
    local wispCount = opts.wispCount or rng:random(2, 5)
@@ -436,14 +393,8 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
    for i = 1, wispTries do
       if wispCount <= 0 then break end
 
-      local x = rng:random(
-         math.max(2, bestX - radiusMax),
-         math.min(LEVELGENBOUNDSX - 1, bestX + radiusMax)
-      )
-      local y = rng:random(
-         math.max(2, bestY - radiusMax),
-         math.min(LEVELGENBOUNDSY - 1, bestY + radiusMax)
-      )
+      local x = rng:random(math.max(2, bestX - radiusMax), math.min(LEVELGENBOUNDSX - 1, bestX + radiusMax))
+      local y = rng:random(math.max(2, bestY - radiusMax), math.min(LEVELGENBOUNDSY - 1, bestY + radiusMax))
 
       if util.isFloor(builder, x, y) then
          builder:addActor(prism.actors.Wisp(), x, y)
@@ -451,6 +402,5 @@ function vegetation.addGraveyard(builder, heatmap, wallDistanceField, rng, opts)
       end
    end
 end
-
 
 return vegetation

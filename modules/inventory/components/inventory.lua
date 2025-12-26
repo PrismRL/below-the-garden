@@ -80,18 +80,12 @@ function Inventory:canAddItem(actor)
          if not self.multipleStacks then return false, "Stack limit exceeded" end
       end
    else
-      if self.totalCount + 1 > self.limitCount then
-         return false, "Inventory count limit exceeded"
-      end
+      if self.totalCount + 1 > self.limitCount then return false, "Inventory count limit exceeded" end
    end
 
-   if item:getWeight() + self.totalWeight > self.limitWeight then
-      return false, "Inventory weight limit exceeded"
-   end
+   if item:getWeight() + self.totalWeight > self.limitWeight then return false, "Inventory weight limit exceeded" end
 
-   if item:getVolume() + self.totalVolume > self.limitVolume then
-      return false, "Inventory volume limit exceeded"
-   end
+   if item:getVolume() + self.totalVolume > self.limitVolume then return false, "Inventory volume limit exceeded" end
 
    return true
 end

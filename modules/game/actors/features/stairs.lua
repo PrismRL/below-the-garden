@@ -5,4 +5,3 @@ prism.registerActor("Stairs", function()
       prism.components.Position(),
    }
 end)
-

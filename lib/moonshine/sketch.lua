@@ -21,18 +21,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local noisetex = love.image.newImageData(256,256)
-  noisetex:mapPixel(function()
-    return love.math.random() * 255,love.math.random() * 255, 0, 0
-  end)
-  noisetex = love.graphics.newImage(noisetex)
-  noisetex:setWrap ("repeat", "repeat")
-  noisetex:setFilter("nearest", "nearest")
+   local noisetex = love.image.newImageData(256, 256)
+   noisetex:mapPixel(function()
+      return love.math.random() * 255, love.math.random() * 255, 0, 0
+   end)
+   noisetex = love.graphics.newImage(noisetex)
+   noisetex:setWrap("repeat", "repeat")
+   noisetex:setFilter("nearest", "nearest")
 
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern Image noisetex;
     extern number amp;
     extern vec2 center;
@@ -44,21 +45,21 @@ return function(moonshine)
       return Texel(texture, tc);
     }]]
 
-  shader:send("noisetex", noisetex)
+   shader:send("noisetex", noisetex)
 
-  local setters = {}
-  setters.amp = function(v)
-    shader:send("amp", math.max(0, tonumber(v) or 0))
-  end
-  setters.center = function(v)
-    assert(type(v) == "table" and #v == 2, "Invalid value for `center'")
-    shader:send("center", v)
-  end
+   local setters = {}
+   setters.amp = function(v)
+      shader:send("amp", math.max(0, tonumber(v) or 0))
+   end
+   setters.center = function(v)
+      assert(type(v) == "table" and #v == 2, "Invalid value for `center'")
+      shader:send("center", v)
+   end
 
-  return moonshine.Effect{
-    name = "sketch",
-    shader = shader,
-    setters = setters,
-    defaults = {amp = .0007, center = {0,0}}
-  }
+   return moonshine.Effect {
+      name = "sketch",
+      shader = shader,
+      setters = setters,
+      defaults = { amp = 0.0007, center = { 0, 0 } },
+   }
 end

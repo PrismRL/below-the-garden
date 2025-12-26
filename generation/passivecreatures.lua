@@ -12,7 +12,7 @@ local passive = {}
 ---    opts.samples integer?  -- default 200
 function passive.addFireflies(builder, lightDistanceField, rng, opts)
    opts = opts or {}
-   local count   = opts.count   or 1
+   local count = opts.count or 1
    local samples = opts.samples or 200
 
    local best = {} -- unsorted top candidates
@@ -26,14 +26,10 @@ function passive.addFireflies(builder, lightDistanceField, rng, opts)
       -- find weakest current candidate
       local weakest = 1
       for i = 2, #best do
-         if best[i].d < best[weakest].d then
-            weakest = i
-         end
+         if best[i].d < best[weakest].d then weakest = i end
       end
 
-      if d > best[weakest].d then
-         best[weakest] = { x = x, y = y, d = d }
-      end
+      if d > best[weakest].d then best[weakest] = { x = x, y = y, d = d } end
    end
 
    for i = 1, samples do
@@ -43,9 +39,7 @@ function passive.addFireflies(builder, lightDistanceField, rng, opts)
       if util.isFloor(builder, x, y) then
          if #builder:query():at(x, y):gather() == 0 then
             local d = lightDistanceField:get(x, y)
-            if d then
-               tryInsert(x, y, d)
-            end
+            if d then tryInsert(x, y, d) end
          end
       end
    end
@@ -54,6 +48,5 @@ function passive.addFireflies(builder, lightDistanceField, rng, opts)
       builder:addActor(prism.actors.Firefly(), c.x, c.y)
    end
 end
-
 
 return passive

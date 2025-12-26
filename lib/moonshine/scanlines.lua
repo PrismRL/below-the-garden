@@ -13,10 +13,11 @@ INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
-]]--
+]]
+--
 
 return function(moonshine)
-  local shader = love.graphics.newShader[[
+   local shader = love.graphics.newShader [[
     extern number width;
     extern number phase;
     extern number thickness;
@@ -30,44 +31,43 @@ return function(moonshine)
       return c;
     }]]
 
+   local defaults = {
+      width = 2,
+      phase = 0,
+      thickness = 1,
+      opacity = 1,
+      color = { 0, 0, 0 },
+   }
 
-  local defaults = {
-    width = 2,
-    phase = 0,
-    thickness = 1,
-    opacity = 1,
-    color = {0,0,0},
-  }
+   local setters = {}
+   setters.width = function(v)
+      shader:send("width", tonumber(v) or defaults.width)
+   end
+   setters.frequency = function(v)
+      shader:send("width", love.graphics.getHeight() / (tonumber(v) or love.graphics.getHeight()))
+   end
+   setters.phase = function(v)
+      shader:send("phase", tonumber(v) or defaults.phase)
+   end
+   setters.thickness = function(v)
+      shader:send("thickness", math.max(0, tonumber(v) or defaults.thickness))
+   end
+   setters.opacity = function(v)
+      shader:send("opacity", math.min(1, math.max(0, tonumber(v) or defaults.opacity)))
+   end
+   setters.color = function(c)
+      assert(type(c) == "table" and #c == 3, "Invalid value for `color'")
+      shader:send("color", {
+         (tonumber(c[1]) or defaults.color[0]) / 255,
+         (tonumber(c[2]) or defaults.color[1]) / 255,
+         (tonumber(c[3]) or defaults.color[2]) / 255,
+      })
+   end
 
-  local setters = {}
-  setters.width = function(v)
-    shader:send("width", tonumber(v) or defaults.width)
-  end
-  setters.frequency = function(v)
-    shader:send("width", love.graphics.getHeight()/(tonumber(v) or love.graphics.getHeight()))
-  end
-  setters.phase = function(v)
-    shader:send("phase", tonumber(v) or defaults.phase)
-  end
-  setters.thickness = function(v)
-    shader:send("thickness", math.max(0, tonumber(v) or defaults.thickness))
-  end
-  setters.opacity = function(v)
-    shader:send("opacity", math.min(1, math.max(0, tonumber(v) or defaults.opacity)))
-  end
-  setters.color = function(c)
-    assert(type(c) == "table" and #c == 3, "Invalid value for `color'")
-    shader:send("color", {
-      (tonumber(c[1]) or defaults.color[0]) / 255,
-      (tonumber(c[2]) or defaults.color[1]) / 255,
-      (tonumber(c[3]) or defaults.color[2]) / 255
-    })
-  end
-
-  return moonshine.Effect{
-    name = "scanlines",
-    shader = shader,
-    setters = setters,
-    defaults = defaults,
-  }
+   return moonshine.Effect {
+      name = "scanlines",
+      shader = shader,
+      setters = setters,
+      defaults = defaults,
+   }
 end

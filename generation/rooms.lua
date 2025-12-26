@@ -1,7 +1,7 @@
 local util = require "generation.util"
 
 local isFloor = util.isFloor
-local isWall  = util.isWall
+local isWall = util.isWall
 
 local room = {}
 
@@ -22,14 +22,10 @@ function room.addDoors(builder, rng)
 
             for _, d in ipairs(prism.Vector2.neighborhood4) do
                local nx, ny = x + d.x, y + d.y
-               if isFloor(builder, nx, ny) then
-                  count = count + 1
-               end
+               if isFloor(builder, nx, ny) then count = count + 1 end
             end
 
-            if count == 1 then
-               candidates[#candidates + 1] = { x = x, y = y }
-            end
+            if count == 1 then candidates[#candidates + 1] = { x = x, y = y } end
          end
       end
    end
@@ -39,9 +35,7 @@ function room.addDoors(builder, rng)
    for _ = 1, 7 do
       local idx = rng:random(1, #candidates)
       local d = table.remove(candidates, idx)
-      if d then
-         builder:addActor(prism.actors.DoorProxy(), d.x, d.y)
-      end
+      if d then builder:addActor(prism.actors.DoorProxy(), d.x, d.y) end
    end
 end
 
@@ -77,20 +71,10 @@ function room.makeHallwayL(rng)
 
    if horizFirst then
       b:rectangle("fill", ox, oy, ox + lenA, oy + t - 1, prism.cells.Floor)
-      b:rectangle(
-         "fill",
-         ox + lenA - (t - 1), oy,
-         ox + lenA, oy + lenB,
-         prism.cells.Floor
-      )
+      b:rectangle("fill", ox + lenA - (t - 1), oy, ox + lenA, oy + lenB, prism.cells.Floor)
    else
       b:rectangle("fill", ox, oy, ox + t - 1, oy + lenA, prism.cells.Floor)
-      b:rectangle(
-         "fill",
-         ox, oy + lenA - (t - 1),
-         ox + lenB, oy + lenA,
-         prism.cells.Floor
-      )
+      b:rectangle("fill", ox, oy + lenA - (t - 1), ox + lenB, oy + lenA, prism.cells.Floor)
    end
 
    room.addDoors(b, rng)
