@@ -5,7 +5,13 @@ local BT = prism.BehaviorTree
 local tree = prism.BehaviorTree.Root {
    BT.Sequence {
       prism.nodes.FindLightBehavior,
-      prism.nodes.MoveTowardTargetBehavior(1),
+      BT.Selector {
+         BT.Sequence {
+            prism.nodes.RandomCheckBehavior(0.3),
+            prism.nodes.AttackEnemyBehavior,
+         },
+         prism.nodes.MoveTowardTargetBehavior(1),
+      },
    },
    prism.nodes.RandomMoveBehavior,
    prism.nodes.WaitBehavior,
