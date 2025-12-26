@@ -18,6 +18,10 @@ prism.logger.setOptions { level = "debug" }
 
 -- Load a sprite atlas and configure the terminal-style display,
 local spriteAtlas = spectrum.SpriteAtlas.fromASCIIGrid("display/wanderlust_16x16.png", 8, 8)
+spriteAtlas.quadsByName["held"] = spriteAtlas:getQuadByIndex(28)
+spriteAtlas.quadsByName["pocket"] = spriteAtlas:getQuadByIndex(266)
+spriteAtlas.quadsByName["weapon"] = spriteAtlas:getQuadByIndex(157)
+spriteAtlas.quadsByName["amulet"] = spriteAtlas:getQuadByIndex(158)
 local display = spectrum.Display(60, 30, spriteAtlas, prism.Vector2(8, 8))
 local overlay = spectrum.Display(70, 32, spriteAtlas, prism.Vector2(8, 8))
 

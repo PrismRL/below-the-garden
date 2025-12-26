@@ -28,6 +28,9 @@ function GameLevelState:__new(display, overlay)
       attack = self.hudPosition + prism.Vector2(6, 3),
       shift = self.hudPosition + prism.Vector2(2, 4),
       throw = self.hudPosition + prism.Vector2(2, 8),
+      upon = self.hudPosition + prism.Vector2(3, 16),
+      pickup = self.hudPosition + prism.Vector2(2, 14),
+      pickupSlot = self.hudPosition + prism.Vector2(7, 17),
    }
 
    self.useActions = {
@@ -180,6 +183,7 @@ function GameLevelState:putHUD(player)
    local inventory = player:expect(prism.components.Inventory)
    local equipper = player:expect(prism.components.Equipper)
 
+   local upon = self.level:query(prism.components.Equipment):at(player:expectPosition():decompose()):first()
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
    local amulet = equipper:get("amulet")
@@ -189,6 +193,13 @@ function GameLevelState:putHUD(player)
    self:putItem(pocket, positions.pocket:decompose())
    self:putItem(weapon, positions.weapon:decompose())
    self:putItem(amulet, positions.amulet:decompose())
+   self:putItem(upon, positions.upon:decompose())
+
+   if upon and prism.actions.Pickup:validateTarget(1, self.level, player, upon) then
+      self.overlay:print(positions.pickup.x, positions.pickup.y, "P", prism.Color4.CORNFLOWER)
+      local slot = next(upon:get(prism.components.Equipment).requiredCategories)
+      self.overlay:put(positions.pickupSlot.x, positions.pickupSlot.y, slot, prism.Color4.TEXT)
+   end
 
    if held or pocket then self.overlay:print(positions.shift.x, positions.shift.y, "SHFT", prism.Color4.CORNFLOWER) end
    if held then
