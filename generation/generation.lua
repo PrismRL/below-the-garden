@@ -126,59 +126,64 @@ end
 -- Level generator entry point
 ------------------------------------------------------------
 return function(seed, player)
-   local builder = prism.LevelBuilder()
-   builder:addSeed(seed)
+   local builder
 
    local rng = prism.RNG(seed)
 
-   builder:rectangle("line", 1, 1, LEVELGENBOUNDSX, LEVELGENBOUNDSY, prism.cells.Wall)
-
-   -- first room
-   local first = rooms.makeRoom(rng)
-   local x = rng:random(10, LEVELGENBOUNDSX - 10)
-   local y = rng:random(10, LEVELGENBOUNDSY - 10)
-   builder:blit(first, x, y)
-
-   -- accretion loop
-   local failures = 0
+   local importantSpawns, wallDistanceField, query
    while true do
-      if not tryAccrete(builder, rng) then
-         failures = failures + 1
-         if failures > 500 then break end
-      else
-         --util.pruneInvalidDoors(builder)
+      builder = prism.LevelBuilder()
+      builder:addSeed(seed)
+      builder:rectangle("line", 1, 1, LEVELGENBOUNDSX, LEVELGENBOUNDSY, prism.cells.Wall)
+
+      -- first room
+      local first = rooms.makeRoom(rng)
+      local x = rng:random(10, LEVELGENBOUNDSX - 10)
+      local y = rng:random(10, LEVELGENBOUNDSY - 10)
+      builder:blit(first, x, y)
+
+      -- accretion loop
+      local failures = 0
+      while true do
+         if not tryAccrete(builder, rng) then
+            failures = failures + 1
+            if failures > 500 then break end
+         else
+            --util.pruneInvalidDoors(builder)
+         end
       end
+
+      util.pruneMisalignedDoors(builder)
+      util.collapseIsolatedFloors(builder, 3)
+      util.collapseThinWalls(rng, builder)
+      util.pruneMisalignedDoors(builder)
+
+      query = builder:query(prism.components.Light)
+      local heatmap = util.doorPathHeatmap(builder)
+      local distanceField = util.buildWallDistanceField(builder)
+         local rooms = util.findRooms(builder, distanceField, 2)
+
+      print(#rooms, "FOUND THIS MANY ROOMS")
+      for _, room in ipairs(rooms) do
+         for x, y in room.tiles:each() do
+            --builder:addActor(prism.Actor.fromComponents{prism.components.Drawable{index="!", layer = math.huge, color=room.color}, prism.components.Position()}, x, y)
+         end
+      end
+
+      vegetation.addTallGrass(builder, heatmap, distanceField, rng)
+      vegetation.addGlowStalks(builder, heatmap, distanceField, rng)
+      spawnFeature(builder, heatmap, distanceField, rng)
+      vegetation.thinTouchingGlowStalks(builder)
+
+      wallDistanceField = util.buildWallDistanceField(builder)
+      util.addSpawnpoints(builder, wallDistanceField, rng)
+      util.addItemSpawns(builder, wallDistanceField, rng)
+
+      importantSpawns = util.getImportantSpawnpoints(builder)
+      print(#importantSpawns)
+      if #importantSpawns == 3 then print "YEYEYE" break end
    end
 
-   util.pruneMisalignedDoors(builder)
-   util.collapseIsolatedFloors(builder, 3)
-   util.collapseThinWalls(rng, builder)
-   util.pruneMisalignedDoors(builder)
-
-   local heatmap = util.doorPathHeatmap(builder)
-   local distanceField = util.buildWallDistanceField(builder)
-      local rooms = util.findRooms(builder, distanceField, 2)
-
-   print(#rooms, "FOUND THIS MANY ROOMS")
-   for _, room in ipairs(rooms) do
-      for x, y in room.tiles:each() do
-         --builder:addActor(prism.Actor.fromComponents{prism.components.Drawable{index="!", layer = math.huge, color=room.color}, prism.components.Position()}, x, y)
-      end
-   end
-
-   vegetation.addTallGrass(builder, heatmap, distanceField, rng)
-   vegetation.addGlowStalks(builder, heatmap, distanceField, rng)
-   spawnFeature(builder, heatmap, distanceField, rng)
-   vegetation.thinTouchingGlowStalks(builder)
-
-   local query = builder:query(prism.components.Light)
-
-   local wallDistanceField = util.buildWallDistanceField(builder)
-   util.addSpawnpoints(builder, wallDistanceField, rng)
-   util.addItemSpawns(builder, wallDistanceField, rng)
-
-   local importantSpawns = util.getImportantSpawnpoints(builder)
-   assert(#importantSpawns >= 3)
    -- place player
    local p = importantSpawns[1]:expectPosition()
    builder:addActor(player, p.x, p.y)
@@ -223,6 +228,7 @@ return function(seed, player)
       prism.actors.Pebble,
       prism.actors.Torch,
       prism.actors.Gloop,
+      prism.actors.Snail,
    }
    for _, actor in ipairs(builder:query(prism.components.ItemSpawner):gather()) do
       local factory = lootTable[rng:random(#lootTable)]
