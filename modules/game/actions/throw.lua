@@ -39,6 +39,20 @@ function Throw:perform(level, object)
    local damage = self.owner:expect(prism.components.Thrower):getDamage()
    level:tryPerform(prism.actions.Damage(object, damage))
    held:give(prism.components.Position(position))
+
+   local explode = held:get(prism.components.ExplodeOnThrow)
+   if explode then
+      local query = level:query(prism.components.Health)
+      level:computeFOV(held:expectPosition(), explode.radius, function (x, y)
+         query:at(x, y)
+         for actor in query:iter() do
+            local damage = prism.actions.Damage(actor, explode.damage)
+            level:tryPerform(damage)
+         end
+      end)
+
+      level:removeActor(held)
+   end
 end
 
 return Throw
