@@ -119,7 +119,8 @@ local function tryAccrete(builder, rng)
 end
 
 local function spawnFeature(builder, heatmap, distanceField, rng)
-   vegetation.addGraveyard(builder, heatmap, distanceField, rng)
+   -- vegetation.addGraveyard(builder, heatmap, distanceField, rng)
+   vegetation.addGrassPatch(builder, heatmap, distanceField, rng)
 end
 ------------------------------------------------------------
 -- Level generator entry point
@@ -221,7 +222,7 @@ return function(seed, player)
       prism.actors.Snip,
       prism.actors.Pebble,
       prism.actors.Torch,
-      prism.actors.Gloop
+      prism.actors.Gloop,
    }
    for _, actor in ipairs(builder:query(prism.components.ItemSpawner):gather()) do
       local factory = lootTable[rng:random(#lootTable)]

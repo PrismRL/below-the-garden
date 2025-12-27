@@ -15,6 +15,7 @@ function Damage:perform(level, damage)
    level:yield(prism.messages.AnimationMessage {
       animation = spectrum.animations.Damage(self.owner),
       actor = self.owner,
+      blocking = true,
    })
 end
 

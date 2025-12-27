@@ -10,7 +10,8 @@ function ThrumbleController:getRequirements()
 end
 
 function ThrumbleController:act(level, owner)
-   self.blackboard = {}
+   self.blackboard["previous"] = self.blackboard["target"]
+   self.blackboard["target"] = nil
    return prism.nodes.ThrumbleTree:run(level, owner, self)
 end
 

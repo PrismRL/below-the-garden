@@ -8,7 +8,7 @@ prism.registerActor("Sqeeto", function()
          layer = 3,
       },
       prism.components.Senses(),
-      prism.components.LightSight { range = 5, fov = true },
+      prism.components.LightSight { range = 5, fov = true, darkvision = 2 / 16 },
       prism.components.SqeetoController(),
       prism.components.Mover { "fly" },
       prism.components.Position(),
