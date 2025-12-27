@@ -42,14 +42,20 @@ function Throw:perform(level, object)
 
    local explode = held:get(prism.components.ExplodeOnThrow)
    if explode then
+      local tiles = prism.SparseGrid()
       local query = level:query(prism.components.Health)
       level:computeFOV(held:expectPosition(), explode.radius, function (x, y)
+         tiles:set(x, y, true)
          query:at(x, y)
          for actor in query:iter() do
             local damage = prism.actions.Damage(actor, explode.damage)
             level:tryPerform(damage)
          end
       end)
+
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Explosion(tiles),
+      })
 
       level:removeActor(held)
    end
