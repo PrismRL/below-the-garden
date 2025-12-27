@@ -63,7 +63,8 @@ function GameLevelState:__new(display, overlay, testing)
       prism.systems.SensesSystem(),
       prism.systems.LightSightSystem(),
       self.lightSystem,
-      prism.systems.ModulateLightSystem()
+      prism.systems.ModulateLightSystem(),
+      prism.systems.AutoTileSystem()
    )
    builder:addTurnHandler(require "modules.base.quickturnhandler")
 
@@ -333,6 +334,7 @@ end
 function GameLevelState:resume()
    -- Run senses when we resume from e.g. Geometer.
    self.level:getSystem(prism.systems.SensesSystem):postInitialize(self.level)
+   -- self.level:getSystem(prism.systems.AutoTileSystem):initialize(self.level)
 
    if self.targets then
       local action = self.selectedAction(self.decision.actor, unpack(self.targets))

@@ -11,6 +11,7 @@ prism.loadModule("modules/equipment")
 prism.loadModule("prism/extra/condition")
 prism.loadModule("prism/extra/log")
 prism.loadModule("prism/extra/lighting")
+prism.loadModule("modules/autotile")
 prism.loadModule("modules/base")
 prism.loadModule("modules/game")
 

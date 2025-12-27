@@ -5,7 +5,7 @@ local BT = prism.BehaviorTree
 
 ThrumbleTree.children = {
    BT.Sequence {
-      prism.nodes.FindEnemyBehavior,
+      prism.nodes.FindEnemyBehavior(true),
       BT.Selector {
          BT.Sequence {
             prism.nodes.ReturnHomeBehavior,
