@@ -23,5 +23,6 @@ prism.registerActor("Firefly", function()
       prism.components.Item(),
       prism.components.Collider { allowedMovetypes = { "walk", "fly" } },
       prism.components.Equipment("held"),
+      prism.components.Slow(),
    }
 end)

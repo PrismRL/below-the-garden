@@ -30,7 +30,6 @@ function QuickTurnHandler:handleTurn(level, actor, controller)
 
       
    if ch and actor:has(prism.components.Slow) then
-      print "STUNNING"
       local stun = prism.conditions.Stunned()
       ch:add(stun)
    end

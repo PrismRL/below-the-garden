@@ -16,7 +16,6 @@ prism.registerActor("Snail", function()
       prism.components.Slow(),
       prism.components.ConditionHolder(),
       prism.components.GloopController(),
-      prism.components.ExplodeOnThrow(1, 2),
       prism.components.SlimeProducer(),
    }
 end)

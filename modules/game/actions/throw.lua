@@ -36,6 +36,16 @@ function Throw:perform(level, object)
       blocking = true,
    })
 
+   if held:get(prism.components.SlimeProducer) then
+      local ox, oy = self.owner:expectPosition():decompose()
+      local tx, ty = position:decompose()
+      local path = prism.Bresenham(ox, oy, tx, ty)
+
+      for i, cell in ipairs(path:getPath()) do
+         level:addActor(prism.actors.Slime(), cell.x, cell.y)
+      end
+   end
+
    local damage = self.owner:expect(prism.components.Thrower):getDamage()
    level:tryPerform(prism.actions.Damage(object, damage))
    held:give(prism.components.Position(position))
