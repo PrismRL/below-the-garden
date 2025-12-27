@@ -342,7 +342,7 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
 
       if util.isWalkable(builder, x, y) then
          local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
-         if rx and util.isWalkable(builder, rx, ry) and #builder:query():at(rx, ry):gather() == 0 then
+         if rx and util.isWalkable(builder, rx, ry) and #builder:query(prism.components.Collider):at(rx, ry):gather() == 0 then
             local d = wallDistanceField:get(rx, ry)
             if d then tryInsertCandidate(rx, ry, d) end
          end
@@ -604,6 +604,170 @@ function util.addItemSpawns(builder, wallDistanceField, rng, opts)
    for _, c in ipairs(chosen) do
       builder:addActor(prism.actors.ItemSpawner(), c.x, c.y)
    end
+end
+
+--- Finds rooms by flood-filling areas with wall distance > 1.
+--- Treats wall distance of 1 as hallways, larger values as room tiles.
+--- Then expands each room once to include adjacent floor tiles (hallways/edges).
+--- Finally, flood-fills remaining unclaimed floor tiles as hallway rooms.
+--- @param builder LevelBuilder
+--- @param wallDistanceField SparseGrid
+--- @param minRoomSize integer? -- minimum tiles to count as a room (default: 9)
+--- @return table[] -- array of rooms, each room is {tiles = SparseGrid, size = number, isHallway = boolean, center = {x = number, y = number}}
+function util.findRooms(builder, wallDistanceField, minRoomSize)
+   minRoomSize = minRoomSize or 9
+   local claimed = prism.SparseGrid()
+   local rooms = {}
+
+   local function isRoomTile(x, y)
+      local d = wallDistanceField:get(x, y)
+      return d and d > 1 and util.isFloor(builder, x, y)
+   end
+
+   local function findRoomCenter(tiles)
+      local bestX, bestY
+      local bestDist = -1
+
+      for tx, ty in tiles:each() do
+         local dist = wallDistanceField:get(tx, ty) or 0
+         if dist > bestDist then
+            bestDist = dist
+            bestX, bestY = tx, ty
+         end
+      end
+
+      return bestX and {x = bestX, y = bestY} or nil
+   end
+
+   local tl, br = builder:getBounds()
+
+   -- Phase 1: Find and expand large rooms (wall distance > 1)
+   for x = tl.x, br.x do
+      for y = tl.y, br.y do
+         if not claimed:get(x, y) and isRoomTile(x, y) then
+            local tiles = prism.SparseGrid()
+            local count = 0
+
+            prism.bfs(prism.Vector2(x, y), function(bx, by)
+               return isRoomTile(bx, by) and not claimed:get(bx, by)
+            end, function(bx, by)
+               tiles:set(bx, by, true)
+               claimed:set(bx, by, true)
+               count = count + 1
+            end)
+
+            if count >= minRoomSize then
+               -- Expand room by one tile to include adjacent floors
+               local expanded = prism.SparseGrid()
+               local expandedCount = 0
+
+               -- Copy original tiles
+               for tx, ty in tiles:each() do
+                  expanded:set(tx, ty, true)
+                  expandedCount = expandedCount + 1
+               end
+
+               -- Add adjacent floor tiles that aren't claimed
+               for tx, ty in tiles:each() do
+                  for _, d in ipairs(prism.Vector2.neighborhood8) do
+                     local nx, ny = tx + d.x, ty + d.y
+                     if not expanded:get(nx, ny) and not claimed:get(nx, ny) and util.isFloor(builder, nx, ny) then
+                        expanded:set(nx, ny, true)
+                        claimed:set(nx, ny, true)
+                        expandedCount = expandedCount + 1
+                     end
+                  end
+               end
+
+               rooms[#rooms + 1] = {
+                  tiles = expanded,
+                  size = expandedCount,
+                  isHallway = false,
+                  center = findRoomCenter(expanded),
+                  color = prism.Color4(math.random(), math.random(), math.random())
+               }
+            end
+         end
+      end
+   end
+
+   -- Phase 2: Flood-fill remaining unclaimed floor tiles as hallway rooms
+   for x = tl.x, br.x do
+      for y = tl.y, br.y do
+         if not claimed:get(x, y) and util.isFloor(builder, x, y) then
+            local tiles = prism.SparseGrid()
+            local count = 0
+
+            prism.bfs(prism.Vector2(x, y), function(bx, by)
+               return util.isFloor(builder, bx, by) and not claimed:get(bx, by)
+            end, function(bx, by)
+               tiles:set(bx, by, true)
+               claimed:set(bx, by, true)
+               count = count + 1
+            end)
+
+            if count > 0 then
+               rooms[#rooms + 1] = {
+                  tiles = tiles,
+                  size = count,
+                  isHallway = true,
+                  center = findRoomCenter(tiles),
+                  color = prism.Color4(math.random(), math.random(), math.random())
+               }
+            end
+         end
+      end
+   end
+
+   return rooms
+end
+
+--- Two rooms are connected if they share adjacent floor tiles.
+--- @param rooms table[] -- output from util.findRooms
+--- @return table -- graph where graph[room] = {connectedRoom1, connectedRoom2, ...}
+function util.buildRoomGraph(rooms)
+   local graph = {}
+   
+   -- Initialize graph
+   for _, room in ipairs(rooms) do
+      graph[room] = {}
+   end
+
+   -- Build tile -> room lookup
+   local tileToRoom = prism.SparseGrid()
+   for _, room in ipairs(rooms) do
+      for x, col in room.tiles:iter() do
+         for y, _ in pairs(col) do
+            tileToRoom:set(x, y, room)
+         end
+      end
+   end
+
+   -- Track which room pairs we've already connected
+   local connected = {}
+
+   -- Check each tile's neighbors once
+   for x, y in tileToRoom:each() do
+      for _, d in ipairs(prism.Vector2.neighborhood4) do
+         local nx, ny = x + d.x, y + d.y
+         local neighborRoom = tileToRoom:get(nx, ny)
+
+         if neighborRoom and neighborRoom ~= room then
+            -- Create unique key for this pair (using table addresses)
+            local a, b = room, neighborRoom
+            if tostring(a) > tostring(b) then a, b = b, a end
+            local key = tostring(a) .. "," .. tostring(b)
+
+            if not connected[key] then
+               connected[key] = true
+               table.insert(graph[room], neighborRoom)
+               table.insert(graph[neighborRoom], room)
+            end
+         end
+      end
+   end
+
+   return graph
 end
 
 return util

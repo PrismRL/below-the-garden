@@ -156,6 +156,15 @@ return function(seed, player)
 
    local heatmap = util.doorPathHeatmap(builder)
    local distanceField = util.buildWallDistanceField(builder)
+      local rooms = util.findRooms(builder, distanceField, 2)
+
+   print(#rooms, "FOUND THIS MANY ROOMS")
+   for _, room in ipairs(rooms) do
+      for x, y in room.tiles:each() do
+         --builder:addActor(prism.Actor.fromComponents{prism.components.Drawable{index="!", layer = math.huge, color=room.color}, prism.components.Position()}, x, y)
+      end
+   end
+
    vegetation.addTallGrass(builder, heatmap, distanceField, rng)
    vegetation.addGlowStalks(builder, heatmap, distanceField, rng)
    spawnFeature(builder, heatmap, distanceField, rng)

@@ -18,6 +18,7 @@ function FindLightBehavior:run(level, actor, controller)
       for entity, relation in pairs(lights) do
          local light = entity:get(prism.components.Light)
          if light then
+            print "FINDING PLAYER Light"
             --- @cast light Light
             if light.radius > lightLevel then
                target = other

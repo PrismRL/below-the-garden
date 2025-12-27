@@ -60,6 +60,7 @@ function GameLevelState:__new(display, overlay, testing)
    --- @type LightSystem
    self.lightSystem = prism.systems.LightSystem()
    builder:addSystems(
+      prism.systems.SlimeTrailSystem(),
       prism.systems.SensesSystem(),
       prism.systems.LightSightSystem(),
       self.lightSystem,

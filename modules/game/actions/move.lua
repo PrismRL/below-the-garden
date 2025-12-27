@@ -23,6 +23,22 @@ end
 --- @param level Level
 --- @param destination Vector2
 function Move:perform(level, destination)
+   local slimeProducer = self.owner:get(prism.components.SlimeProducer)
+   local mover = self.owner:expect(prism.components.Mover)
+   local direction = destination - self.owner:expectPosition()
+
+   while not slimeProducer and level:query(prism.components.Slime):at(destination:decompose()):first() do
+      local x, y = (destination + direction):decompose()
+      if level:getCellPassableByActor(x, y, self.owner, mover.mask) then
+         destination = destination + direction
+      else
+         break
+      end
+   end
+
+   if slimeProducer then
+      level:addActor(prism.actors.Slime(6), self.owner:expectPosition():decompose())
+   end
    level:moveActor(self.owner, destination)
 end
 
