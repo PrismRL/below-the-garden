@@ -15,5 +15,6 @@ prism.registerActor("Sqeeto", function()
       prism.components.Collider(),
       prism.components.Health(3),
       prism.components.Attacker(1),
+      prism.components.SqeetoFaction(),
    }
 end)
