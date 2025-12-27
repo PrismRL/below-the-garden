@@ -1,0 +1,33 @@
+--- @class Faction : Component
+--- @field set table<Faction, boolean>
+--- @overload fun(): Faction
+local Faction = prism.Component:extend "Faction"
+
+function Faction:getEnemies()
+   return {}
+end
+
+function Faction:buildSet()
+   print "BUILDING FACTION SET"
+   self.set = {}
+   if not self.cache then self.cache = self:getEnemies() end
+   for _, enemy in ipairs(self.cache) do
+      print(enemy.className)
+      self.set[enemy.className] = true
+   end
+end
+
+--- @param owner Actor
+---@param possibleEnemy Actor
+function Faction.isEnemy(owner, possibleEnemy)
+   local factionComp = owner:get(prism.components.Faction)
+   if not factionComp then return true end
+   if not factionComp.set then factionComp:buildSet() end
+
+   local otherFactionComp = possibleEnemy:get(prism.components.Faction)
+   if not otherFactionComp then return false end
+
+   return factionComp.set[otherFactionComp.className]
+end
+
+return Faction

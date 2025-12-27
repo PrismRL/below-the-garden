@@ -210,6 +210,8 @@ return function(seed, player)
       prism.actors.Hammer,
       prism.actors.Sling,
       prism.actors.Snip,
+      prism.actors.Pebble,
+      prism.actors.Torch
    }
    for _, actor in ipairs(builder:query(prism.components.ItemSpawner):gather()) do
       local factory = lootTable[rng:random(#lootTable)]

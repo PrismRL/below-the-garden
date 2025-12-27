@@ -255,6 +255,10 @@ function GameLevelState:draw()
       self.display:beginCamera()
       self.display:pushModifier(self.lightPass)
       self.display:pushModifier(function(entity, x, y, drawable)
+         --- @cast entity Entity
+         --- @cast x integer
+         --- @cast y integer
+         --- @cast drawable Drawable
          local sight = player:get(prism.components.Sight)
          local darkvision = sight and sight.darkvision or 0
 
@@ -263,15 +267,21 @@ function GameLevelState:draw()
 
          -- Preserve original color
          local base = drawable.color:copy()
+         local baseBackground = drawable.background:copy()
 
          -- Apply lighting normally
          if prism.Actor:is(entity) then
             local value = math.min(light:average(), 1)
             drawable.color = drawable.color * value
+            drawable.background = drawable.background * value
          else
             drawable.color.r = drawable.color.r * light.r
             drawable.color.g = drawable.color.g * light.g
             drawable.color.b = drawable.color.b * light.b
+
+            drawable.background.r = drawable.background.r * light.r
+            drawable.background.g = drawable.background.g * light.g
+            drawable.background.b = drawable.background.b * light.b
          end
 
          -- Linear darkness (no perceptual luminance)
@@ -293,7 +303,7 @@ function GameLevelState:draw()
 
          -- Lerp back toward base color
          drawable.color = drawable.color:lerp(base, restore)
-
+         drawable.background = drawable.background:lerp(baseBackground, restore)
          -- Fade opacity as darkness increases
          drawable.color.a = base.a * (1 - alphaLoss)
       end)

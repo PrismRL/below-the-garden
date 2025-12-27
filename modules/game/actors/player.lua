@@ -14,6 +14,7 @@ prism.registerActor("Player", function()
       prism.components.Thrower(5),
       prism.components.LightSight { range = 15, fov = true, darkvision = 2 / 16 },
       prism.components.WarmBlooded(),
+      prism.components.PlayerFaction(),
       prism.components.Attacker(1),
    }
 end)
