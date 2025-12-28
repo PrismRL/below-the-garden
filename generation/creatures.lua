@@ -87,7 +87,7 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
       thrumbleSpots[i], thrumbleSpots[j] = thrumbleSpots[j], thrumbleSpots[i]
    end
 
-   local numThrumbles = math.min(#thrumbleSpots, rng:random(1, 3))
+   local numThrumbles = math.min(#thrumbleSpots, rng:random(2, 3))
    for i = 1, numThrumbles do
       local p = thrumbleSpots[i]
       builder:addActor(prism.actors.Thrumble(), p.x, p.y)
@@ -115,7 +115,8 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    end
 
    local numSwords = math.min(#swordSpots, rng:random(1, 2))
-   for i = 1, numSwords do
+   builder:addActor(prism.actors.Torch(), swordSpots[1].x, swordSpots[1].y)
+   for i = 2, numSwords do
       local p = swordSpots[i]
       builder:addActor(prism.actors.Sword(), p.x, p.y)
    end
