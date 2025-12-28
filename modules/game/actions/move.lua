@@ -27,13 +27,26 @@ function Move:perform(level, destination)
    local mover = self.owner:expect(prism.components.Mover)
    local direction = destination - self.owner:expectPosition()
 
+   local modified = false
    while not slimeProducer and level:query(prism.components.Slime):at(destination:decompose()):first() do
       local x, y = (destination + direction):decompose()
       if level:getCellPassableByActor(x, y, self.owner, mover.mask) then
+         modified = true
          destination = destination + direction
       else
          break
       end
+   end
+
+   if modified then
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Projectile(
+            self.owner:expectPosition(),
+            destination,
+            self.owner:expect(prism.components.Drawable)
+         ),
+         blocking = true,
+      })
    end
 
    if slimeProducer then level:addActor(prism.actors.Slime(6), self.owner:expectPosition():decompose()) end

@@ -24,5 +24,6 @@ prism.registerCell("Grass", function()
       prism.components.Drawable { index = ",", color = prism.Color4.LIME },
       prism.components.Collider({ allowedMovetypes = { "walk", "fly" } }),
       GrassAutoTile,
+      prism.components.Vegetation(),
    }
 end)

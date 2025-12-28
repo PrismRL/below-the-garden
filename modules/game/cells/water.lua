@@ -3,5 +3,6 @@ prism.registerCell("Water", function()
       prism.components.Name("Water"),
       prism.components.Collider { allowedMovetypes = { "fly" } },
       prism.components.Drawable { index = "~", color = prism.Color4.BLUE, background = prism.Color4.NAVY / 2 },
+      prism.components.Wet(),
    }
 end)

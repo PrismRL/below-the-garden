@@ -4,5 +4,6 @@ prism.registerCell("TallGrass", function()
       prism.components.Collider { allowedMovetypes = { "walk", "fly" } },
       prism.components.Opaque(),
       prism.components.Drawable { index = ";", color = prism.Color4.GREEN },
+      prism.components.Vegetation(),
    }
 end)

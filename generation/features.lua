@@ -296,7 +296,7 @@ function features.addPit(rooms, builder, heatmap, wallDistanceField, rng, opts)
          ncount = ncount + 1
       end
 
-      if room.size > 25 and room.size < 64 and wallDistanceField:get(room.center:decompose()) > 3 then break end
+      if room.size > 25 and wallDistanceField:get(room.center:decompose()) > 3 then break end
    end
 
    if not room then return end
@@ -324,7 +324,7 @@ function features.addPit(rooms, builder, heatmap, wallDistanceField, rng, opts)
    local radiusx = rng:random(0, wallDistanceField:get(room.center:decompose()) - 2)
    local radiusy = math.max(0, rng:random(-1, 1) + radiusx)
 
-   if radiusx ~= 0 or radiusy ~= 0 then
+   if radiusx >= 2 and radiusy >= 2 then
       prism.Ellipse("fill", room.center, radiusx, radiusy, function(x, y)
          if room.tiles:get(x, y) then builder:set(x, y, prism.cells.Floor()) end
       end)
