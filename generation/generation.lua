@@ -277,7 +277,7 @@ return function(seed, player)
    for x, y in builder:each() do
       local d = (veggieDistanceField:get(x, y) or 32) + 1
       -- chance falls off with distance
-      local chance = math.pow(0.5, d)     -- tweak 0.5 to taste
+      local chance = math.pow(0.3, d)     -- tweak 0.5 to taste
 
       chance = chance 
       if util.isFloor(builder, x, y) and rng:random()/2 * love.math.noise(x/25, y/25) < chance then
