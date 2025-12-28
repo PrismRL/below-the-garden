@@ -20,9 +20,10 @@ end
 function Tongue:perform(level, actor)
    local position = self.owner:expectPosition()
    local other = actor:expectPosition()
-   local direction = (other - position):normalize()
+   local difference = other - position
+   local direction = difference:normalize()
    level:yield(prism.messages.AnimationMessage {
-      animation = spectrum.animations.FrogTongue(),
+      animation = spectrum.animations.FrogTongue(direction, difference:length()),
       actor = self.owner,
       blocking = true,
    })
