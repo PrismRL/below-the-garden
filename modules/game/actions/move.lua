@@ -36,9 +36,7 @@ function Move:perform(level, destination)
       end
    end
 
-   if slimeProducer then
-      level:addActor(prism.actors.Slime(6), self.owner:expectPosition():decompose())
-   end
+   if slimeProducer then level:addActor(prism.actors.Slime(6), self.owner:expectPosition():decompose()) end
    level:moveActor(self.owner, destination)
 end
 

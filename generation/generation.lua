@@ -3,6 +3,7 @@ local rooms = require "generation.rooms"
 local vegetation = require "generation.vegetation"
 local passive = require "generation.passivecreatures"
 local creatures = require "generation.creatures"
+local features = require "generation.features"
 
 LEVELGENBOUNDSX = 60 -- 1..60
 LEVELGENBOUNDSY = 30 -- 1..30
@@ -118,10 +119,22 @@ local function tryAccrete(builder, rng)
    return false
 end
 
-local function spawnFeature(builder, heatmap, distanceField, rng)
-   -- vegetation.addGraveyard(builder, heatmap, distanceField, rng)
-   vegetation.addGrassPatch(builder, heatmap, distanceField, rng)
+local featureList = {
+   features.addMeadow,
+   features.addGraveyard,
+   features.addGrassPatch,
+   features.addPit,
+   features.addWaterPit,
+   features.addTallGrassClearing,
+}
+
+local function spawnFeature(rooms, builder, heatmap, distanceField, rng)
+   if #featureList == 0 then return end
+
+   local feature = featureList[rng:random(1, #featureList)]
+   feature(rooms, builder, heatmap, distanceField, rng)
 end
+
 ------------------------------------------------------------
 -- Level generator entry point
 ------------------------------------------------------------
@@ -161,8 +174,8 @@ return function(seed, player)
       query = builder:query(prism.components.Light)
       local heatmap = util.doorPathHeatmap(builder)
       local distanceField = util.buildWallDistanceField(builder)
-         local rooms = util.findRooms(builder, distanceField, 2)
-
+      local rooms = util.findRooms(builder, distanceField, 2)
+      util.buildRoomGraph(rooms)
       print(#rooms, "FOUND THIS MANY ROOMS")
       for _, room in ipairs(rooms) do
          for x, y in room.tiles:each() do
@@ -172,7 +185,10 @@ return function(seed, player)
 
       vegetation.addTallGrass(builder, heatmap, distanceField, rng)
       vegetation.addGlowStalks(builder, heatmap, distanceField, rng)
-      spawnFeature(builder, heatmap, distanceField, rng)
+      for i = 1, rng:random(4) do
+         spawnFeature(rooms, builder, heatmap, distanceField, rng)
+         distanceField = util.buildWallDistanceField(builder)
+      end
       vegetation.thinTouchingGlowStalks(builder)
 
       wallDistanceField = util.buildWallDistanceField(builder)
@@ -181,7 +197,10 @@ return function(seed, player)
 
       importantSpawns = util.getImportantSpawnpoints(builder)
       print(#importantSpawns)
-      if #importantSpawns == 3 then print "YEYEYE" break end
+      if #importantSpawns == 3 then
+         print "YEYEYE"
+         break
+      end
    end
 
    -- place player
@@ -230,6 +249,7 @@ return function(seed, player)
       prism.actors.Gloop,
       prism.actors.Snail,
    }
+
    for _, actor in ipairs(builder:query(prism.components.ItemSpawner):gather()) do
       local factory = lootTable[rng:random(#lootTable)]
       builder:addActor(factory(), actor:expectPosition():decompose())

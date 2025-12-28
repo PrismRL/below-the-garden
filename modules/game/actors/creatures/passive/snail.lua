@@ -2,7 +2,7 @@ prism.registerActor("Snail", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Snail"),
       prism.components.Drawable {
-         index = 290,
+         index = 322,
          color = prism.Color4.YELLOW,
          layer = 2,
       },

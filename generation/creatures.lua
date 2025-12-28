@@ -58,7 +58,7 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    -- Stamp floor around the campfire (3x3)
    for dx = -1, 1 do
       for dy = -1, 1 do
-         builder:set(cx + dx, cy + dy, prism.cells.Floor())
+         if not util.isFloor(builder, cx + dx, cy + dy) then builder:set(cx + dx, cy + dy, prism.cells.Floor()) end
       end
    end
 

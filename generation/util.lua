@@ -342,7 +342,11 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
 
       if util.isWalkable(builder, x, y) then
          local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
-         if rx and util.isWalkable(builder, rx, ry) and #builder:query(prism.components.Collider):at(rx, ry):gather() == 0 then
+         if
+            rx
+            and util.isWalkable(builder, rx, ry)
+            and #builder:query(prism.components.Collider):at(rx, ry):gather() == 0
+         then
             local d = wallDistanceField:get(rx, ry)
             if d then tryInsertCandidate(rx, ry, d) end
          end
@@ -636,7 +640,7 @@ function util.findRooms(builder, wallDistanceField, minRoomSize)
          end
       end
 
-      return bestX and {x = bestX, y = bestY} or nil
+      return bestX and prism.Vector2(bestX, bestY) or nil
    end
 
    local tl, br = builder:getBounds()
@@ -684,7 +688,8 @@ function util.findRooms(builder, wallDistanceField, minRoomSize)
                   size = expandedCount,
                   isHallway = false,
                   center = findRoomCenter(expanded),
-                  color = prism.Color4(math.random(), math.random(), math.random())
+                  color = prism.Color4(math.random(), math.random(), math.random()),
+                  neighbors = {},
                }
             end
          end
@@ -710,9 +715,10 @@ function util.findRooms(builder, wallDistanceField, minRoomSize)
                rooms[#rooms + 1] = {
                   tiles = tiles,
                   size = count,
-                  isHallway = true,
+                  isHallway = false,
                   center = findRoomCenter(tiles),
-                  color = prism.Color4(math.random(), math.random(), math.random())
+                  color = prism.Color4(math.random(), math.random(), math.random()),
+                  neighbors = {},
                }
             end
          end
@@ -726,20 +732,11 @@ end
 --- @param rooms table[] -- output from util.findRooms
 --- @return table -- graph where graph[room] = {connectedRoom1, connectedRoom2, ...}
 function util.buildRoomGraph(rooms)
-   local graph = {}
-   
-   -- Initialize graph
-   for _, room in ipairs(rooms) do
-      graph[room] = {}
-   end
-
    -- Build tile -> room lookup
    local tileToRoom = prism.SparseGrid()
    for _, room in ipairs(rooms) do
-      for x, col in room.tiles:iter() do
-         for y, _ in pairs(col) do
-            tileToRoom:set(x, y, room)
-         end
+      for x, y in room.tiles:each() do
+         tileToRoom:set(x, y, room)
       end
    end
 
@@ -747,7 +744,7 @@ function util.buildRoomGraph(rooms)
    local connected = {}
 
    -- Check each tile's neighbors once
-   for x, y in tileToRoom:each() do
+   for x, y, room in tileToRoom:each() do
       for _, d in ipairs(prism.Vector2.neighborhood4) do
          local nx, ny = x + d.x, y + d.y
          local neighborRoom = tileToRoom:get(nx, ny)
@@ -755,19 +752,62 @@ function util.buildRoomGraph(rooms)
          if neighborRoom and neighborRoom ~= room then
             -- Create unique key for this pair (using table addresses)
             local a, b = room, neighborRoom
-            if tostring(a) > tostring(b) then a, b = b, a end
+            if tostring(a) > tostring(b) then
+               a, b = b, a
+            end
             local key = tostring(a) .. "," .. tostring(b)
 
             if not connected[key] then
                connected[key] = true
-               table.insert(graph[room], neighborRoom)
-               table.insert(graph[neighborRoom], room)
+               room.neighbors[neighborRoom] = true
+               neighborRoom.neighbors[room] = true
             end
          end
       end
    end
+end
 
-   return graph
+--- Finds all rooms that are part of non-looping branches
+--- (i.e. not in any cycle)
+--- @param rooms table[]
+--- @return table set -- rooms that are in branches
+function util.findBranchRooms(rooms)
+   -- Copy adjacency into mutable degrees
+   local degree = {}
+   local queue = {}
+   local inCore = {}
+
+   for _, room in ipairs(rooms) do
+      local d = 0
+      for _ in pairs(room.neighbors) do
+         d = d + 1
+      end
+      degree[room] = d
+      inCore[room] = true
+
+      if d <= 1 then table.insert(queue, room) end
+   end
+
+   -- Peel leaves
+   while #queue > 0 do
+      local room = table.remove(queue)
+      inCore[room] = false
+
+      for neighbor in pairs(room.neighbors) do
+         if inCore[neighbor] then
+            degree[neighbor] = degree[neighbor] - 1
+            if degree[neighbor] == 1 then table.insert(queue, neighbor) end
+         end
+      end
+   end
+
+   -- Anything NOT in core is a branch
+   local branches = {}
+   for _, room in ipairs(rooms) do
+      if not inCore[room] then branches[room] = true end
+   end
+
+   return branches
 end
 
 return util
