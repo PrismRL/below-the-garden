@@ -25,6 +25,14 @@ function FindEnemyBehavior:run(level, actor, controller)
       })
    end
 
+   if not closest then
+      local lseen = actor:get(prism.components.LastSeen)
+      if lseen then
+         if lseen.position then 
+            closest = lseen.position
+         end
+      end
+   end
    controller.blackboard["target"] = closest
    return not not closest
 end

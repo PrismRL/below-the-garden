@@ -62,6 +62,7 @@ function GameLevelState:__new(display, overlay, testing)
    builder:addSystems(
       prism.systems.SlimeTrailSystem(),
       prism.systems.SensesSystem(),
+      prism.systems.LastSeenSystem(),
       prism.systems.LightSightSystem(),
       self.lightSystem,
       prism.systems.ModulateLightSystem(),
