@@ -1,6 +1,6 @@
 --- @class ReturnHomeBehavior : BehaviorTree.Node
 local ReturnHomeBehavior = prism.BehaviorTree.Node:extend("ReturnHomeBehavior")
-ReturnHomeBehavior.distanceToHome = 10
+ReturnHomeBehavior.distanceToHome = 15
 
 --- @param distance integer
 function ReturnHomeBehavior:__new(distance)
