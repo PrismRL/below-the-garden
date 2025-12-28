@@ -16,13 +16,17 @@ Throw.targets = {
 }
 
 --- @param level Level
-function Throw:canPerform(level)
-   return not not self.owner:expect(prism.components.Equipper):get("held")
+function Throw:canPerform(level, object)
+   local position = object
+   if prism.Actor:is(object) then position = object:expectPosition() end
+   local held = self.owner:expect(prism.components.Equipper):get("held")
+   return held and level:getCellPassableByActor(position.x, position.y, held, throwMask)
 end
 
 --- @param level Level
 function Throw:perform(level, object)
    local held = self.owner:expect(prism.components.Equipper):get("held")
+   --- @cast held Actor
    level:perform(prism.actions.Unequip(self.owner, held))
    local position = object
    if prism.Actor:is(object) then position = object:expectPosition() end
@@ -32,7 +36,6 @@ function Throw:perform(level, object)
          position,
          held:expect(prism.components.Drawable)
       ),
-      actor = held,
       blocking = true,
    })
 
@@ -54,7 +57,7 @@ function Throw:perform(level, object)
    if explode then
       local tiles = prism.SparseGrid()
       local query = level:query(prism.components.Health)
-      level:computeFOV(held:expectPosition(), explode.radius, function (x, y)
+      level:computeFOV(held:expectPosition(), explode.radius, function(x, y)
          tiles:set(x, y, true)
          query:at(x, y)
          for actor in query:iter() do

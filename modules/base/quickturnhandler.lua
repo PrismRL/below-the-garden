@@ -2,10 +2,10 @@
 local QuickTurnHandler = prism.TurnHandler:extend "QuickTurnHandler"
 
 function QuickTurnHandler:handleTurn(level, actor, controller)
-   local ch = actor:get(prism.components.ConditionHolder) 
+   local ch = actor:get(prism.components.ConditionHolder)
    if ch then
       local removed = false
-      ch:removeIf(function (condition)
+      ch:removeIf(function(condition)
          removed = removed or prism.conditions.Stunned:is(condition)
          return prism.conditions.Stunned:is(condition)
       end)
@@ -28,7 +28,6 @@ function QuickTurnHandler:handleTurn(level, actor, controller)
 
    level:perform(action)
 
-      
    if ch and actor:has(prism.components.Slow) then
       local stun = prism.conditions.Stunned()
       ch:add(stun)
