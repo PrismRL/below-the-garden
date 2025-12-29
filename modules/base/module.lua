@@ -15,6 +15,16 @@ function Display:border(x, y, width, height, config)
    self:put(x1, y1, 175, config.cornerColor or config.color)
 end
 
+function Display:itemBorder(x, y, color)
+   self:put(x - 1, y - 1, 164, color)
+   self:put(x, y - 1, 130, color)
+   self:put(x + 1, y - 1, 166, color)
+   self:put(x - 1, y, 129, color)
+   self:put(x + 1, y, 129, color)
+   self:put(x - 1, y + 1, 196, color)
+   self:put(x, y + 1, 130, color)
+end
+
 --- @class QuickAction : Action
 local QuickAction = prism.Action:extend "QuickAction"
 QuickAction.abstract = true

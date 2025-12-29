@@ -28,10 +28,11 @@ function GameLevelState:__new(display, overlay, testing)
       attack = self.hudPosition + prism.Vector2(6, 3),
       shift = self.hudPosition + prism.Vector2(2, 4),
       throw = self.hudPosition + prism.Vector2(2, 8),
-      upon = self.hudPosition + prism.Vector2(3, 16),
-      pickup = self.hudPosition + prism.Vector2(2, 14),
-      pickupSlot = self.hudPosition + prism.Vector2(7, 17),
-      pickupSwap = self.hudPosition + prism.Vector2(6, 16),
+      upon = self.hudPosition + prism.Vector2(3, 17),
+      drop = self.hudPosition + prism.Vector2(2, 13),
+      pickup = self.hudPosition + prism.Vector2(2, 15),
+      pickupSlot = self.hudPosition + prism.Vector2(7, 18),
+      pickupSwap = self.hudPosition + prism.Vector2(6, 17),
    }
 
    self.useActions = {
@@ -53,7 +54,9 @@ function GameLevelState:__new(display, overlay, testing)
       builder:addActor(prism.actors.Player(), 16, 16)
       builder:addActor(prism.actors.Torch(), 12, 12)
    else
+      print(love.timer.getTime())
       builder = generator(love.timer.getTime(), player)
+      print(love.timer.getTime())
    end
 
    -- Add systems
@@ -155,6 +158,12 @@ function GameLevelState:updateDecision(dt, owner, decision)
       )
    end
 
+   if controls.drop.pressed then
+      self.targets = {}
+      self.selectedAction = prism.actions.Drop
+      self.manager:push(spectrum.gamestates.DropState(self, owner, self.targets))
+   end
+
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
 end
 
@@ -212,6 +221,10 @@ function GameLevelState:putHUD(player)
    self:putItem(weapon, positions.weapon:decompose())
    self:putItem(amulet, positions.amulet:decompose())
    self:putItem(upon, positions.upon:decompose())
+
+   if held or weapon or amulet or pocket then
+      self.overlay:print(positions.drop.x, positions.drop.y, "V", prism.Color4.CORNFLOWER)
+   end
 
    if upon and prism.actions.Pickup:validateTarget(1, self.level, player, upon) then
       self.overlay:print(positions.pickup.x, positions.pickup.y, "P", prism.Color4.CORNFLOWER)
