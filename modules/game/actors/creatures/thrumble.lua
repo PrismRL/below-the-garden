@@ -28,5 +28,6 @@ prism.registerActor("Thrumble", function()
       prism.components.ThrumbleFaction(),
       prism.components.LastSeen(prism.components.PlayerController),
       prism.components.Health(6),
+      prism.components.ConditionHolder(),
    }
 end)
