@@ -10,7 +10,7 @@ function FindEnemyBehavior:run(level, actor, controller)
    local closest
    local bestD = math.huge
    for candidate, _ in actor:expect(prism.components.Senses):query(level, prism.components.Health):iter() do
-      if prism.components.Faction.isEnemy(actor, candidate) then
+      if candidate ~= actor and prism.components.Faction.isEnemy(actor, candidate) then
          local distance = actor:getRange(candidate)
 
          if distance < bestD then closest = candidate end
@@ -28,9 +28,7 @@ function FindEnemyBehavior:run(level, actor, controller)
    if not closest then
       local lseen = actor:get(prism.components.LastSeen)
       if lseen then
-         if lseen.position then 
-            closest = lseen.position
-         end
+         if lseen.position then closest = lseen.position end
       end
    end
    controller.blackboard["target"] = closest

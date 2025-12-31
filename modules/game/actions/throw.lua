@@ -5,32 +5,48 @@ Throw.name = "thrw"
 Throw.requiredComponents = { prism.components.Equipper, prism.components.Thrower }
 
 local throwMask = prism.Collision.createBitmaskFromMovetypes { "fly" }
-local target = prism.Target():los(throwMask):excludeOwner():filter(function(level, owner, targetObject, previousTargets)
-   local range = owner:expect(prism.components.Thrower):getRange()
-   local position = targetObject
-   if prism.Actor:is(targetObject) then position = targetObject:expectPosition() end
-   return owner:getRangeVec(position) <= range
-end)
+local target = prism.Target():excludeOwner()
 
 Throw.targets = {
    target,
 }
 
 --- @param level Level
+--- @param object Vector2|Actor
 function Throw:canPerform(level, object)
-   local position = object
-   if prism.Actor:is(object) then position = object:expectPosition() end
-   local held = self.owner:expect(prism.components.Equipper):get("held")
-   return held and level:getCellPassableByActor(position.x, position.y, held, throwMask)
+   -- local position = object
+   -- if prism.Actor:is(object) then position = object:expectPosition() end
+   -- local held = self.owner:expect(prism.components.Equipper):get("held")
+   -- return held and level:getCellPassableByActor(position.x, position.y, held, throwMask)
+   return true
 end
 
 --- @param level Level
 function Throw:perform(level, object)
    local held = self.owner:expect(prism.components.Equipper):get("held")
    --- @cast held Actor
-   level:perform(prism.actions.Unequip(self.owner, held))
    local position = object
    if prism.Actor:is(object) then position = object:expectPosition() end
+
+   if position.x > level.map.w then position.x = level.map.w end
+   if position.y > level.map.h then position.y = level.map.w end
+   if position.x < 1 then position.x = 1 end
+   if position.y < 1 then position.y = 1 end
+
+   local path = nil
+   local minimumDistance = 0
+
+   while not path and minimumDistance < 32 do
+      path = level:findPath(self.owner:expectPosition(), position, self.owner, throwMask, minimumDistance)
+      minimumDistance = minimumDistance + 1
+   end
+   if not path then return end
+
+   level:perform(prism.actions.Unequip(self.owner, held))
+
+   local maximumDistance = self.owner:expect(prism.components.Thrower):getRange()
+   position = path:length() > maximumDistance and path.path[maximumDistance] or path.path[#path.path]
+
    level:yield(prism.messages.AnimationMessage {
       animation = spectrum.animations.Projectile(
          self.owner:expectPosition(),

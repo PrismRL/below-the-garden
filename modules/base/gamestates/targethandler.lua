@@ -13,6 +13,7 @@ local TargetHandler = spectrum.GameState:extend("TargetHandler")
 ---@param levelState LevelState
 ---@param targetList any[]
 ---@param target Target
+---@param owner Actor
 function TargetHandler:__new(display, levelState, targetList, target, owner)
    self.display = display
    self.levelState = levelState
