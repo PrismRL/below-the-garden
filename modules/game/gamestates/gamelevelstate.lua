@@ -91,6 +91,8 @@ function GameLevelState:handleMessage(message)
    if prism.messages.LoseMessage:is(message) then
       self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
    end
+
+   if prism.messages.DescendMessage:is(message) then self.manager:enter(GameLevelState(self.display, self.overlay)) end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
    -- here.
@@ -102,20 +104,16 @@ end
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
    self.lightSystem:update()
-   local inventory = owner:expect(prism.components.Inventory)
    local idle
    local held
+   local pocket
    for slot, equipped in pairs(owner:expect(prism.components.Equipper).equipped) do
       if equipped then
          idle = equipped:get(prism.components.IdleAnimation)
          if idle then idle.animation:update(dt) end
       end
       if slot == "held" then held = equipped end
-   end
-   local pocket = inventory:query():first()
-   if pocket then
-      idle = pocket:get(prism.components.IdleAnimation)
-      if idle then idle.animation:update(dt) end
+      if slot == "pocket" then pocket = equipped end
    end
 
    -- Controls need to be updated each frame.
@@ -130,6 +128,10 @@ function GameLevelState:updateDecision(dt, owner, decision)
       local target = self.level:query(prism.components.Health):at(destination:decompose()):first()
       local attack = prism.actions.Attack(owner, target)
       if self:setAction(attack) then return end
+
+      local stair = self.level:query(prism.components.Stair):at(destination:decompose()):first()
+      local descend = prism.actions.Descend(owner, stair)
+      if self:setAction(descend) then return end
    end
 
    if controls.pickup.pressed then
@@ -207,14 +209,13 @@ function GameLevelState:putHUD(player)
       prism.Color4.BLACK
    )
 
-   local inventory = player:expect(prism.components.Inventory)
    local equipper = player:expect(prism.components.Equipper)
 
    local upon = self.level:query(prism.components.Equipment):at(player:expectPosition():decompose()):first()
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
    local amulet = equipper:get("amulet")
-   local pocket = inventory:query():first()
+   local pocket = equipper:get("pocket")
 
    self:putItem(held, positions.held:decompose())
    self:putItem(pocket, positions.pocket:decompose())

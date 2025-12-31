@@ -11,6 +11,7 @@ local target = prism.Target():los(throwMask):excludeOwner():filter(function(leve
    if prism.Actor:is(targetObject) then position = targetObject:expectPosition() end
    return owner:getRangeVec(position) <= range
 end)
+
 Throw.targets = {
    target,
 }

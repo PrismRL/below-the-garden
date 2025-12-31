@@ -11,7 +11,7 @@ end)
 local Animation = spectrum.Animation
 
 spectrum.registerAnimation("Fire", function()
-   return Animation({ { index = 240, color = prism.Color4.ORANGE }, { index = 272, color = prism.Color4.ORANGE } }, 0.5)
+   return Animation({ { index = 240, color = prism.Color4.YELLOW }, { index = 272, color = prism.Color4.YELLOW } }, 0.5)
 end)
 
 prism.registerActor("Fire", function()
@@ -24,6 +24,6 @@ prism.registerActor("Fire", function()
       prism.components.Position(),
       prism.components.IdleAnimation("Fire"),
       prism.components.Camp(),
-      prism.components.Light((prism.Color4.ORANGE + prism.Color4.ORANGE) / 1.5, 6, prism.lighteffects.Flicker()),
+      prism.components.Light((prism.Color4.YELLOW + prism.Color4.YELLOW) / 1.5, 6, prism.lighteffects.Flicker()),
    }
 end)

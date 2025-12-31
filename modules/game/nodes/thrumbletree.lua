@@ -8,22 +8,18 @@ ThrumbleTree.children = {
       prism.nodes.FindEnemyBehavior(true),
       BT.Selector {
          BT.Sequence {
-            prism.nodes.ReturnHomeBehavior,
-            prism.nodes.MoveTowardTargetBehavior,
-         },
-         BT.Sequence {
-            prism.nodes.HasWeaponBehavior,
-            prism.nodes.PerformOnBehavior(prism.actions.Attack),
-            prism.nodes.MoveTowardTargetBehavior(1),
-         },
-         BT.Sequence {
             prism.nodes.FindWeaponBehavior,
             prism.nodes.PerformOnBehavior(prism.actions.Pickup),
             prism.nodes.MoveTowardTargetBehavior,
          },
+         BT.Sequence {
+            prism.nodes.PerformOnBehavior(prism.actions.Attack),
+            prism.nodes.MoveTowardTargetBehavior(1),
+         },
       },
    },
    BT.Sequence {
+      prism.nodes.DropWeaponBehavior,
       prism.nodes.ReturnHomeBehavior(1),
       prism.nodes.MoveTowardTargetBehavior,
    },
