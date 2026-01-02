@@ -8,13 +8,13 @@ prism.registerActor("Player", function()
       prism.components.PlayerController(),
       prism.components.Senses(),
       prism.components.Mover { "walk" },
-      prism.components.Health(5),
-      prism.components.Inventory { limitCount = 1 },
-      prism.components.Equipper { "weapon", "held", "amulet" },
+      prism.components.Health(10),
+      -- prism.components.Inventory { limitCount = 1 },
+      prism.components.Equipper { "weapon", "held", "amulet", "pocket" },
       prism.components.Thrower(5),
       prism.components.LightSight { range = 15, fov = true, darkvision = 2 / 16 },
       prism.components.WarmBlooded(),
       prism.components.PlayerFaction(),
-      prism.components.Attacker(1),
+      prism.components.Attacker(2),
    }
 end)

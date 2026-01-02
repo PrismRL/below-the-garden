@@ -27,10 +27,11 @@ function GameLevelState:__new(display, overlay, testing)
       attack = self.hudPosition + prism.Vector2(6, 3),
       shift = self.hudPosition + prism.Vector2(2, 4),
       throw = self.hudPosition + prism.Vector2(2, 8),
-      upon = self.hudPosition + prism.Vector2(3, 16),
-      pickup = self.hudPosition + prism.Vector2(2, 14),
-      pickupSlot = self.hudPosition + prism.Vector2(7, 17),
-      pickupSwap = self.hudPosition + prism.Vector2(6, 16),
+      upon = self.hudPosition + prism.Vector2(3, 17),
+      drop = self.hudPosition + prism.Vector2(2, 13),
+      pickup = self.hudPosition + prism.Vector2(2, 15),
+      pickupSlot = self.hudPosition + prism.Vector2(7, 18),
+      pickupSwap = self.hudPosition + prism.Vector2(6, 17),
    }
 
    self.useActions = {
@@ -91,6 +92,8 @@ function GameLevelState:handleMessage(message)
    if prism.messages.LoseMessage:is(message) then
       self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
    end
+
+   if prism.messages.DescendMessage:is(message) then self.manager:enter(GameLevelState(self.display, self.overlay)) end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
    -- here.
@@ -102,20 +105,16 @@ end
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
    self.lightSystem:update()
-   local inventory = owner:expect(prism.components.Inventory)
    local idle
    local held
+   local pocket
    for slot, equipped in pairs(owner:expect(prism.components.Equipper).equipped) do
       if equipped then
          idle = equipped:get(prism.components.IdleAnimation)
          if idle then idle.animation:update(dt) end
       end
       if slot == "held" then held = equipped end
-   end
-   local pocket = inventory:query():first()
-   if pocket then
-      idle = pocket:get(prism.components.IdleAnimation)
-      if idle then idle.animation:update(dt) end
+      if slot == "pocket" then pocket = equipped end
    end
 
    -- Controls need to be updated each frame.
@@ -130,6 +129,10 @@ function GameLevelState:updateDecision(dt, owner, decision)
       local target = self.level:query(prism.components.Health):at(destination:decompose()):first()
       local attack = prism.actions.Attack(owner, target)
       if self:setAction(attack) then return end
+
+      local stair = self.level:query(prism.components.Stair):at(destination:decompose()):first()
+      local descend = prism.actions.Descend(owner, stair)
+      if self:setAction(descend) then return end
    end
 
    if controls.pickup.pressed then
@@ -156,6 +159,12 @@ function GameLevelState:updateDecision(dt, owner, decision)
       self.manager:push(
          spectrum.gamestates.GeneralTargetHandler(self.overlay, self, self.targets, self.selectedAction:getTarget(1))
       )
+   end
+
+   if controls.drop.pressed then
+      self.targets = {}
+      self.selectedAction = prism.actions.Drop
+      self.manager:push(spectrum.gamestates.DropState(self, owner, self.targets))
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
@@ -201,20 +210,23 @@ function GameLevelState:putHUD(player)
       prism.Color4.BLACK
    )
 
-   local inventory = player:expect(prism.components.Inventory)
    local equipper = player:expect(prism.components.Equipper)
 
    local upon = self.level:query(prism.components.Equipment):at(player:expectPosition():decompose()):first()
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
    local amulet = equipper:get("amulet")
-   local pocket = inventory:query():first()
+   local pocket = equipper:get("pocket")
 
    self:putItem(held, positions.held:decompose())
    self:putItem(pocket, positions.pocket:decompose())
    self:putItem(weapon, positions.weapon:decompose())
    self:putItem(amulet, positions.amulet:decompose())
    self:putItem(upon, positions.upon:decompose())
+
+   if held or weapon or amulet or pocket then
+      self.overlay:print(positions.drop.x, positions.drop.y, "V", prism.Color4.CORNFLOWER)
+   end
 
    if upon and prism.actions.Pickup:validateTarget(1, self.level, player, upon) then
       self.overlay:print(positions.pickup.x, positions.pickup.y, "P", prism.Color4.CORNFLOWER)

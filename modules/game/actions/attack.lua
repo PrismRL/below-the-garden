@@ -1,6 +1,3 @@
-local Log = prism.components.Log
-local Name = prism.components.Name
-
 local AttackTarget = prism.Target(prism.components.Health):range(1)
 
 ---@class Attack : Action
@@ -13,6 +10,23 @@ local mask = prism.Collision.createBitmaskFromMovetypes { "fly" }
 --- @param level Level
 --- @param attacked Actor
 function Attack:perform(level, attacked)
+   local blockChance = 0
+   for _, mod in
+      ipairs(prism.components.ConditionHolder.getActorModifiers(attacked, prism.modifiers.BlockChanceModifier))
+   do
+      --- @cast mod BlockChanceModifier
+      blockChance = blockChance + mod.blockChance
+   end
+
+   if blockChance > level.RNG:random() then
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Block(),
+         actor = attacked,
+         blocking = true,
+         override = true,
+      })
+      return
+   end
    local attacker = self.owner:expect(prism.components.Attacker)
    local damage, knockback = attacker:getDamageAndKnockback()
 

@@ -8,7 +8,13 @@ local GeneralTargetHandler = spectrum.gamestates.TargetHandler:extend("GeneralTa
 function GeneralTargetHandler:getValidTargets()
    local valid = {}
 
-   for foundTarget in self.level:query():target(self.target, self.level, self.owner, self.targetList):iter() do
+   for foundTarget in
+      self.owner
+         :expect(prism.components.Senses)
+         :query(self.level)
+         :target(self.target, self.level, self.owner, self.targetList)
+         :iter()
+   do
       table.insert(valid, foundTarget)
    end
 

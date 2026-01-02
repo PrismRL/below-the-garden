@@ -1,6 +1,6 @@
 local Animation = spectrum.Animation
 spectrum.registerAnimation("FireflyIdle", function()
-   local animation = Animation(Animation.buildFrames { range = "275-276", color = prism.Color4.YELLOW }, 0.4)
+   local animation = Animation(Animation.buildFrames { range = "275-276", color = prism.Color4.YELLOW, layer = 2 }, 0.4)
    animation:update(love.math.random())
    return animation
 end)
@@ -11,7 +11,7 @@ prism.registerActor("Firefly", function()
       prism.components.Drawable {
          index = 8,
          color = prism.Color4.YELLOW,
-         layer = 3,
+         layer = 2,
       },
       prism.components.Senses(),
       prism.components.LightSight { range = 1, fov = true },

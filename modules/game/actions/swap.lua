@@ -2,8 +2,8 @@
 --- @overload fun(owner: Actor, ...): SwapHeld
 local SwapHeld = prism.actions.QuickAction:extend "Swap"
 SwapHeld.abstract = false
-SwapHeld.requiredComponents = { prism.components.Equipper, prism.components.Inventory }
-SwapHeld.targets = { prism.targets.InventoryTarget(prism.components.Equipment):optional() }
+SwapHeld.requiredComponents = { prism.components.Equipper }
+SwapHeld.targets = { prism.targets.EquippedTarget("pocket"):optional() }
 
 --- @param level Level
 function SwapHeld:canPerform(level, item)
@@ -16,14 +16,9 @@ end
 
 --- @param level Level
 function SwapHeld:perform(level, item)
-   local inventory = self.owner:expect(prism.components.Inventory)
-   local held = self.owner:expect(prism.components.Equipper):get("held")
-   level:tryPerform(prism.actions.Unequip(self.owner, held))
-   if item then
-      inventory:removeItem(item)
-      level:perform(prism.actions.Equip(self.owner, item))
-   end
-   if held then self.owner:expect(prism.components.Inventory):addItem(held) end
+   local equipper = self.owner:expect(prism.components.Equipper)
+   equipper.equipped["pocket"] = equipper:get("held")
+   equipper.equipped["held"] = item
 end
 
 return SwapHeld

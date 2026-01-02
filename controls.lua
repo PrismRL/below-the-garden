@@ -18,6 +18,7 @@ return spectrum.Input.Controls {
       use            = "p",
       swap           = { "lshift", "rshift" },
       throw          = "t",
+      drop           = "v",
       wait           = "x",
       newgame        = "n",
       quit           = "q",
