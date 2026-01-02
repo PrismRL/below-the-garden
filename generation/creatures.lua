@@ -14,13 +14,14 @@ function creatures.spawnThrumbleCamp(builder, rng, wallDistanceField)
    local spawnpoints = builder:query(prism.components.Spawner):gather()
    local candidates = {}
 
-   local MIN_WALL_DIST = 3
+   local MIN_WALL_DIST = 10
 
    -- Collect valid candidates and wall distances
    for _, sp in ipairs(spawnpoints) do
       local x, y = sp:expectPosition():decompose()
       local wallDist = wallDistanceField:get(x, y)
 
+      print(wallDist)
       -- Hard cutoff: must be at least somewhat open
       if wallDist and wallDist >= MIN_WALL_DIST then
          local player = builder:query(prism.components.PlayerController):first()

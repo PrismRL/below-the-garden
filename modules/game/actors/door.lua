@@ -3,5 +3,6 @@ prism.registerActor("Door", function()
       prism.components.Name("Door"),
       prism.components.Drawable { index = 142, color = prism.Color4.BROWN },
       prism.components.Position(),
+      prism.components.Door(),
    }
 end)

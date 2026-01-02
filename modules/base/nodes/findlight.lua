@@ -27,7 +27,6 @@ function FindLightBehavior:run(level, actor, controller)
          end
       end
    end
-   if target then print(target:getName()) end
    controller.blackboard["target"] = target
    return not not target
 end

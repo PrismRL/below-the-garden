@@ -1,19 +1,68 @@
 local util = {}
 
-function util.isWalkable(builder, x, y, mask) end
-
+--- Checks if a tile is a wall (no tile, no collision, or has collider)
 --- @param builder LevelBuilder
----@param x integer
----@param y integer
+--- @param x integer
+--- @param y integer
+--- @return boolean
+function util.isWall(builder, x, y)
+   if not builder:get(x, y) then return true end
+   if builder:get(x, y):getCollisionMask() == 0 then return true end
+   if builder:query(prism.components.Collider, prism.components.Opaque):at(x, y):first() then
+      print "COLLIDER"
+      return true
+   end
+   return false
+end
+
+local walkmask = prism.Collision.createBitmaskFromMovetypes { "walk" }
+
+--- Checks if a tile is walkable (has walkable collision mask)
+--- @param builder LevelBuilder
+--- @param x integer
+--- @param y integer
+--- @param mask number? Optional collision mask to test against (defaults to walk mask)
+--- @return boolean
+function util.isWalkable(builder, x, y, mask)
+   if not builder:get(x, y) then return false end
+   mask = mask or walkmask
+   if prism.Collision.checkBitmaskOverlap(mask, builder:get(x, y):getCollisionMask()) then return true end
+   return false
+end
+
+--- Checks if a tile blocks vision (has Opaque component)
+--- @param builder LevelBuilder
+--- @param x integer
+--- @param y integer
+--- @return boolean
 function util.isOpaque(builder, x, y)
    return builder:get(x, y) and builder:get(x, y):get(prism.components.Opaque) ~= nil
 end
 
+--- Checks if a tile is a floor (walkable and not opaque)
+--- @param builder LevelBuilder
+--- @param x integer
+--- @param y integer
+--- @return boolean
+function util.isFloor(builder, x, y)
+   return util.isWalkable(builder, x, y)
+end
+
+--- Checks if a tile is an empty floor (floor with no actors)
+--- @param builder LevelBuilder
+--- @param x integer
+--- @param y integer
+--- @return boolean
 function util.isEmptyFloor(builder, x, y)
    return util.isFloor(builder, x, y) and #builder:query():at(x, y):gather() == 0
 end
 
-function util.rollToWall(distanceField, x, y)
+--- Follows gradient downhill in distance field until reaching distance=1 (wall-adjacent)
+--- @param distanceField SparseGrid Distance field to traverse
+--- @param x integer Starting x coordinate
+--- @param y integer Starting y coordinate
+--- @return integer?, integer? Coordinates of wall-adjacent tile, or nil if unreachable
+function util.rollDownhill(distanceField, x, y)
    local bestX, bestY = x, y
    local bestD = distanceField:get(x, y)
 
@@ -33,24 +82,20 @@ function util.rollToWall(distanceField, x, y)
          end
       end
 
-      -- no downhill step found → stuck
       if not nextX then break end
-
       bestX, bestY, bestD = nextX, nextY, nextD
    end
 
    if bestD == 1 then return bestX, bestY end
-
    return nil
 end
 
---- Rolls uphill in a distance field, away from walls.
---- Stops at a local maximum.
---- @param distanceField SparseGrid
---- @param x integer
---- @param y integer
---- @return integer?, integer?
-function util.rollAwayFromWall(distanceField, x, y)
+--- Follows gradient uphill in distance field, moving away from walls until local maximum
+--- @param distanceField SparseGrid Distance field to traverse
+--- @param x integer Starting x coordinate
+--- @param y integer Starting y coordinate
+--- @return integer?, integer? Coordinates of local maximum, or nil if invalid start
+function util.rollUphill(distanceField, x, y)
    local bestX, bestY = x, y
    local bestD = distanceField:get(x, y)
 
@@ -70,107 +115,35 @@ function util.rollAwayFromWall(distanceField, x, y)
          end
       end
 
-      -- no uphill step found → local maximum
       if not nextX then break end
-
       bestX, bestY, bestD = nextX, nextY, nextD
    end
 
    return bestX, bestY
 end
 
+--- Returns a random floor tile from the level
 --- @param builder LevelBuilder
---- @param rng RNG
+--- @param rng RNG Random number generator
+--- @return table {x: integer, y: integer} Random floor coordinates
 function util.randomFloor(builder, rng)
    local floors = {}
 
    for x = 1, LEVELGENBOUNDSX do
       for y = 1, LEVELGENBOUNDSY do
-         if util.isFloor(builder, x, y) then table.insert(floors, { x = x, y = y }) end
+         if util.isFloor(builder, x, y) then table.insert(floors, prism.Vector2(x, y)) end
       end
    end
 
    if #floors == 0 then error("No floor tiles to place player") end
-
    return floors[rng:random(1, #floors)]
 end
 
---- Turns isolated floor tiles into walls.
---- Any floor with >= wallThreshold surrounding wall/nil neighbors is filled.
+--- Generates a heatmap showing path frequency between all door pairs
 --- @param builder LevelBuilder
---- @param wallThreshold integer
-function util.collapseIsolatedFloors(builder, wallThreshold)
-   wallThreshold = wallThreshold or 5
-
-   local toFill = {}
-
-   for x = 1, LEVELGENBOUNDSX do
-      for y = 1, LEVELGENBOUNDSY do
-         if util.isFloor(builder, x, y) then -- floor
-            local walls = 0
-
-            for _, offset in ipairs(prism.Vector2.neighborhood4) do
-               if util.isWall(builder, x + offset.x, y + offset.y) then walls = walls + 1 end
-            end
-
-            if walls >= wallThreshold then table.insert(toFill, { x = x, y = y }) end
-         end
-      end
-   end
-
-   for _, p in ipairs(toFill) do
-      builder:set(p.x, p.y, prism.cells.Wall())
-   end
-end
-
---- Removes thin / isolated wall tiles (probabilistic).
---- Uses util.isWall / util.isFloor.
---- @param rng RNG
---- @param builder LevelBuilder
-function util.collapseThinWalls(rng, builder)
-   local toCarve = {}
-
-   for x = 1, LEVELGENBOUNDSX do
-      for y = 1, LEVELGENBOUNDSY do
-         if util.isWall(builder, x, y) then
-            local n = util.isFloor(builder, x, y - 1)
-            local s = util.isFloor(builder, x, y + 1)
-            local w = util.isFloor(builder, x - 1, y)
-            local e = util.isFloor(builder, x + 1, y)
-
-            local floors = 0
-            if n then floors = floors + 1 end
-            if s then floors = floors + 1 end
-            if w then floors = floors + 1 end
-            if e then floors = floors + 1 end
-
-            local chance = 0
-
-            -- Strong case: sandwiched wall
-            if (n and s) or (w and e) then
-               chance = 0.4
-
-            -- Weaker case: wall nub
-            elseif floors == 3 then
-               chance = 0.1
-            elseif floors == 4 then
-               chance = 0.2
-            end
-
-            if chance > 0 and rng:random() < chance then toCarve[#toCarve + 1] = { x = x, y = y } end
-         end
-      end
-   end
-
-   for _, p in ipairs(toCarve) do
-      builder:set(p.x, p.y, prism.cells.Floor())
-   end
-end
-
---- @return SparseGrid
+--- @return SparseGrid Grid mapping coordinates to path traversal counts
 function util.doorPathHeatmap(builder)
    local result = prism.SparseGrid()
-
    local doors = builder:query(prism.components.Door):gather()
 
    for i = 1, #doors do
@@ -192,19 +165,21 @@ function util.doorPathHeatmap(builder)
    return result
 end
 
+--- Builds a distance field from walls to floors
+--- @param builder LevelBuilder
+--- @return SparseGrid Distance field (1 = wall-adjacent, increasing outward)
 function util.buildWallDistanceField(builder)
    return util.buildDistanceField(builder, util.isWall, util.isFloor, prism.Vector2.neighborhood4)
 end
 
---- Builds a distance field from source tiles defined by a predicate.
+--- Builds a distance field using Dijkstra from source tiles
 --- @param builder LevelBuilder
---- @param isSource fun(builder: LevelBuilder, x: integer, y: integer): boolean
---- @param isPassable fun(builder: LevelBuilder, x: integer, y: integer): boolean
---- @param neighborhood table? -- defaults to 4-neighborhood
---- @return SparseGrid
+--- @param isSource fun(builder: LevelBuilder, x: integer, y: integer): boolean Predicate for source tiles (distance=0)
+--- @param isPassable fun(builder: LevelBuilder, x: integer, y: integer): boolean Predicate for traversable tiles
+--- @param neighborhood table? Neighbor offsets (defaults to 4-neighborhood)
+--- @return SparseGrid Distance field from sources
 function util.buildDistanceField(builder, isSource, isPassable, neighborhood)
    neighborhood = neighborhood or prism.Vector2.neighborhood4
-
    local tl, br = builder:getBounds()
    local sources = {}
 
@@ -219,75 +194,16 @@ function util.buildDistanceField(builder, isSource, isPassable, neighborhood)
    end, neighborhood)
 end
 
---- Removes doors that do not neighbor exactly one floor (cardinal only).
---- A valid door must have exactly one adjacent floor in neighborhood4.
+--- Places spawnpoints in open areas far from walls, maximizing mutual separation
 --- @param builder LevelBuilder
-function util.pruneInvalidDoors(builder)
-   local toRemove = {}
-
-   for door in builder:query(prism.components.DoorProxy):iter() do
-      local x, y = door:expectPosition():decompose()
-
-      local floorCount = 0
-      for _, d in ipairs(prism.Vector2.neighborhood4) do
-         if util.isFloor(builder, x + d.x, y + d.y) then
-            floorCount = floorCount + 1
-            if floorCount > 1 then break end
-         end
-      end
-
-      if floorCount ~= 1 or util.isFloor(builder, x, y) then table.insert(toRemove, door) end
-   end
-
-   for _, door in ipairs(toRemove) do
-      builder:removeActor(door)
-   end
-end
-
---- Removes doors that do not have exactly two wall neighbors (cardinal).
---- @param builder LevelBuilder
-function util.pruneMisalignedDoors(builder)
-   local toRemove = {}
-
-   --- @param x integer
-   --- @param y integer
-   local function isValidDoor(x, y)
-      local walls = 0
-
-      for _, d in ipairs(prism.Vector2.neighborhood4) do
-         if util.isWall(builder, x + d.x, y + d.y) then
-            walls = walls + 1
-            if walls > 2 then return false end
-         end
-      end
-
-      return walls == 2
-   end
-
-   for door in builder:query(prism.components.Door):iter() do
-      local x, y = door:expectPosition():decompose()
-
-      if not isValidDoor(x, y) then toRemove[#toRemove + 1] = door end
-   end
-
-   for _, door in ipairs(toRemove) do
-      builder:removeActor(door)
-   end
-end
-
---- Spawns spawnpoints in the most open sampled areas (furthest from walls),
---- then keeps only the most mutually separated ones.
---- @param builder LevelBuilder
---- @param wallDistanceField SparseGrid
---- @param rng RNG
---- @param opts table?
+--- @param wallDistanceField SparseGrid Distance field from walls
+--- @param rng RNG Random number generator
+--- @param opts table? Configuration options
 function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
    opts = opts or {}
-
-   local finalCount = opts.count or 15 -- FINAL spawnpoints
-   local samples = opts.samples or 150 -- random probes
-   local poolSize = opts.pool or 100 -- candidates kept before separation
-
+   local finalCount = opts.count or 15
+   local samples = opts.samples or 150
+   local poolSize = opts.pool or 100
    local candidates = {}
 
    local function tryInsertCandidate(x, y, d)
@@ -296,7 +212,6 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
          return
       end
 
-      -- replace weakest wall-distance candidate
       local weakest = 1
       for i = 2, #candidates do
          if candidates[i].d < candidates[weakest].d then weakest = i end
@@ -305,13 +220,12 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
       if d > candidates[weakest].d then candidates[weakest] = { x = x, y = y, d = d } end
    end
 
-   -- Phase 1: sample good open spots
    for _ = 1, samples do
       local x = rng:random(2, LEVELGENBOUNDSX - 1)
       local y = rng:random(2, LEVELGENBOUNDSY - 1)
 
       if util.isWalkable(builder, x, y) then
-         local rx, ry = util.rollAwayFromWall(wallDistanceField, x, y)
+         local rx, ry = util.rollUphill(wallDistanceField, x, y)
          if
             rx
             and util.isWalkable(builder, rx, ry)
@@ -325,9 +239,8 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
 
    if #candidates == 0 then return end
 
-   -- Phase 2: maximize separation
    table.sort(candidates, function(a, b)
-      return a.d > b.d -- start from most open
+      return a.d > b.d
    end)
 
    local chosen = {}
@@ -360,42 +273,34 @@ function util.addSpawnpoints(builder, wallDistanceField, rng, opts)
       chosen[#chosen + 1] = table.remove(candidates, bestIdx)
    end
 
-   -- Spawn
    for _, c in ipairs(chosen) do
       builder:addActor(prism.actors.Spawner(), c.x, c.y)
    end
 end
 
---- Returns the 3 most mutually distant spawnpoints using A* path distance.
---- Distance is measured by walkable path length, not Euclidean distance.
+--- Selects the 3 most mutually distant spawnpoints using A* path distance
 --- @param builder LevelBuilder
---- @return Actor[] -- prism.actors.Spawner
+--- @return Actor[] Array of 3 (or fewer) maximally separated spawner actors
 function util.getImportantSpawnpoints(builder)
    local spawners = builder:query(prism.components.Spawner):gather()
-
    if #spawners <= 3 then return spawners end
 
-   -- Cache positions
    local nodes = {}
    for i, s in ipairs(spawners) do
       local x, y = s:expectPosition():decompose()
       nodes[i] = { actor = s, x = x, y = y }
    end
 
-   -- Path distance cache
    local dist = {}
 
    local function pathDistance(a, b)
       local path = prism.astar(prism.Vector2(a.x, a.y), prism.Vector2(b.x, b.y), function(x, y)
          return util.isWalkable(builder, x, y)
       end)
-
       if not path then return math.huge end
-
       return #path:getPath()
    end
 
-   -- Precompute distances
    for i = 1, #nodes do
       dist[i] = {}
       for j = i + 1, #nodes do
@@ -406,7 +311,6 @@ function util.getImportantSpawnpoints(builder)
       end
    end
 
-   -- Pick farthest pair
    local a, b
    local best = -1
 
@@ -422,7 +326,6 @@ function util.getImportantSpawnpoints(builder)
 
    if not a then return { spawners[1], spawners[2], spawners[3] } end
 
-   -- Pick third maximizing total distance to {a,b}
    local c
    local bestScore = -1
 
@@ -443,35 +346,21 @@ function util.getImportantSpawnpoints(builder)
 
    if not c then return { nodes[a].actor, nodes[b].actor } end
 
-   return {
-      nodes[a].actor,
-      nodes[b].actor,
-      nodes[c].actor,
-   }
+   return { nodes[a].actor, nodes[b].actor, nodes[c].actor }
 end
 
---- Spawns item spawners in open areas, biased away from existing spawnpoints.
+--- Places item spawners in open areas, biased away from player spawnpoints
 --- @param builder LevelBuilder
---- @param wallDistanceField SparseGrid
---- @param rng RNG
---- @param opts table?
----    opts.count integer?        -- final item spawns
----    opts.samples integer?      -- random probes
----    opts.pool integer?         -- candidate pool
----    opts.wallWeight number?    -- weight for wall distance
----    opts.spawnWeight number?   -- weight for spawnpoint distance
+--- @param wallDistanceField SparseGrid Distance field from walls
+--- @param rng RNG Random number generator
+--- @param opts table? Configuration options
 function util.addItemSpawns(builder, wallDistanceField, rng, opts)
    opts = opts or {}
-
    local finalCount = opts.count or 5
    local samples = opts.samples or 150
    local poolSize = opts.pool or 100
    local wallWeight = opts.wallWeight or 1.0
    local spawnWeight = opts.spawnWeight or 2
-
-   --------------------------------------------------------------------------
-   -- Build distance field from existing spawnpoints
-   --------------------------------------------------------------------------
 
    local spawnDistanceField = util.buildDistanceField(builder, function(builder, x, y)
       return builder:query(prism.components.Spawner):at(x, y):first() ~= nil
@@ -509,10 +398,6 @@ function util.addItemSpawns(builder, wallDistanceField, rng, opts)
       end
    end
 
-   --------------------------------------------------------------------------
-   -- Phase 1: sample good candidates
-   --------------------------------------------------------------------------
-
    for _ = 1, samples do
       local x = rng:random(2, LEVELGENBOUNDSX - 1)
       local y = rng:random(2, LEVELGENBOUNDSY - 1)
@@ -525,7 +410,6 @@ function util.addItemSpawns(builder, wallDistanceField, rng, opts)
 
             if wallD and spawnD then
                local score = wallD * wallWeight + spawnD * spawnWeight
-
                tryInsertCandidate(rx, ry, score, wallD, spawnD)
             end
          end
@@ -533,10 +417,6 @@ function util.addItemSpawns(builder, wallDistanceField, rng, opts)
    end
 
    if #candidates == 0 then return end
-
-   --------------------------------------------------------------------------
-   -- Phase 2: maximize mutual separation (same as spawnpoints)
-   --------------------------------------------------------------------------
 
    table.sort(candidates, function(a, b)
       return a.score > b.score
@@ -570,10 +450,6 @@ function util.addItemSpawns(builder, wallDistanceField, rng, opts)
 
       chosen[#chosen + 1] = table.remove(candidates, bestIdx)
    end
-
-   --------------------------------------------------------------------------
-   -- Spawn item spawners
-   --------------------------------------------------------------------------
 
    for _, c in ipairs(chosen) do
       builder:addActor(prism.actors.ItemSpawner(), c.x, c.y)

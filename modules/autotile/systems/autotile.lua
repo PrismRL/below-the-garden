@@ -91,7 +91,6 @@ function AutoTileSystem:getDrawableFor(x, y, autotile)
       local pattern = rule.pattern
       local dx, dy = -1, -1
       local ruleIsValid = true
-      print("hello")
 
       if not pattern then return self:getVariationForRule(autotile, rule) end
 
@@ -116,7 +115,6 @@ end
 
 function AutoTileSystem:getVariationForRule(autotile, rule)
    local random = love.math.random(rule.totalWeight)
-   print(random)
 
    local sum = 0
    for value, weight in pairs(rule.variations) do

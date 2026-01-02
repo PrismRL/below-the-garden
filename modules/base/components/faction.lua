@@ -12,7 +12,6 @@ function Faction:buildSet()
    self.set = {}
    if not self.cache then self.cache = self:getEnemies() end
    for _, enemy in ipairs(self.cache) do
-      print(enemy.className)
       self.set[enemy.className] = true
    end
 end

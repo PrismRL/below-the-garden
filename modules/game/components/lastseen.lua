@@ -5,7 +5,7 @@
 local LastSeen = prism.Component:extend "LastSeen"
 
 function LastSeen:__new(...)
-   self.components = {...}
+   self.components = { ... }
 end
 
 return LastSeen

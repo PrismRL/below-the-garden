@@ -2,15 +2,12 @@
 local LastSeenSystem = prism.System:extend "LastSeenSystem"
 
 function LastSeenSystem:onTurn(level, actor)
-   if not actor:has(prism.components.PlayerController) then
-      return
-   end
+   if not actor:has(prism.components.PlayerController) then return end
 
    for actor, lastseen, senses in level:query(prism.components.LastSeen, prism.components.Senses):iter() do
       --- @cast lastseen LastSeen
       lastseen.duration = (lastseen.duration or 0) - 1
       if lastseen.duration <= 0 then
-         print "REMOVING LAST SEEN"
          lastseen.position = nil
          lastseen.duration = nil
       end
@@ -18,7 +15,6 @@ function LastSeenSystem:onTurn(level, actor)
       --- @cast senses Senses
       local seenActor = senses:query(level, unpack(lastseen.components)):first()
       if seenActor then
-         print "APPLYING LAST SEEN"
          lastseen.position = seenActor:expectPosition()
          lastseen.duration = 20
 
@@ -33,6 +29,5 @@ function LastSeenSystem:onTurn(level, actor)
       end
    end
 end
-
 
 return LastSeenSystem

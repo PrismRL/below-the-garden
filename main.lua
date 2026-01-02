@@ -14,6 +14,8 @@ prism.loadModule("prism/extra/lighting")
 prism.loadModule("modules/autotile")
 prism.loadModule("modules/base")
 prism.loadModule("modules/game")
+prism.loadModule("modules/levelgen")
+prism.loadModule("modules/btggen")
 
 prism.logger.setOptions { level = "debug" }
 
@@ -35,9 +37,15 @@ love.keyboard.setKeyRepeat(true)
 -- we put out levelstate on top here, but you could create a main menu
 --- @diagnostic disable-next-line
 function love.load(args)
-   local testing = not not args[1]
+   local testing = args[1] == "-t"
+   local map = args[1] == "-m"
    if testing then
       manager:push(spectrum.gamestates.GameLevelState(display, overlay, testing))
+   elseif map then
+      MAPDEBUG = true
+      manager:push(spectrum.gamestates.MapGeneratorState(function()
+         prism.generators.FirstThird.generate(1, 60, 30, 1, prism.actors.Player())
+      end, nil, overlay))
    else
       manager:push(spectrum.gamestates.GameStartState(display, overlay))
    end

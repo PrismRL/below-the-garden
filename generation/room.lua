@@ -1,1 +1,0 @@
-local Room = prism.Object:extend "Room"

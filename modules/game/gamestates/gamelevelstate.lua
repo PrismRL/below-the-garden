@@ -1,6 +1,5 @@
 local controls = require "controls"
 local settings = require "settings"
-local generator = require "generation.generation"
 
 --- @class GameLevelState : LevelState
 --- A custom game level state responsible for initializing the level map,
@@ -42,6 +41,7 @@ function GameLevelState:__new(display, overlay, testing)
    local player = prism.actors.Player()
    local builder
    if testing then
+      print "TESTING?"
       builder = prism.LevelBuilder()
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
       -- Fill the interior with floor tiles
@@ -53,7 +53,10 @@ function GameLevelState:__new(display, overlay, testing)
       builder:addActor(prism.actors.Player(), 16, 16)
       builder:addActor(prism.actors.Torch(), 12, 12)
    else
-      builder = generator(love.timer.getTime(), player)
+      print "WHERE IS THIS Handle"
+      assert(player)
+      print("Player", player)
+      builder = prism.generators.FirstThird.generate(love.timer.getTime(), 60, 40, 1, player)
    end
 
    -- Add systems

@@ -119,23 +119,62 @@ function room.makeEllipseRoom(rng)
    return b
 end
 
+--- @param rng RNG
+--- @return LevelBuilder
+function room.makeRingRoom(rng)
+   local b = prism.LevelBuilder()
+
+   local rOuter = rng:random(5, 8)
+   local thickness = rng:random(3, 4)
+
+   local rWall = rOuter - thickness
+   local rInner = rWall - 1
+
+   local cx = rOuter + 2
+   local cy = rOuter + 2
+
+   -- Outer walkable ring
+   b:ellipse("fill", cx, cy, rOuter, rOuter, prism.cells.Floor)
+
+   -- Wall ring
+   b:ellipse("fill", cx, cy, rWall, rWall, prism.cells.Wall)
+
+   -- Hollow inner void
+   if rInner > 0 then b:ellipse("fill", cx, cy, rInner, rInner, prism.cells.Floor) end
+
+   ----------------------------------------------------------------
+   -- Carve a random opening through the wall ring
+   ----------------------------------------------------------------
+   local dirs = prism.Vector2.neighborhood4
+   local d = dirs[rng:random(1, #dirs)]
+
+   -- carve radially through the wall band
+   for i = rInner + 1, rOuter - 1 do
+      local x = cx + d.x * i
+      local y = cy + d.y * i
+      b:setCell(x, y, prism.cells.Floor())
+   end
+
+   room.addDoors(b, rng)
+   return b
+end
+
 ----------------------------------------------------------------
 -- Random room dispatcher
 ----------------------------------------------------------------
 --- @param rng RNG
 --- @return LevelBuilder
 function room.makeRandomRoom(rng)
-   local roll = rng:random()
+   local roomTypes = {
+      room.makeHallwayL,
+      room.makeCircleRoom,
+      room.makeEllipseRoom,
+      room.makeRingRoom,
+      room.makeRoom,
+   }
 
-   if roll < 0.25 then
-      return room.makeHallwayL(rng)
-   elseif roll < 0.45 then
-      return room.makeCircleRoom(rng)
-   elseif roll < 0.60 then
-      return room.makeEllipseRoom(rng)
-   else
-      return room.makeRoom(rng)
-   end
+   local fn = roomTypes[rng:random(1, #roomTypes)]
+   return fn(rng)
 end
 
 ----------------------------------------------------------------

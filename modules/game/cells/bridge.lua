@@ -6,5 +6,6 @@ prism.registerCell("Bridge", function()
          index = 241,
          color = prism.Color4.BROWN,
       },
+      prism.components.BridgeComponent(),
    }
 end)
