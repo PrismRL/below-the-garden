@@ -6,6 +6,7 @@ local BT = prism.BehaviorTree
 FrogTree.children = {
    BT.Sequence {
       prism.nodes.FindEnemyBehavior,
+      prism.nodes.PerformOnBehavior(prism.actions.Attack),
       prism.nodes.PerformOnBehavior(prism.actions.Tongue),
       prism.nodes.MoveTowardTargetBehavior(1),
    },

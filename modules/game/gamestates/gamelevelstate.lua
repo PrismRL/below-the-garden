@@ -70,7 +70,8 @@ function GameLevelState:__new(display, overlay, testing)
       prism.systems.LightSightSystem(),
       self.lightSystem,
       prism.systems.ModulateLightSystem(),
-      prism.systems.AutoTileSystem()
+      prism.systems.AutoTileSystem(),
+      prism.systems.EquipmentSystem()
    )
    builder:addTurnHandler(require "modules.base.quickturnhandler")
 
@@ -145,6 +146,19 @@ function GameLevelState:updateDecision(dt, owner, decision)
    if controls.use.pressed and held then
       for _, action in ipairs(self.useActions) do
          if self:setAction(action(owner, held)) then return end
+      end
+
+      if held:has(prism.components.Tonguer) then
+         self.targets = { nil }
+         self.selectedAction = prism.actions.Tongue
+         self.manager:push(
+            spectrum.gamestates.DirectionalTargetHandler(
+               self.overlay,
+               self,
+               self.targets,
+               self.selectedAction:getTarget(2)
+            )
+         )
       end
    end
 
@@ -245,6 +259,12 @@ function GameLevelState:putHUD(player)
             extraAction = true
             break
          end
+      end
+
+      if held:has(prism.components.Tonguer) then
+         self.overlay:print(positions.throw.x, positions.throw.y, "P", prism.Color4.CORNFLOWER)
+         self.overlay:print(positions.throw.x + 2, positions.throw.y, prism.actions.Tongue.name, prism.Color4.TEXT)
+         extraAction = true
       end
 
       self.overlay:print(positions.throw.x, positions.throw.y + (extraAction and 1 or 0), "T", prism.Color4.CORNFLOWER)
@@ -354,6 +374,7 @@ function GameLevelState:resume()
    -- self.level:getSystem(prism.systems.AutoTileSystem):initialize(self.level)
 
    if self.targets then
+      print(unpack(self.targets))
       local action = self.selectedAction(self.decision.actor, unpack(self.targets))
       local success, err = self:setAction(action)
       if not success then prism.logger.info(err) end
