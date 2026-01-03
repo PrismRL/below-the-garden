@@ -10,18 +10,16 @@ function MeadowDecorator.tryDecorate(rng, builder, room)
 
    local wallDistanceField = util.buildWallDistanceField(builder)
 
-   -- roll uphill from center to avoid edge bias
-   local mx, my = util.rollUphill(wallDistanceField, cx, cy)
-   local centerD = wallDistanceField:get(mx, my)
+   local centerD = wallDistanceField:get(cx, cy)
    if not centerD or centerD <= radiusMin + 1 then return end
 
-   local maxRadius = centerD - 3
+   local maxRadius = centerD - 2
    if maxRadius < radiusMin then return end
 
    local r = rng:random(radiusMin, maxRadius)
 
    local blob = prism.LevelBuilder()
-   blob:ellipse("fill", mx, my, r, r, prism.cells.Water)
+   blob:ellipse("fill", cx, cy, r, r, prism.cells.Water)
 
    for x, y in blob:each() do
       if util.isFloor(builder, x, y) then builder:set(x, y, prism.cells.Water()) end
@@ -29,8 +27,8 @@ function MeadowDecorator.tryDecorate(rng, builder, room)
 
    local fireflyCount = rng:random(4, 7)
    for i = 1, fireflyCount do
-      local x = mx + rng:random(-centerD, centerD)
-      local y = my + rng:random(-centerD, centerD)
+      local x = cx + rng:random(-centerD, centerD)
+      local y = cy + rng:random(-centerD, centerD)
 
       local cell = builder:get(x, y)
       if cell == prism.cells.Water or util.isFloor(builder, x, y) then
@@ -42,11 +40,11 @@ function MeadowDecorator.tryDecorate(rng, builder, room)
    local r2 = r * r
 
    for i = 1, innerCount do
-      local gx = mx + rng:random(-r, r)
-      local gy = my + rng:random(-r, r)
+      local gx = cx + rng:random(-r, r)
+      local gy = cy + rng:random(-r, r)
 
-      local dx = gx - mx
-      local dy = gy - my
+      local dx = gx - cx
+      local dy = gy - cy
       if (dx * dx + dy * dy) <= r2 then
          if builder:get(gx, gy) == prism.cells.Water then builder:set(gx, gy, prism.cells.TallGrass()) end
       end
@@ -60,8 +58,8 @@ function MeadowDecorator.tryDecorate(rng, builder, room)
       local angle = rng:random() * math.pi * 2
       local dist = rng:random(outerMin, outerMax)
 
-      local gx = math.floor(mx + math.cos(angle) * dist + 0.5)
-      local gy = math.floor(my + math.sin(angle) * dist + 0.5)
+      local gx = math.floor(cx + math.cos(angle) * dist + 0.5)
+      local gy = math.floor(cy + math.sin(angle) * dist + 0.5)
 
       if util.isFloor(builder, gx, gy) then builder:set(gx, gy, prism.cells.TallGrass()) end
    end

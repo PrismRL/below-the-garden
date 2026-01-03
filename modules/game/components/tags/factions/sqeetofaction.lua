@@ -3,7 +3,7 @@
 local SqeetoFaction = prism.components.Faction:extend "SqeetoFaction"
 
 function SqeetoFaction:getEnemies()
-   return prism.components.PlayerFaction
+   return {prism.components.PlayerFaction}
 end
 
 return SqeetoFaction

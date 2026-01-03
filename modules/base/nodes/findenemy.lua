@@ -2,18 +2,19 @@
 local FindEnemyBehavior = prism.BehaviorTree.Conditional:extend("FindEnemyBehavior")
 
 --- @param alert boolean
-function FindEnemyBehavior:__new(alert)
+function FindEnemyBehavior:__new(alert, maxRange)
    self.alert = alert
 end
 
-function FindEnemyBehavior:run(level, actor, controller)
+function FindEnemyBehavior:run(level, actor, controller, maxRange)
+   maxRange = maxRange or math.huge
    local closest
    local bestD = math.huge
    for candidate, _ in actor:expect(prism.components.Senses):query(level, prism.components.Health):iter() do
       if candidate ~= actor and prism.components.Faction.isEnemy(actor, candidate) then
          local distance = actor:getRange(candidate)
 
-         if distance < bestD then closest = candidate end
+         if distance < bestD and distance < maxRange then closest = candidate end
       end
    end
 

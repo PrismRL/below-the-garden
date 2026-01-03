@@ -4,7 +4,10 @@ local SqeetoTree = prism.BehaviorTree.Root:extend "SqeetoTree"
 local BT = prism.BehaviorTree
 SqeetoTree.children = {
    BT.Sequence {
-      prism.nodes.FindLightBehavior,
+      BT.Selector {
+         prism.nodes.FindEnemyBehavior(false, 4),
+         prism.nodes.FindLightBehavior,
+      },
       BT.Sequence {
          prism.nodes.PerformOnBehavior(prism.actions.Attack),
          prism.nodes.MoveTowardTargetBehavior(1),

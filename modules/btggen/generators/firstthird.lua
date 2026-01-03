@@ -294,7 +294,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    }
 
    local encounterRooms = rm:getRemovableRooms()
-   local encounterAttempts = rng:random(math.min(math.min(depth, 1), 2), math.min(depth, 3))
+   local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
 
    for _ = 1, encounterAttempts do
       if #encounterRooms == 0 then break end
@@ -335,7 +335,21 @@ function FirstThird.generate(seed, w, h, depth, player)
          end
       end
    end
-   
+
+   local mediumEncounterDecorators = {
+      prism.decorators.FrogDecorator,
+   }
+
+   local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
+   for _ = 1, encounterAttempts do
+      local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
+      for _, room in ipairs(rooms) do
+         if not used[room] then
+            if deco.tryDecorate(rng, builder, room) then break end
+         end
+      end
+   end
+
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
       print("ROOM CHECK", used[room])
@@ -352,6 +366,15 @@ function FirstThird.generate(seed, w, h, depth, player)
       end
    end
 
+   local weapons = {
+      prism.actors.Sling,
+      prism.actors.Sword,
+      prism.actors.Hammer
+   }
+
+   local misc = {
+      prism.actors.Torch,
+   }
    prism.decorators.FireflyDecorator.tryDecorate(rng, builder)
    coroutine.yield(builder)
 
