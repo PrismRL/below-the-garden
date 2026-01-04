@@ -20,6 +20,8 @@ function Move:canPerform(level, destination)
    return level:getCellPassableByActor(destination.x, destination.y, self.owner, mover.mask)
 end
 
+local fly = prism.components.Collider { allowedMovetypes = { "fly" } }
+
 --- @param level Level
 --- @param destination Vector2
 function Move:perform(level, destination)
@@ -47,6 +49,15 @@ function Move:perform(level, destination)
          ),
          blocking = true,
       })
+   end
+
+   local cell = level:getCell(destination:decompose())
+   if
+      cell:has(prism.components.Wet)
+      and not prism.Collision.checkBitmaskOverlap(mover.mask, fly:getMask())
+      and not self.owner:expect(prism.components.ConditionHolder):has(prism.conditions.Aquatic)
+   then
+      self.owner:expect(prism.components.ConditionHolder):add(prism.conditions.Stunned())
    end
 
    if slimeProducer then level:addActor(prism.actors.Slime(6), self.owner:expectPosition():decompose()) end

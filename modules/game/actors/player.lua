@@ -7,7 +7,7 @@ prism.registerActor("Player", function()
       prism.components.Collider(),
       prism.components.PlayerController(),
       prism.components.Senses(),
-      prism.components.Mover { "walk" },
+      prism.components.Mover { "walk", "swim" },
       prism.components.Health(10),
       -- prism.components.Inventory { limitCount = 1 },
       prism.components.Equipper { "weapon", "held", "amulet", "pocket" },
