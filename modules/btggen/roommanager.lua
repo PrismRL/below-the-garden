@@ -62,7 +62,6 @@ function RoomManager:findRooms(minRoomSize)
                tiles = tiles,
                size = count,
                isHallway = false,
-               center = self:findRoomCenter(tiles),
                color = prism.Color4(math.random(), math.random(), math.random()),
                neighbors = {},
             }
@@ -119,12 +118,16 @@ function RoomManager:findRooms(minRoomSize)
                tiles = tiles,
                size = count,
                isHallway = true,
-               center = self:findRoomCenter(tiles),
                color = prism.Color4(math.random(), math.random(), math.random()),
                neighbors = {},
             }
          end
       end
+   end
+
+      -- after all room growth is complete
+   for _, room in ipairs(rooms) do
+      room.center = self:findRoomCenter(room.tiles)
    end
 
    return rooms

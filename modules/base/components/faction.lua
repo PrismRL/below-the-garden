@@ -8,7 +8,6 @@ function Faction:getEnemies()
 end
 
 function Faction:buildSet()
-   print "BUILDING FACTION SET"
    self.set = {}
    if not self.cache then self.cache = self:getEnemies() end
    for _, enemy in ipairs(self.cache) do

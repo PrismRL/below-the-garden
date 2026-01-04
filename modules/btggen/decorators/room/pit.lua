@@ -145,7 +145,7 @@ function PitDecorator.tryDecorate(rng, builder, room)
 
       for neighbor in pairs(room.neighbors) do
          local path = prism.astar(neighbor.center, mainCenter, function(x, y)
-            return not util.isWall(builder, x, y)
+            return not util.isWall(builder, x, y) and room.tiles:get(x,y) or neighbor.tiles:get(x, y)
          end, function(x, y)
             return util.isWalkable(builder, x, y) and 1 or bridgeCost
          end, nil, "4way", prism.Vector2.neighborhood4)

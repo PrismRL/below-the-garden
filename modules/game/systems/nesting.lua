@@ -3,7 +3,6 @@ local NestingSystem = prism.System:extend "NestingSystem"
 
 --- @param level Level
 function NestingSystem:postInitialize(level)
-   print "NESTING"
    level:query(prism.components.Nesting):each(function(nester, nesting)
       --- @cast nesting Nesting
       local candidates = level:query(nesting.nestType)
@@ -13,7 +12,6 @@ function NestingSystem:postInitialize(level)
       local bestRange = math.huge
 
       for candidate in candidates:iter() do
-         print "FOUND CANDIDATE"
          if candidate ~= nester then
             local r = candidate:getRange(nester)
             if r < bestRange then

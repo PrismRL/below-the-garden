@@ -3,9 +3,9 @@ local util = prism.levelgen.util
 local SqeetoThinningDecorator =
    prism.levelgen.Decorator:extend "SqeetoThinningDecorator"
 
-local MAX_SQEETOS  = 16
-local KILL_RADIUS = 10
-local CLUMP_RADIUS = 5
+local MAX_SQEETOS   = 16
+local KILL_RADIUS  = 10
+local CLUMP_RADIUS = 10
 
 function SqeetoThinningDecorator.tryDecorate(rng, builder)
    local sqeetos = {}
@@ -64,29 +64,45 @@ function SqeetoThinningDecorator.tryDecorate(rng, builder)
 
    local excess = #sqeetos - MAX_SQEETOS
    if excess > 0 then
-      local function localDensity(sq)
-         local sx, sy = sq:expectPosition():decompose()
-         local count = 0
+      local BUCKET = CLUMP_RADIUS
+      local buckets = prism.SparseGrid()
 
-         for _, other in ipairs(sqeetos) do
-            if other ~= sq then
-               local ox, oy = other:expectPosition():decompose()
-               if math.abs(ox - sx) <= CLUMP_RADIUS
-                  and math.abs(oy - sy) <= CLUMP_RADIUS then
-                  count = count + 1
-               end
-            end
-         end
-
-         return count
+      local function bucketCoord(v)
+         return math.floor(v / BUCKET)
       end
 
-      table.sort(sqeetos, function(a, b)
-         return localDensity(a) > localDensity(b)
-      end)
+      for _, sq in ipairs(sqeetos) do
+         print "BUCKETING"
+         local x, y = sq:expectPosition():decompose()
+         local bx = bucketCoord(x)
+         local by = bucketCoord(y)
 
-      for i = 1, excess do
-         builder:removeActor(sqeetos[i])
+         local bucket = buckets:get(bx, by)
+         if not bucket then
+            bucket = {}
+            buckets:set(bx, by, bucket)
+         end
+
+         bucket[#bucket + 1] = sq
+      end
+
+      local removedSomething = true
+
+      while excess > 0 and removedSomething do
+         removedSomething = false
+
+         for bx, by, bucket in buckets:each() do
+            if excess <= 0 then break end
+
+            if #bucket > 1 then
+               local idx = rng:random(1, #bucket)
+               builder:removeActor(bucket[idx])
+               table.remove(bucket, idx)
+
+               excess = excess - 1
+               removedSomething = true
+            end
+         end
       end
    end
 

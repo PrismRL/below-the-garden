@@ -58,11 +58,16 @@ local function tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng)
             local gx = ox + (x - rs.x)
             local gy = oy + (y - rs.y)
 
-            if gx <= 1 or gx >= LEVELGENBOUNDSX or gy <= 1 or gy >= LEVELGENBOUNDSY then return false end
+            if gx < 2 or gx > LEVELGENBOUNDSX - 1 or
+               gy < 2 or gy > LEVELGENBOUNDSY - 1 then
+               return false
+            end
 
             for _, d in ipairs(prism.Vector2.neighborhood8) do
                if util.isFloor(builder, gx + d.x, gy + d.y) then return false end
             end
+
+            if builder:get(gx, gy) then return false end
          end
       end
    end
@@ -124,7 +129,7 @@ local function tryAccrete(builder, rng)
 
          for _, rdoor in ipairs(rdoors) do
             if tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng) then
-               coroutine.yield(builder)
+               --coroutine.yield(builder)
                return true
             end
          end
@@ -138,7 +143,7 @@ end
 ---@param w integer
 ---@param h integer
 ---@return LevelBuilder
-local function accrete(rng, w, h)
+local function accrete(rng)
    local builder
 
    while true do
@@ -148,9 +153,15 @@ local function accrete(rng, w, h)
 
       -- first room
       local first = randomRoom(rng)
-      local x = rng:random(10, LEVELGENBOUNDSX - 10)
-      local y = rng:random(10, LEVELGENBOUNDSY - 10)
+      local rs, rf = first:getBounds()
+      local w = rf.x - rs.x
+      local h = rf.y - rs.y
+
+      local x = rng:random(2, LEVELGENBOUNDSX - w - 1)
+      local y = rng:random(2, LEVELGENBOUNDSY - h - 1)
+
       builder:blit(first, x, y)
+
 
       -- accretion loop
       local failures = 0
@@ -187,12 +198,12 @@ local function mapdebug(builder, rooms)
          end
       end
    end
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    for _, spawner in ipairs(builder:query(prism.components.Spawner):gather()) do
       builder:removeActor(spawner)
    end
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 end
 
 --- @param seed any
@@ -202,16 +213,16 @@ end
 function FirstThird.generate(seed, w, h, depth, player)
    print(seed, w, h, depth, player)
    local rng = prism.RNG(seed)
-   local builder = accrete(rng, w, h)
+   local builder = accrete(rng)
 
    for _, proxy in pairs(builder:query(prism.components.DoorProxy):gather()) do
       builder:removeActor(proxy)
    end
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    prism.decorators.ErosionDecorator.tryDecorate(rng, builder)
    builder:rectangle("line", 1, 1, LEVELGENBOUNDSX, LEVELGENBOUNDSY, prism.cells.Wall)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    local distanceField = util.buildWallDistanceField(builder)
    local rooms = prism.levelgen.RoomManager(builder, distanceField).rooms
@@ -255,8 +266,9 @@ function FirstThird.generate(seed, w, h, depth, player)
       local decorated = false
       for i = 1, #undecoratedRooms do
          local room = undecoratedRooms[i]
+         print(decorator.className)
          if decorator.tryDecorate(rng, builder, room) then
-            coroutine.yield(builder)
+            --coroutine.yield(builder)
             table.remove(undecoratedRooms, i)
             decorated = true
             break
@@ -268,19 +280,19 @@ function FirstThird.generate(seed, w, h, depth, player)
    end
 
    prism.decorators.BridgeToFloorDecorator.tryDecorate(rng, builder)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    prism.decorators.TallGrassNearWallsDecorator.tryDecorate(rng, builder)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    prism.decorators.GrassSpreadDecorator.tryDecorate(rng, builder)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    prism.decorators.GlowStalkDecorator.tryDecorate(rng, builder)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    prism.decorators.PruneMisalignedDoorsDecorator.tryDecorate(rng, builder)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    local rm = prism.levelgen.RoomManager(builder, distanceField)
    local rooms = rm.rooms
@@ -318,6 +330,11 @@ function FirstThird.generate(seed, w, h, depth, player)
                   return util.isFloor(builder, x, y)
                end)
 
+               if not path then
+                  mapdebug(builder, {room, oroom})
+                  coroutine.yield(builder)
+               end
+
                if path:getTotalCost() < 10 then
                   skipped[room] = true
                end
@@ -339,7 +356,7 @@ function FirstThird.generate(seed, w, h, depth, player)
       for i = 1, #encounterRooms do
          local room = encounterRooms[i]
          if not used[room] and decorator.tryDecorate(rng, builder, room) then
-            coroutine.yield(builder)
+            --coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
 
@@ -381,13 +398,11 @@ function FirstThird.generate(seed, w, h, depth, player)
 
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
-      print("ROOM CHECK", used[room])
       if canSpawnRoom(room) then
-         print "TRYING"
          prism.decorators.SqeetoSwarmDecorator.tryDecorate(rng, builder, room)
       end
    end
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    prism.decorators.SqeetoThinningDecorator.tryDecorate(rng, builder)
 
@@ -407,7 +422,7 @@ function FirstThird.generate(seed, w, h, depth, player)
       prism.actors.Torch,
    }
    prism.decorators.FireflyDecorator.tryDecorate(rng, builder)
-   coroutine.yield(builder)
+   --coroutine.yield(builder)
 
    return builder
 end

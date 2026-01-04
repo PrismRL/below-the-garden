@@ -10,5 +10,4 @@ prism.levelgen.RoomManager = require(basePath .. ".roommanager")
 --- @module "modules.btggen.roomgenerator"
 prism.levelgen.RoomGenerator = require(basePath .. ".roomgenerator")
 
-print "REGISTERING ROOM GENS"
 prism.registerRegistry("roomgenerators", prism.levelgen.RoomGenerator)

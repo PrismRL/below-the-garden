@@ -37,7 +37,6 @@ function LockRoomDecorator.tryDecorate(rng, builder, room)
             end
 
             if clean then
-               print "FOUND CLEAN"
                cardinalPairs[#cardinalPairs + 1] = {
                   room = roomPos,
                   out  = outPos,

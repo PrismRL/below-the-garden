@@ -1,8 +1,6 @@
 --- @class CircleRoomGenerator : RoomGenerator
 local CircleRoomGenerator = prism.levelgen.RoomGenerator:extend "CircleRoomGenerator"
 
-print "LOADED CIRLCE"
-
 function CircleRoomGenerator.generate(rng)
    local b = prism.LevelBuilder()
 
