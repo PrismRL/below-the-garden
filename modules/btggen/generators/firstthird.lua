@@ -207,6 +207,16 @@ local function mapdebug(builder, rooms)
    --coroutine.yield(builder)
 end
 
+
+-- Fisher–Yates shuffle using rng
+local function shuffle(t, rng)
+   for i = #t, 2, -1 do
+      local j = rng:random(i)
+      t[i], t[j] = t[j], t[i]
+   end
+end
+
+
 --- @param seed any
 ---@param w integer
 ---@param h integer
@@ -243,14 +253,6 @@ function FirstThird.generate(seed, w, h, depth, player)
    local undecoratedRooms = {}
    for _, room in ipairs(rooms) do
       table.insert(undecoratedRooms, room)
-   end
-
-   -- Fisher–Yates shuffle using rng
-   local function shuffle(t, rng)
-      for i = #t, 2, -1 do
-         local j = rng:random(i)
-         t[i], t[j] = t[j], t[i]
-      end
    end
 
    local attempts = rng:random(3, 5)
@@ -301,6 +303,8 @@ function FirstThird.generate(seed, w, h, depth, player)
 
    local used = {}
    local skipped = {}
+   local hard = {}
+   local medium = {}
 
    local function canSpawnRoom(room)
       return not used[room] and not skipped[room]
@@ -360,6 +364,7 @@ function FirstThird.generate(seed, w, h, depth, player)
             --coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
+            hard[room] = true
 
             for _, room in ipairs(rooms) do
                if canSpawnRoom(room) then
@@ -408,6 +413,13 @@ function FirstThird.generate(seed, w, h, depth, player)
    prism.decorators.SqeetoThinningDecorator.tryDecorate(rng, builder)
    --coroutine.yield(builder)
 
+   local count = 0
+   -- Easy spawns: remaining unused rooms
+   for _, room in ipairs(rooms) do
+      if count > 6 then break end
+      prism.decorators.PebbleDecorator.tryDecorate(rng, builder, room)
+   end
+
    for x = 1, w do
       for y = 1, h do
          if not builder:get(x, y) then builder:set(x, y, prism.cells.Wall()) end
@@ -423,6 +435,49 @@ function FirstThird.generate(seed, w, h, depth, player)
    local misc = {
       prism.actors.Torch,
    }
+
+   local natural = {
+      prism.actors.Pebble,
+   }
+
+   local pocketmobs = {
+      prism.actors.Gloop,
+      prism.actors.Snail,
+   }
+
+   local healing = {
+      prism.actors.Snip
+   }
+
+   for i = 1, rng:random(4, 6) do
+      local room = rooms[rng:random(1, #rooms)]
+      local nature = natural[rng:random(#natural)]
+      prism.decorators.ItemSpawnerDecorator.tryDecorate(rng, builder, room, nature)
+   end
+
+   for i = 1, 2 do
+      local room = rooms[rng:random(1, #rooms)]
+      local heal = healing[rng:random(#healing)]
+      prism.decorators.ItemSpawnerDecorator.tryDecorate(rng, builder, room, heal)
+   end
+
+   for i = 1, 2 do
+      local room = rooms[rng:random(1, #rooms)]
+      local weapon = weapons[rng:random(#weapons)]
+      prism.decorators.ItemSpawnerDecorator.tryDecorate(rng, builder, room, weapon)
+   end
+
+   for i = 1, 3 do
+      local room = rooms[rng:random(1, #rooms)]
+      local pokemob = pocketmobs[rng:random(#pocketmobs)]
+      prism.decorators.ItemSpawnerDecorator.tryDecorate(rng, builder, room, pokemob)
+   end
+
+   for i = 1, 1 do
+      local room = rooms[rng:random(1, #rooms)]
+      prism.decorators.ItemSpawnerDecorator.tryDecorate(rng, builder, room, prism.actors.Torch)
+   end
+
    prism.decorators.FireflyDecorator.tryDecorate(rng, builder)
    --coroutine.yield(builder)
 
