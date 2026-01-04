@@ -5,7 +5,7 @@ local SqeetoThinningDecorator =
 
 local MAX_SQEETOS   = 16
 local KILL_RADIUS  = 10
-local CLUMP_RADIUS = 10
+local CLUMP_RADIUS = 5
 
 function SqeetoThinningDecorator.tryDecorate(rng, builder)
    local sqeetos = {}
@@ -41,7 +41,7 @@ function SqeetoThinningDecorator.tryDecorate(rng, builder)
             return false
          end,
          function(builder, x, y)
-            return util.isFloor(builder, x, y)
+            return not util.isWall(builder, x, y)
          end,
          prism.Vector2.neighborhood8
       )

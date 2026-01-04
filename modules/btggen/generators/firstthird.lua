@@ -95,7 +95,7 @@ local function tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng)
       builder:removeActor(door)
    end
 
-   builder:addActor(prism.actors.Door(), ax, ay)
+   --builder:addActor(prism.actors.Door(), ax, ay)
 
    return true
 end
@@ -168,8 +168,9 @@ local function accrete(rng)
       while true do
          if not tryAccrete(builder, rng) then
             failures = failures + 1
-            if failures > 500 then break end
+            if failures > 50 then break end
          else
+            failures = 0
             --if MAPDEBUG then coroutine.yield(builder) end
          end
       end
@@ -355,7 +356,7 @@ function FirstThird.generate(seed, w, h, depth, player)
 
       for i = 1, #encounterRooms do
          local room = encounterRooms[i]
-         if not used[room] and decorator.tryDecorate(rng, builder, room) then
+         if canSpawnRoom(room) and decorator.tryDecorate(rng, builder, room) then
             --coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
@@ -405,6 +406,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    --coroutine.yield(builder)
 
    prism.decorators.SqeetoThinningDecorator.tryDecorate(rng, builder)
+   --coroutine.yield(builder)
 
    for x = 1, w do
       for y = 1, h do
