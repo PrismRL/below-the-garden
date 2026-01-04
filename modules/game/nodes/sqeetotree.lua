@@ -5,7 +5,7 @@ local BT = prism.BehaviorTree
 SqeetoTree.children = {
    BT.Sequence {
       BT.Selector {
-         prism.nodes.FindEnemyBehavior(false, 4),
+         prism.nodes.FindEnemyBehavior(false, 3),
          prism.nodes.FindLightBehavior,
       },
       BT.Sequence {

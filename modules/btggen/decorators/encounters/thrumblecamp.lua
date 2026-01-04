@@ -10,11 +10,6 @@ function ThrumbleCampDecorator.tryDecorate(rng, builder, room)
       return false
    end
 
-   local player = builder:query(prism.components.PlayerController):first()
-   if not player then
-      return false
-   end
-
    local wallDistanceField = util.buildWallDistanceField(builder)
 
    local bestX, bestY
@@ -39,18 +34,6 @@ function ThrumbleCampDecorator.tryDecorate(rng, builder, room)
    end
 
    local cx, cy = bestX, bestY
-
-   local astar = prism.astar(
-      player:expectPosition(),
-      prism.Vector2(cx, cy),
-      function(x, y)
-         return util.isFloor(builder, x, y)
-      end
-   )
-
-   if not astar then
-      return false
-   end
 
    for dx = -1, 1 do
       for dy = -1, 1 do

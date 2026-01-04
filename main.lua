@@ -44,9 +44,6 @@ function love.load(args)
    elseif map then
       MAPDEBUG = true
 
-      for i = 1, 1000 do
-         prism.generators.FirstThird.generate(1, 60, 30, 1, prism.actors.Player())
-      end
       manager:push(spectrum.gamestates.MapGeneratorState(function()
          prism.generators.FirstThird.generate(1, 60, 30, 1, prism.actors.Player())
       end, nil, overlay))

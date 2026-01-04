@@ -79,7 +79,7 @@ prism.registerActor("Frog", function()
       prism.components.Collider(),
       prism.components.Mover { "walk" },
       prism.components.Senses(),
-      prism.components.Sight { range = 6, fov = true },
+      prism.components.LightSight { range = 4, fov = false, darkvision = 0},
       prism.components.FrogController(),
       prism.components.Health(6),
       prism.components.Attacker(1),
@@ -87,5 +87,6 @@ prism.registerActor("Frog", function()
       prism.components.ConditionHolder(),
       prism.components.Tonguer(),
       equipper,
+      prism.components.Nesting(prism.components.FrogHome),
    }
 end)

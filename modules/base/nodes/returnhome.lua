@@ -14,9 +14,17 @@ function ReturnHomeBehavior:run(level, actor, controller)
 
    local distance = actor:getRange(home)
    if distance > self.distanceToHome then
-      print("RETURNING HOME")
-      local vec = prism.Vector2.neighborhood8[level.RNG:random(1, 8)]
-      controller.blackboard["target"] = home:expectPosition() + vec
+      print("RETURNING HOME", prism.components.Name.get(actor))
+
+      local target
+      if self.distanceToHome == 0 then
+         target = home:expectPosition()
+      else
+         local vec = prism.Vector2.neighborhood8[level.RNG:random(1, 8)]
+         target = home:expectPosition() + vec
+      end
+
+      controller.blackboard.target = target
       return true
    end
 

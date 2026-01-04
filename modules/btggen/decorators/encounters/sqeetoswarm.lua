@@ -11,23 +11,7 @@ function SqeetoSwarmDecorator.tryDecorate(rng, builder, room)
       end
    end
 
-   local area = #candidates
-   if area == 0 then return false end
-
-   ----------------------------------------------------------------
-   -- Spawn scaling
-   ----------------------------------------------------------------
-   local tilesPerSqeeto = 30            -- density control
-   local minCount = 1
-   local maxCount = 6
-
-   local expected = math.floor(area / tilesPerSqeeto)
-   local jitter = rng:random(-1, 1)
-
-   local count = math.max(
-      minCount,
-      math.min(maxCount, expected + jitter)
-   )
+   local count = rng:random(1, 2)
 
    ----------------------------------------------------------------
    -- Shuffle candidates

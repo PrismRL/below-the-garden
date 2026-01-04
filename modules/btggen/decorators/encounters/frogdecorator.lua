@@ -4,7 +4,7 @@ local FrogDecorator =
    prism.levelgen.Decorator:extend "FrogDecorator"
 
 -- Out of 8 neighbors
-local MIN_OPAQUE_NEIGHBORS = 8
+local MIN_OPAQUE_NEIGHBORS = 7
 
 function FrogDecorator.tryDecorate(rng, builder, room)
    print("[FrogDecorator] tryDecorate")
@@ -29,6 +29,7 @@ function FrogDecorator.tryDecorate(rng, builder, room)
             for dy = -1, 1 do
                if not (dx == 0 and dy == 0) then
                   if util.isOpaque(builder, x + dx, y + dy) then
+                     print("FOUND", prism.components.Name.get(builder:get(x + dx, y + dy)))
                      opaqueCount = opaqueCount + 1
                   end
                end
@@ -64,6 +65,7 @@ function FrogDecorator.tryDecorate(rng, builder, room)
    ))
 
    builder:addActor(prism.actors.Frog(), p.x, p.y)
+   builder:addActor(prism.actors.FrogHome(), p.x, p.y)
 
    return true
 end

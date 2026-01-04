@@ -71,20 +71,14 @@ function GameLevelState:__new(display, overlay, testing)
       self.lightSystem,
       prism.systems.ModulateLightSystem(),
       prism.systems.AutoTileSystem(),
-      prism.systems.EquipmentSystem()
+      prism.systems.EquipmentSystem(),
+      prism.systems.NestingSystem()
    )
    builder:addTurnHandler(require "modules.base.quickturnhandler")
 
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display)
-   print(self.level:query(prism.components.Camp):first())
-   self.level:query(prism.components.Inventory):each(function(thrumble)
-      if thrumble:getName() == "Thrumble" then
-         local campFire = thrumble:expect(prism.components.Senses):query(self.level, prism.components.Camp):first()
-         if campFire then thrumble:addRelation(prism.relations.Home, campFire) end
-      end
-   end)
 end
 
 function GameLevelState:handleMessage(message)

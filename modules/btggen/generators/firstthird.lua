@@ -98,6 +98,11 @@ end
 
 local function tryAccrete(builder, rng)
    local anchors = builder:query(prism.components.DoorProxy):gather()
+   table.sort(anchors, function(a, b)
+      local ax, ay = a:expectPosition():decompose()
+      local bx, by = b:expectPosition():decompose()
+      return ay == by and ax < bx or ay < by
+   end)
    if #anchors == 0 then return false end
 
    local room = randomRoom(rng)
@@ -110,7 +115,14 @@ local function tryAccrete(builder, rng)
       local normal = doorNormal(builder, ax, ay)
 
       if normal then
-         for rdoor in room:query(prism.components.DoorProxy):iter() do
+         local rdoors = room:query(prism.components.DoorProxy):gather()
+         table.sort(rdoors, function(a, b)
+            local ax, ay = a:expectPosition():decompose()
+            local bx, by = b:expectPosition():decompose()
+            return ay == by and ax < bx or ay < by
+         end)
+
+         for _, rdoor in ipairs(rdoors) do
             if tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng) then
                coroutine.yield(builder)
                return true
@@ -217,7 +229,7 @@ function FirstThird.generate(seed, w, h, depth, player)
 
    -- copy rooms
    local undecoratedRooms = {}
-   for _, room in pairs(rooms) do
+   for _, room in ipairs(rooms) do
       table.insert(undecoratedRooms, room)
    end
 
@@ -243,7 +255,7 @@ function FirstThird.generate(seed, w, h, depth, player)
       local decorated = false
       for i = 1, #undecoratedRooms do
          local room = undecoratedRooms[i]
-         if decorator.tryDecorate(rng, builder, room) then
+         if prism.decorators.MeadowDecorator.tryDecorate(rng, builder, room) then
             coroutine.yield(builder)
             table.remove(undecoratedRooms, i)
             decorated = true
@@ -275,6 +287,11 @@ function FirstThird.generate(seed, w, h, depth, player)
    mapdebug(builder, rooms)
 
    local used = {}
+   local skipped = {}
+
+   local function canSpawnRoom(room)
+      return not used[room] and not skipped[room]
+   end
 
    local importantRooms = rm:getImportantRooms(used)
    assert(#importantRooms ==  3)
@@ -293,6 +310,22 @@ function FirstThird.generate(seed, w, h, depth, player)
       prism.decorators.ThrumbleCampDecorator,
    }
 
+   for _, room in ipairs(rooms) do
+      if canSpawnRoom(room) then
+         for _, oroom in ipairs(rooms) do
+            if oroom ~= room and not canSpawnRoom(oroom) then
+               local path = prism.astar(room.center, oroom.center, function (x, y)
+                  return util.isFloor(builder, x, y)
+               end)
+
+               if path:getTotalCost() < 10 then
+                  skipped[room] = true
+               end
+            end
+         end
+      end
+   end
+
    local encounterRooms = rm:getRemovableRooms()
    local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
 
@@ -305,47 +338,43 @@ function FirstThird.generate(seed, w, h, depth, player)
 
       for i = 1, #encounterRooms do
          local room = encounterRooms[i]
-         if decorator.tryDecorate(rng, builder, room) then
+         if not used[room] and decorator.tryDecorate(rng, builder, room) then
             coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
-            break
-         end
-      end
-   end
 
-   for _, room in ipairs(rooms) do
-      local d = distanceField:get(room.center:decompose())
-      for _, oroom in ipairs(rooms) do
-         if oroom ~= room and not used[oroom] and not used[room] then
-            local od = distanceField:get(room.center:decompose())
+            for _, room in ipairs(rooms) do
+               if canSpawnRoom(room) then
+                  for _, oroom in ipairs(rooms) do
+                     if oroom ~= room and not canSpawnRoom(oroom) then
+                        local path = prism.astar(room.center, oroom.center, function (x, y)
+                           return util.isFloor(builder, x, y)
+                        end)
 
-            local path = prism.astar(room.center, oroom.center, function (x, y)
-               return util.isFloor(builder, x, y)
-            end)
-
-            assert(path)
-            if path:getTotalCost() < 10 then
-               if od > d then
-                  used[room] = true
-               else
-                  used[oroom] = true
+                        if path:getTotalCost() < 10 then
+                           skipped[room] = true
+                        end
+                     end
+                  end
                end
             end
+
+            break
          end
       end
    end
 
    local mediumEncounterDecorators = {
       prism.decorators.FrogDecorator,
+      prism.decorators.ThrumbleScoutDecorator,
    }
 
    local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
    for _ = 1, encounterAttempts do
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
       for _, room in ipairs(rooms) do
-         if not used[room] then
-            if deco.tryDecorate(rng, builder, room) then break end
+         if canSpawnRoom(room) then
+            if deco.tryDecorate(rng, builder, room) then used[room] = true break end
          end
       end
    end
@@ -353,12 +382,14 @@ function FirstThird.generate(seed, w, h, depth, player)
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
       print("ROOM CHECK", used[room])
-      if not used[room] then
+      if canSpawnRoom(room) then
          print "TRYING"
          prism.decorators.SqeetoSwarmDecorator.tryDecorate(rng, builder, room)
       end
    end
    coroutine.yield(builder)
+
+   prism.decorators.SqeetoThinningDecorator.tryDecorate(rng, builder, room)
 
    for x = 1, w do
       for y = 1, h do

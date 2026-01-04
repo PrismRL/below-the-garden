@@ -3,7 +3,7 @@ local MeadowDecorator = prism.levelgen.Decorator:extend "MeadowDecorator"
 
 function MeadowDecorator.tryDecorate(rng, builder, room)
    local radiusMin = 2
-   local outerPad = 3
+   local outerPad = rng:random(2, 3)
 
    local cx, cy = room.center:decompose()
    if not util.isFloor(builder, cx, cy) then return end
@@ -11,9 +11,7 @@ function MeadowDecorator.tryDecorate(rng, builder, room)
    local wallDistanceField = util.buildWallDistanceField(builder)
 
    local centerD = wallDistanceField:get(cx, cy)
-   if not centerD or centerD <= radiusMin + 1 then return end
-
-   local maxRadius = centerD - 2
+   local maxRadius = centerD - outerPad - 2
    if maxRadius < radiusMin then return end
 
    local r = rng:random(radiusMin, maxRadius)
