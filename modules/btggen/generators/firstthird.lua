@@ -255,7 +255,7 @@ function FirstThird.generate(seed, w, h, depth, player)
       local decorated = false
       for i = 1, #undecoratedRooms do
          local room = undecoratedRooms[i]
-         if prism.decorators.MeadowDecorator.tryDecorate(rng, builder, room) then
+         if decorator.tryDecorate(rng, builder, room) then
             coroutine.yield(builder)
             table.remove(undecoratedRooms, i)
             decorated = true
@@ -389,7 +389,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    end
    coroutine.yield(builder)
 
-   prism.decorators.SqeetoThinningDecorator.tryDecorate(rng, builder, room)
+   prism.decorators.SqeetoThinningDecorator.tryDecorate(rng, builder)
 
    for x = 1, w do
       for y = 1, h do

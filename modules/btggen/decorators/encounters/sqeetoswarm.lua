@@ -11,7 +11,7 @@ function SqeetoSwarmDecorator.tryDecorate(rng, builder, room)
       end
    end
 
-   local count = rng:random(1, 2)
+   local count = 3
 
    ----------------------------------------------------------------
    -- Shuffle candidates
