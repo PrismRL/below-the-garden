@@ -3,9 +3,9 @@ local util = prism.levelgen.util
 local SqeetoThinningDecorator =
    prism.levelgen.Decorator:extend "SqeetoThinningDecorator"
 
-local MAX_SQEETOS   = 16
+local MAX_SQEETOS   = 12
 local KILL_RADIUS  = 10
-local CLUMP_RADIUS = 5
+local CLUMP_RADIUS = 10
 
 function SqeetoThinningDecorator.tryDecorate(rng, builder)
    local sqeetos = {}

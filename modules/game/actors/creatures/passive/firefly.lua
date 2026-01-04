@@ -17,7 +17,7 @@ prism.registerActor("Firefly", function()
       prism.components.LightSight { range = 1, fov = true },
       prism.components.Mover { "walk", "fly" },
       prism.components.Position(),
-      prism.components.Light(prism.Color4.YELLOW, 2, prism.lighteffects.Flicker()),
+      prism.components.Light(prism.Color4.YELLOW, 3, prism.lighteffects.Flicker()),
       prism.components.IdleAnimation("FireflyIdle"),
       prism.components.FireflyController(),
       prism.components.Item(),

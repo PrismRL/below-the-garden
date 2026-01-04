@@ -10,7 +10,7 @@ prism.registerActor("Torch", function()
       prism.components.Equipment("held"),
       prism.components.Light(
          (prism.Color4.YELLOW + prism.Color4.YELLOW) / 2,
-         5,
+         6,
          prism.lighteffects.Flicker { speed = 2, colorShift = 0.1 }
       ),
    }

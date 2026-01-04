@@ -7,6 +7,6 @@ prism.registerActor("ScoutTorch", function()
       },
       prism.components.Position(),
       prism.components.Camp(),
-      prism.components.Light((prism.Color4.YELLOW + prism.Color4.YELLOW) / 1.5, 5, prism.lighteffects.Flicker()),
+      prism.components.Light((prism.Color4.YELLOW + prism.Color4.YELLOW) / 1.5, 7, prism.lighteffects.Flicker()),
    }
 end)
