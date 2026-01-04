@@ -11,9 +11,10 @@ local target = prism
    :range(DISTANCE)
    :optional()
    :filter(function(level, owner, targetObject, previousTargets)
+      local moveable = targetObject:has(prism.components.Health) or targetObject:has(prism.components.Equipment)
       local position = owner:expectPosition()
       local other = targetObject:expectPosition()
-      return position.x == other.x or position.y == other.y
+      return moveable and position.x == other.x or position.y == other.y
    end)
 
 Tongue.targets = { target, prism.Target():isVector2():optional() }
@@ -34,7 +35,13 @@ function Tongue:perform(level, actor, direction)
    local distance = 0
    while not actor and distance < DISTANCE do
       position = position + direction
-      actor = level:query():at(position:decompose()):first()
+      for _, new in ipairs(level:query():target(target, level, self.owner):at(position:decompose()):gather()) do
+         if not actor then
+            actor = new
+         elseif new:has(prism.components.Health) then
+            actor = new
+         end
+      end
       distance = distance + 1
       if not level:getCellPassable(position.x, position.y, TONGUE_MASK) then break end
    end

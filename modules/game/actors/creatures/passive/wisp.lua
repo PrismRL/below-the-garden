@@ -1,6 +1,6 @@
 local Animation = spectrum.Animation
 spectrum.registerAnimation("WispIdle", function()
-   local animation = Animation(Animation.buildFrames { range = "275-276", color = prism.Color4.BLUE }, 0.4)
+   local animation = Animation(Animation.buildFrames { range = "275-276", color = prism.Color4.BLUE, layer = 2 }, 0.4)
    animation:update(love.math.random())
    return animation
 end)
@@ -11,7 +11,7 @@ prism.registerActor("Wisp", function()
       prism.components.Drawable {
          index = 8,
          color = prism.Color4.BLUE,
-         layer = 3,
+         layer = 2,
       },
       prism.components.Senses(),
       prism.components.LightSight { range = 3, fov = true },
