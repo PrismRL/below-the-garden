@@ -89,6 +89,12 @@ function Throw:perform(level, object)
 
       level:removeActor(held)
    end
+
+   local poof = held:get(prism.components.PoofOnThrow)
+   if poof then
+      level:addActor(prism.actors.PoofEmitter(), position:decompose())
+      level:removeActor(held)
+   end
 end
 
 return Throw

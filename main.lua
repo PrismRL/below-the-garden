@@ -17,6 +17,7 @@ prism.loadModule("modules/base")
 prism.loadModule("modules/game")
 prism.loadModule("modules/levelgen")
 prism.loadModule("modules/btggen")
+prism.loadModule("modules/smoke")
 
 prism.logger.setOptions { level = "debug" }
 
