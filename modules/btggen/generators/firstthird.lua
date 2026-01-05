@@ -313,7 +313,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    end
 
    local importantRooms = rm:getImportantRooms(used)
-   assert(#importantRooms ==  3)
+   assert(#importantRooms ==  4)
 
    local room = table.remove(importantRooms, rng:random(#importantRooms))
    used[room] = true
@@ -324,6 +324,9 @@ function FirstThird.generate(seed, w, h, depth, player)
 
    room = table.remove(importantRooms, rng:random(#importantRooms))
    builder:addActor(prism.actors.Stairs(), room.center:decompose())
+
+   room = table.remove(importantRooms, rng:random(#importantRooms))
+   builder:addActor(prism.actors.Chest(), room.center:decompose())
 
    local encounterDecorators = {
       prism.decorators.ThrumbleCampDecorator,
@@ -351,9 +354,10 @@ function FirstThird.generate(seed, w, h, depth, player)
    end
 
    local encounterRooms = rm:getRemovableRooms()
-   local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
+   local encounterAttempts = depth < 2 and 1 or 2
 
    for _ = 1, encounterAttempts do
+      print("ENCOUNTER ATTEMPT", _, encounterAttempts, depth)
       if #encounterRooms == 0 then break end
 
       local decorator = encounterDecorators[rng:random(#encounterDecorators)]
@@ -376,7 +380,7 @@ function FirstThird.generate(seed, w, h, depth, player)
                            return util.isFloor(builder, x, y)
                         end)
 
-                        if path:getTotalCost() < 10 then
+                        if path:getTotalCost() < 8 then
                            skipped[room] = true
                         end
                      end
@@ -396,6 +400,7 @@ function FirstThird.generate(seed, w, h, depth, player)
 
    local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
    for _ = 1, encounterAttempts do
+      print("ENCOUNTER ATTEMPT", _, encounterAttempts)
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
       for _, room in ipairs(rooms) do
          if canSpawnRoom(room) then

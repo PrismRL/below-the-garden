@@ -11,6 +11,7 @@ prism.loadModule("modules/equipment")
 prism.loadModule("prism/extra/condition")
 prism.loadModule("prism/extra/log")
 prism.loadModule("prism/extra/lighting")
+prism.loadModule("modules/telepathy")
 prism.loadModule("modules/autotile")
 prism.loadModule("modules/base")
 prism.loadModule("modules/game")
@@ -46,7 +47,7 @@ function love.load(args)
 
       manager:push(spectrum.gamestates.MapGeneratorState(function()
          --for i = 1, 100 do
-            prism.generators.FirstThird.generate(love.timer.getTime(), 60, 30, 1, prism.actors.Player())
+            prism.generators.FirstThird.generate(love.timer.getTime(), 60, 30, 2, prism.actors.Player())
          --end
       end, nil, overlay))
    else

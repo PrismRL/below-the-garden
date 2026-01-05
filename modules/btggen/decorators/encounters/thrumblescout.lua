@@ -40,7 +40,7 @@ function ThrumbleScoutDecorator.tryDecorate(rng, builder, room)
    local thrumbleSpot = table.remove(spots, i)
    builder:addActor(prism.actors.Thrumble(), thrumbleSpot.x, thrumbleSpot.y)
 
-   if #spots > 0 and rng:random() < 0.5 then
+   if #spots > 0 then
       local torchSpot = spots[rng:random(1, #spots)]
       builder:addActor(prism.actors.Torch(), torchSpot.x, torchSpot.y)
    end

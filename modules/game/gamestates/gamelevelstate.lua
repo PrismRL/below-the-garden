@@ -66,6 +66,7 @@ function GameLevelState:__new(display, overlay, testing)
       prism.systems.SensesSystem(),
       prism.systems.LastSeenSystem(),
       prism.systems.LightSightSystem(),
+      prism.systems.TelepathySystem(),
       self.lightSystem,
       prism.systems.ModulateLightSystem(),
       prism.systems.AutoTileSystem(),
