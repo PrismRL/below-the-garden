@@ -161,7 +161,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
       if self:setAction(swap) then return end
    end
 
-   if controls.throw.pressed then
+   if held and controls.throw.pressed then
       self.targets = {}
       self.selectedAction = prism.actions.Throw
       self.manager:push(
