@@ -416,6 +416,149 @@ function RoomManager:findLockableRooms(opts)
    return lockable
 end
 
+--- Creates a short loop between two rooms.
+--- Selects the pair of rooms that maximizes a score based on
+--- path distance divided by Euclidean distance, then connects
+--- them with a short 4-way A* corridor.
+--- @return boolean success
+function RoomManager:createLoop()
+   print("[createLoop] start")
 
+   local rooms = self.rooms
+   if #rooms < 2 then
+      print("[createLoop] not enough rooms")
+      return false
+   end
+
+   --- Squared Euclidean distance between two centers
+   --- @param a Vector2
+   --- @param b Vector2
+   --- @return number
+   local function euclidSq(a, b)
+      local dx = a.x - b.x
+      local dy = a.y - b.y
+      return dx * dx + dy * dy
+   end
+
+   --- Finds a 4-way A* path and returns the path and its length.
+   --- @param a Vector2
+   --- @param b Vector2
+   --- @return Path?, integer?
+   local function findPath(a, b)
+      local path = prism.astar(
+         a,
+         b,
+         function(x, y)
+            return util.isWalkable(self.builder, x, y)
+         end,
+         nil,
+         nil,
+         nil,
+         prism.Vector2.neighborhood4
+      )
+      if not path then return nil end
+      return path, #path:getPath()
+   end
+
+   local bestA, bestB
+   local bestScore = -math.huge
+
+   print("[createLoop] evaluating room pairs")
+
+   for i = 1, #rooms do
+      local a = rooms[i]
+      if a.center then
+         for j = i + 1, #rooms do
+            local b = rooms[j]
+            if b.center then
+               local _, plen = findPath(a.center, b.center)
+               if plen then
+                  local d2 = euclidSq(a.center, b.center)
+                  if d2 > 0 then
+                     local score = plen / math.sqrt(d2)
+                     print(string.format(
+                        "[createLoop] pair %d-%d plen=%d dist=%.2f score=%.3f",
+                        i, j, plen, math.sqrt(d2), score
+                     ))
+
+                     if score > bestScore then
+                        bestScore = score
+                        bestA, bestB = a, b
+                        print(string.format(
+                           "[createLoop] new best pair %d-%d score=%.3f",
+                           i, j, score
+                        ))
+                     end
+                  end
+               end
+            end
+         end
+      end
+   end
+
+   if not bestA or not bestB then
+      print("[createLoop] no valid room pair found")
+      return false
+   end
+
+   print(string.format(
+      "[createLoop] selected rooms score=%.3f",
+      bestScore
+   ))
+
+   local function passable(x, y)
+      local isWall = util.isWall(self.builder, x, y)
+      local isRoom = bestA.tiles:get(x, y) or bestB.tiles:get(x, y)
+      local isBoundsX = x > 1 and x < LEVELGENBOUNDSX
+      local isBoundsY = y > 1 and y < LEVELGENBOUNDSY
+      local ok = (isWall or isRoom) and isBoundsX and isBoundsY
+
+      return ok
+   end
+
+   print("[createLoop] carving final loop path")
+
+   local path = prism.astar(
+      bestA.center,
+      bestB.center,
+      passable,
+      nil,
+      nil,
+      nil,
+      prism.Vector2.neighborhood4
+   )
+
+   if not path then
+      print("[createLoop] final A* failed")
+      return false
+   end
+
+   local cost = path:getTotalCost()
+   print("[createLoop] final path cost:", cost)
+
+   for _, p in ipairs(path:getPath()) do
+      print(string.format(
+         "[createLoop] carving tile (%d,%d)",
+         p.x, p.y
+      ))
+
+      if not util.isFloor(self.builder, p.x, p.y) then
+         self.builder:set(p.x, p.y, prism.cells.Floor())
+      end
+
+      if not bestA.tiles:get(p.x, p.y) then
+         bestA.tiles:set(p.x, p.y, true)
+         bestA.size = bestA.size + 1
+      end
+   end
+
+   bestA.neighbors[bestB] = true
+   bestB.neighbors[bestA] = true
+
+   print("[createLoop] loop created successfully")
+
+   coroutine.yield(self.builder)
+   return true
+end
 
 return RoomManager

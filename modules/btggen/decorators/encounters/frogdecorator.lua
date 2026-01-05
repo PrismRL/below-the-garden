@@ -7,10 +7,7 @@ local FrogDecorator =
 local MIN_OPAQUE_NEIGHBORS = 7
 
 function FrogDecorator.tryDecorate(rng, builder, room)
-   print("[FrogDecorator] tryDecorate")
-
    if not room then
-      print("[FrogDecorator] no room, aborting")
       return false
    end
 
@@ -29,7 +26,6 @@ function FrogDecorator.tryDecorate(rng, builder, room)
             for dy = -1, 1 do
                if not (dx == 0 and dy == 0) then
                   if util.isOpaque(builder, x + dx, y + dy) then
-                     print("FOUND", prism.components.Name.get(builder:get(x + dx, y + dy)))
                      opaqueCount = opaqueCount + 1
                   end
                end
@@ -37,32 +33,18 @@ function FrogDecorator.tryDecorate(rng, builder, room)
          end
 
          if opaqueCount >= MIN_OPAQUE_NEIGHBORS then
-            print(string.format(
-               "[FrogDecorator] candidate at (%d,%d) with %d opaque neighbors",
-               x, y, opaqueCount
-            ))
             candidates[#candidates + 1] = { x = x, y = y }
          end
       end
    end
 
-   print(string.format(
-      "[FrogDecorator] checked %d tiles, found %d candidates",
-      checked, #candidates
-   ))
 
    if #candidates == 0 then
-      print("[FrogDecorator] no valid frog locations")
       return false
    end
 
    local index = rng:random(1, #candidates)
    local p = candidates[index]
-
-   print(string.format(
-      "[FrogDecorator] spawning frog at (%d,%d) [index %d/%d]",
-      p.x, p.y, index, #candidates
-   ))
 
    builder:addActor(prism.actors.Frog(), p.x, p.y)
    builder:addActor(prism.actors.FrogHome(), p.x, p.y)

@@ -298,6 +298,8 @@ function FirstThird.generate(seed, w, h, depth, player)
    --coroutine.yield(builder)
 
    local rm = prism.levelgen.RoomManager(builder, distanceField)
+   coroutine.yield(builder)
+   rm:createLoop()
    local rooms = rm.rooms
    mapdebug(builder, rooms)
 
