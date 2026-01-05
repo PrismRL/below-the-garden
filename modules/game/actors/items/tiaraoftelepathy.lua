@@ -4,7 +4,7 @@ prism.registerActor("TiaraOfTelepathy", function()
       prism.components.Equipment("amulet", prism.condition.Condition(prism.modifiers.TelepathyModifier(10))),
       prism.components.Position(),
       prism.components.Drawable {
-         index = "c",
+         index = 337,
          color = prism.Color4.BROWN,
       },
    }
