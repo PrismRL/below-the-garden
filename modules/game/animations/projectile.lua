@@ -3,11 +3,10 @@ spectrum.registerAnimation("Projectile", function(source, destination, sprite, t
    --- @cast destination Vector2
    --- @cast sprite Sprite
 
-   totalTime = source:distance(destination) * 0.04
+   local path = prism.Bresenham(source.x, source.y, destination.x, destination.y):getPath()
    return spectrum.Animation(function(time, display)
-      local progress = math.min(time / totalTime, 1)
-      local position = source:lerp(destination, progress)
-      display:putSprite(math.floor(position.x), math.floor(position.y), sprite)
-      return time >= totalTime
+      local index = math.floor(time / 0.05) + 1
+      display:putSprite(path[index].x, path[index].y, sprite)
+      return index == #path
    end)
 end)
