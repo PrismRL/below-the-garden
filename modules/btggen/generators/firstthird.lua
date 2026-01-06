@@ -447,10 +447,6 @@ function FirstThird.generate(generatorInfo, player)
       prism.actors.Hammer
    }
 
-   local misc = {
-      prism.actors.Torch,
-   }
-
    local natural = {
       prism.actors.Pebble,
    }
@@ -458,6 +454,7 @@ function FirstThird.generate(generatorInfo, player)
    local pocketmobs = {
       prism.actors.Gloop,
       prism.actors.Snail,
+      prism.actors.Poof,
    }
 
    local healing = {
