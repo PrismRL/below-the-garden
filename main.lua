@@ -27,8 +27,8 @@ spriteAtlas.quadsByName["held"] = spriteAtlas:getQuadByIndex(28)
 spriteAtlas.quadsByName["pocket"] = spriteAtlas:getQuadByIndex(266)
 spriteAtlas.quadsByName["weapon"] = spriteAtlas:getQuadByIndex(157)
 spriteAtlas.quadsByName["amulet"] = spriteAtlas:getQuadByIndex(158)
-local display = spectrum.Display(50, 30, spriteAtlas, prism.Vector2(8, 8))
-local overlay = spectrum.Display(60, 32, spriteAtlas, prism.Vector2(8, 8))
+local display = spectrum.Display(58, 30, spriteAtlas, prism.Vector2(8, 8))
+local overlay = spectrum.Display(60, 40, spriteAtlas, prism.Vector2(8, 8))
 
 -- spin up our state machine
 --- @type GameStateManager
@@ -48,7 +48,7 @@ function love.load(args)
 
       manager:push(spectrum.gamestates.MapGeneratorState(function()
          --for i = 1, 100 do
-            prism.generators.FirstThird.generate(love.timer.getTime(), 60, 30, 2, prism.actors.Player())
+         prism.generators.FirstThird.generate(love.timer.getTime(), 60, 30, 2, prism.actors.Player())
          --end
       end, nil, overlay))
    else

@@ -69,7 +69,9 @@ function Throw:perform(level, object)
 
    local damage = self.owner:expect(prism.components.Thrower):getDamage()
    level:tryPerform(prism.actions.Damage(object, damage))
-   held:give(prism.components.Position(position))
+   held:give(prism.components.Position(start))
+   level:getSystem(prism.systems.SensesSystem):triggerRebuild(level, self.owner)
+   level:moveActor(held, position)
 
    local explode = held:get(prism.components.ExplodeOnThrow)
    if explode then

@@ -6,7 +6,7 @@ local function makeTongueFrame(direction, length, stage, skipFirst)
       if direction == prism.Vector2.RIGHT then
          base, tip, mid, full = 293, 292, 291, 130
       elseif direction == prism.Vector2.LEFT then
-         base, tip, mid, full = 296, 295, 294, 307
+         base, tip, mid, full = 296, 295, 294, 130
       elseif direction == prism.Vector2.DOWN then
          base, tip, mid, full = 299, 298, 297, 129
       else -- prism.Vector2.UP
@@ -62,7 +62,6 @@ prism.registerActor("FrogTongue", function()
          index = 308,
          color = prism.Color4.PEACH,
       },
-      prism.components.Position(),
       prism.components.Tonguer(),
    }
 end)
@@ -73,7 +72,7 @@ prism.registerActor("Frog", function()
 
    return prism.Actor.fromComponents {
       prism.components.Name("Frog"),
-      prism.components.Drawable { index = 224, layer = 3 },
+      prism.components.Drawable { index = 293, layer = 3 },
       prism.components.IdleAnimation("FrogIdle"),
       prism.components.Position(),
       prism.components.Collider(),

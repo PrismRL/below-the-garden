@@ -72,7 +72,8 @@ function GameLevelState:__new(display, overlay, testing)
       prism.systems.ModulateLightSystem(),
       prism.systems.AutoTileSystem(),
       prism.systems.EquipmentSystem(),
-      prism.systems.NestingSystem()
+      prism.systems.NestingSystem(),
+      prism.systems.FallSystem()
    )
    builder:addTurnHandler(require "modules.base.quickturnhandler")
 
@@ -282,8 +283,8 @@ function GameLevelState:draw()
 
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses
-      local x, y = self.display:getCenterOffset(player:expectPosition():decompose())
-      self.display:setCamera(x, y)
+      -- local x, y = self.display:getCenterOffset(player:expectPosition():decompose())
+      -- self.display:setCamera(x, y)
       self.display:beginCamera()
       self.display:pushModifier(self.lightPass)
       self.display:pushModifier(function(entity, x, y, drawable)

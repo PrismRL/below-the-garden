@@ -337,10 +337,8 @@ function FirstThird.generate(seed, w, h, depth, player)
                   return util.isFloor(builder, x, y)
                end)
 
-               if not path then
-                  mapdebug(builder, { room, oroom })
-                  coroutine.yield(builder)
-               end
+               if not path then mapdebug(builder, { room, oroom })                   -- coroutine.yield(builder)
+end
 
                if path:getTotalCost() < 10 then skipped[room] = true end
             end
@@ -486,4 +484,3 @@ function FirstThird.generate(seed, w, h, depth, player)
 end
 
 return FirstThird
-

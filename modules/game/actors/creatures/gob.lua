@@ -1,10 +1,3 @@
-local Animation = spectrum.Animation
-spectrum.registerAnimation("Gob", function()
-   local animation = Animation(Animation.buildFrames { range = "269-270", color = prism.Color4.RED }, { 3, 0.2 })
-   animation:update(love.math.random())
-   return animation
-end)
-
 prism.registerActor("Gob", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Gob"),
@@ -21,8 +14,8 @@ prism.registerActor("Gob", function()
       prism.components.Senses(),
       prism.components.Sight { fov = true, range = 12 },
       prism.components.Inventory { limitCount = 1, limitWeight = 1, limitVolume = 1 },
-      prism.components.Equipper { "weapon" },
-      prism.components.FireflyController(),
+      prism.components.Equipper { "weapon", "held" },
+      prism.components.GobController(),
       prism.components.Attacker(1),
       prism.components.WarmBlooded(),
       prism.components.ThrumbleFaction(),

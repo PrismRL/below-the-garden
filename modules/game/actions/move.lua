@@ -47,6 +47,7 @@ function Move:perform(level, destination)
             destination,
             self.owner:expect(prism.components.Drawable)
          ),
+         actor = self.owner,
          blocking = true,
       })
    end
