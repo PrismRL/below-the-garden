@@ -1,7 +1,7 @@
 local util = prism.levelgen.util
 local PruneMisalignedDoorsDecorator = prism.levelgen.Decorator:extend "PruneMisalignedDoorsDecorator"
 
-function PruneMisalignedDoorsDecorator.tryDecorate(rng, builder)
+function PruneMisalignedDoorsDecorator.tryDecorate(generatorInfo, rng, builder)
    local toRemove = {}
 
    ----------------------------------------------------------------

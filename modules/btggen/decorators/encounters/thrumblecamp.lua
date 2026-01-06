@@ -5,7 +5,7 @@ local ThrumbleCampDecorator =
 
 local MIN_WALL_DIST = 3
 
-function ThrumbleCampDecorator.tryDecorate(rng, builder, room)
+function ThrumbleCampDecorator.tryDecorate(generatorInfo, rng, builder, room)
    if not room then
       return false
    end

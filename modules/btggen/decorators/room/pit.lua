@@ -2,7 +2,7 @@ local util = prism.levelgen.util
 local PitDecorator = prism.levelgen.Decorator:extend "PitDecorator"
 
 PitDecorator.pitCell = prism.cells.Pit
-function PitDecorator.tryDecorate(rng, builder, room)
+function PitDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local minRoomSize = 9
    local minWallDist = 3
    local pitThreshold = 0.0

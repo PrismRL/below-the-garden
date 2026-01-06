@@ -2,7 +2,7 @@ local util = prism.levelgen.util
 local WaterPitDecorator = prism.levelgen.Decorator:extend "WaterPitDecorator"
 
 WaterPitDecorator.pitCell = prism.cells.Pit
-function WaterPitDecorator.tryDecorate(rng, builder, room)
+function WaterPitDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local minRoomSize = 9
    local minWallDist = 3
    local pitThreshold = 0.0

@@ -5,7 +5,7 @@ local ThrumbleScoutDecorator =
 
 local MIN_WALL_DIST = 3
 
-function ThrumbleScoutDecorator.tryDecorate(rng, builder, room)
+function ThrumbleScoutDecorator.tryDecorate(generatorInfo, rng, builder, room)
    if not room then return false end
 
    local cx, cy = room.center:decompose()
@@ -42,10 +42,10 @@ function ThrumbleScoutDecorator.tryDecorate(rng, builder, room)
 
    if #spots > 0 then
       local torchSpot = spots[rng:random(1, #spots)]
-      builder:addActor(prism.actors.Torch(), torchSpot.x, torchSpot.y)
+      builder:addActor(prism.actors.Sword(), torchSpot.x, torchSpot.y)
    end
 
-   if #spots > 1 then
+   if #spots > 0 then
       local scoutSpot = spots[rng:random(1, #spots)]
       builder:addActor(prism.actors.ScoutTorch(), scoutSpot.x, scoutSpot.y)
    end

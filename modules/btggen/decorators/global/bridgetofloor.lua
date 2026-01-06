@@ -1,7 +1,9 @@
 local util = prism.levelgen.util
+
+--- @class BridgeToFloorDecorator : Decorator
 local BridgeToFloorDecorator = prism.levelgen.Decorator:extend "BridgeToFloorDecorator"
 
-function BridgeToFloorDecorator.tryDecorate(rng, builder, room)
+function BridgeToFloorDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local changed = false
 
    ----------------------------------------------------------------

@@ -121,23 +121,6 @@ function util.rollUphill(distanceField, x, y)
    return bestX, bestY
 end
 
---- Returns a random floor tile from the level
---- @param builder LevelBuilder
---- @param rng RNG Random number generator
---- @return table {x: integer, y: integer} Random floor coordinates
-function util.randomFloor(builder, rng)
-   local floors = {}
-
-   for x = 1, LEVELGENBOUNDSX do
-      for y = 1, LEVELGENBOUNDSY do
-         if util.isFloor(builder, x, y) then table.insert(floors, prism.Vector2(x, y)) end
-      end
-   end
-
-   if #floors == 0 then error("No floor tiles to place player") end
-   return floors[rng:random(1, #floors)]
-end
-
 --- Generates a heatmap showing path frequency between all door pairs
 --- @param builder LevelBuilder
 --- @return SparseGrid Grid mapping coordinates to path traversal counts

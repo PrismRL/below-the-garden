@@ -431,7 +431,7 @@ end
 --- then attempts to connect them with a short 4-way A* corridor.
 --- @param maxTries integer? Number of top pairs to try
 --- @return boolean success
-function RoomManager:createLoop(maxTries)
+function RoomManager:createLoop(generationInfo, maxTries)
    print("[createLoop] start")
 
    maxTries = maxTries or 5
@@ -526,8 +526,8 @@ function RoomManager:createLoop(maxTries)
       local function passable(x, y)
          local isWall = util.isWall(self.builder, x, y)
          local isRoom = bestA.tiles:get(x, y) or bestB.tiles:get(x, y)
-         local isBoundsX = x > 1 and x < LEVELGENBOUNDSX
-         local isBoundsY = y > 1 and y < LEVELGENBOUNDSY
+         local isBoundsX = x > 1 and x < generationInfo.w
+         local isBoundsY = y > 1 and y < generationInfo.h
 
          for _, vec in ipairs(prism.Vector2.neighborhood8) do
             local dx, dy = x + vec.x, y + vec.y

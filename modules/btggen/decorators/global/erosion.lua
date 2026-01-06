@@ -1,12 +1,13 @@
 local util = prism.levelgen.util
 
+--- @class ErosionDecorator : Decorator
 local ErosionDecorator = prism.levelgen.Decorator:extend "ErosionDecorator"
 
-function ErosionDecorator.tryDecorate(rng, builder, _)
+function ErosionDecorator.tryDecorate(generationInfo, rng, builder, _)
    local toCarve = {}
 
-   for x = 1, LEVELGENBOUNDSX do
-      for y = 1, LEVELGENBOUNDSY do
+   for x = 1, generationInfo.w do
+      for y = 1, generationInfo.h do
          if util.isWall(builder, x, y) then
             local n = util.isFloor(builder, x, y - 1)
             local s = util.isFloor(builder, x, y + 1)

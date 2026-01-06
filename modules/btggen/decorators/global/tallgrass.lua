@@ -1,7 +1,7 @@
 local util = prism.levelgen.util
 local TallGrassNearWallsDecorator = prism.levelgen.Decorator:extend "TallGrassNearWallsDecorator"
 
-function TallGrassNearWallsDecorator.tryDecorate(rng, builder)
+function TallGrassNearWallsDecorator.tryDecorate(generationInfo, rng, builder)
    local attempts = 200
    local maxTotal = 4
    local maxWallDistance = 2
@@ -15,8 +15,8 @@ function TallGrassNearWallsDecorator.tryDecorate(rng, builder)
    -- Attempts to place a single tall grass patch
    ----------------------------------------------------------------
    local function tryPlace()
-      local x = rng:random(2, LEVELGENBOUNDSX - 1)
-      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+      local x = rng:random(2, generationInfo.w - 1)
+      local y = rng:random(2, generationInfo.h - 1)
 
       if not util.isFloor(builder, x, y) then return 0 end
 

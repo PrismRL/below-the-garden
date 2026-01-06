@@ -1,7 +1,7 @@
 local util = prism.levelgen.util
 local TallGrassClearingDecorator = prism.levelgen.Decorator:extend "TallGrassClearingDecorator"
 
-function TallGrassClearingDecorator.tryDecorate(rng, builder, room)
+function TallGrassClearingDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local minRoomSize = 25
    local minWallDist = 2
 

@@ -55,7 +55,12 @@ function GameLevelState:__new(display, overlay, testing)
    else
       assert(player)
       print("Player", player)
-      builder = prism.generators.FirstThird.generate(love.timer.getTime(), 60, 40, 1, player)
+      builder = prism.generators.FirstThird.generate({
+         seed = love.timer.getTime(),
+         w = 50,
+         h = 30,
+         depth = 1,
+      }, player)
    end
 
    -- Add systems

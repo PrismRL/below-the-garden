@@ -1,7 +1,9 @@
 local util = prism.levelgen.util
+
+--- @class FireflyDecorator : Decorator
 local FireflyDecorator = prism.levelgen.Decorator:extend "FireflyDecorator"
 
-function FireflyDecorator.tryDecorate(rng, builder)
+function FireflyDecorator.tryDecorate(generatorInfo, rng, builder)
    local count = 8
    local placed = false
 

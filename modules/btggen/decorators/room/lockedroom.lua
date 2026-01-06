@@ -3,7 +3,7 @@ local util = prism.levelgen.util
 local LockRoomDecorator = prism.levelgen.Decorator:extend "LockRoomDecorator"
 
 --- Seals a room by walling off all exits except one door.
-function LockRoomDecorator.tryDecorate(rng, builder, room)
+function LockRoomDecorator.tryDecorate(generatorInfo, rng, builder, room)
    if not room or not room.tiles then return end
 
    local doorRoomPos

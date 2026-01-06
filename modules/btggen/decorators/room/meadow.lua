@@ -1,7 +1,7 @@
 local util = prism.levelgen.util
 local MeadowDecorator = prism.levelgen.Decorator:extend "MeadowDecorator"
 
-function MeadowDecorator.tryDecorate(rng, builder, room)
+function MeadowDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local radiusMin = 2
    local outerPad = 3
 

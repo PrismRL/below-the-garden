@@ -7,7 +7,7 @@ local ItemSpawnerDecorator = prism.levelgen.Decorator:extend "ItemSpawnerDecorat
 --- @param builder LevelBuilder
 --- @param room Room
 --- @param itemFactory function Function returning an actor (e.g. prism.actors.Pebble)
-function ItemSpawnerDecorator.tryDecorate(rng, builder, room, itemFactory)
+function ItemSpawnerDecorator.tryDecorate(generatorInfo, rng, builder, room, itemFactory)
    if not room.size or room.size < 1 then return end
    if not itemFactory then return end
 

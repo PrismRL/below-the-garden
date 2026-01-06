@@ -24,7 +24,7 @@ local function findGlowStalkSpot(builder, wallDistanceField, lightDistanceField,
    return gx, gy
 end
 
-function GlowStalkDecorator.tryDecorate(rng, builder, _)
+function GlowStalkDecorator.tryDecorate(generatorInfo, rng, builder, _)
    local wallDistanceField = util.buildWallDistanceField(builder)
 
    local lightQuery = builder:query(prism.components.Light)
@@ -40,8 +40,8 @@ function GlowStalkDecorator.tryDecorate(rng, builder, _)
    local stalks = {}
 
    for _ = 1, ATTEMPTS do
-      local x = rng:random(2, LEVELGENBOUNDSX - 1)
-      local y = rng:random(2, LEVELGENBOUNDSY - 1)
+      local x = rng:random(2, generatorInfo.w - 1)
+      local y = rng:random(2, generatorInfo.h - 1)
 
       local gx, gy = findGlowStalkSpot(
          builder,

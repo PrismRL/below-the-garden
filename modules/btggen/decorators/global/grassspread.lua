@@ -2,7 +2,7 @@ local util = prism.levelgen.util
 
 local GrassSpreadDecorator = prism.levelgen.Decorator:extend "GrassSpreadDecorator"
 
-function GrassSpreadDecorator.tryDecorate(rng, builder, _)
+function GrassSpreadDecorator.tryDecorate(generatorInfo, rng, builder, _)
    local changed = false
    -- Run several growth iterations
    for _ = 1, 3 do

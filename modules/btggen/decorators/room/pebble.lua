@@ -2,7 +2,7 @@ local util = prism.levelgen.util
 
 local PebbleDecorator = prism.levelgen.Decorator:extend "PebbleDecorator"
 
-function PebbleDecorator.tryDecorate(rng, builder, room)
+function PebbleDecorator.tryDecorate(generatorInfo, rng, builder, room)
    if not room.size or room.size < 16 then return end
 
    local candidates = {}

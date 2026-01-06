@@ -1,7 +1,7 @@
 local util = prism.levelgen.util
 local SunlightDecorator = prism.levelgen.Decorator:extend "SunlightDecorator"
 
-function SunlightDecorator.tryDecorate(rng, builder, room)
+function SunlightDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local radiusMin = 2
    local radiusMax = 4
    local minWallDist = 1

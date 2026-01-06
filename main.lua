@@ -47,9 +47,12 @@ function love.load(args)
       MAPDEBUG = true
 
       manager:push(spectrum.gamestates.MapGeneratorState(function()
-         --for i = 1, 100 do
-            prism.generators.FirstThird.generate(love.timer.getTime(), 60, 30, 2, prism.actors.Player())
-         --end
+            prism.generators.FirstThird.generate({
+               seed = love.timer.getTime(),
+               w = 60,
+               h = 30,
+               depth = 1,
+            }, prism.actors.Player())
       end, nil, overlay))
    else
       manager:push(spectrum.gamestates.GameStartState(display, overlay))

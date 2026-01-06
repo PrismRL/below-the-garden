@@ -3,7 +3,7 @@ local util = prism.levelgen.util
 local SqeetoSwarmDecorator = prism.levelgen.Decorator:extend "SqeetoSwarmDecorator"
 
 local flyMask = prism.Collision.getMovetypeByName("fly")
-function SqeetoSwarmDecorator.tryDecorate(rng, builder, room)
+function SqeetoSwarmDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local candidates = {}
 
    for x, y in room.tiles:each() do

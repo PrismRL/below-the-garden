@@ -1,7 +1,7 @@
 local util = prism.levelgen.util
 local GraveyardDecorator = prism.levelgen.Decorator:extend "GraveyardDecorator"
 
-function GraveyardDecorator.tryDecorate(rng, builder, room)
+function GraveyardDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local countMin = 4
    local countMax = 8
    local minWallDist = 3

@@ -3,11 +3,13 @@ local util = prism.levelgen.util
 local SqeetoThinningDecorator =
    prism.levelgen.Decorator:extend "SqeetoThinningDecorator"
 
-local MAX_SQEETOS   = 12
 local KILL_RADIUS  = 10
 local CLUMP_RADIUS = 10
 
-function SqeetoThinningDecorator.tryDecorate(rng, builder)
+function SqeetoThinningDecorator.tryDecorate(generatorInfo, rng, builder)
+   local area = generatorInfo.w * generatorInfo.h
+   local MAX_SQEETOS = math.floor(area / 150)
+
    local sqeetos = {}
    for actor in builder:query(prism.components.SqeetoFaction):iter() do
       sqeetos[#sqeetos + 1] = actor
@@ -72,7 +74,6 @@ function SqeetoThinningDecorator.tryDecorate(rng, builder)
       end
 
       for _, sq in ipairs(sqeetos) do
-         print "BUCKETING"
          local x, y = sq:expectPosition():decompose()
          local bx = bucketCoord(x)
          local by = bucketCoord(y)
@@ -91,7 +92,7 @@ function SqeetoThinningDecorator.tryDecorate(rng, builder)
       while excess > 0 and removedSomething do
          removedSomething = false
 
-         for bx, by, bucket in buckets:each() do
+         for _, _, bucket in buckets:each() do
             if excess <= 0 then break end
 
             if #bucket > 1 then

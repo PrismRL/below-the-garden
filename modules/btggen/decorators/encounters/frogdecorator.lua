@@ -6,7 +6,7 @@ local FrogDecorator =
 -- Out of 8 neighbors
 local MIN_OPAQUE_NEIGHBORS = 7
 
-function FrogDecorator.tryDecorate(rng, builder, room)
+function FrogDecorator.tryDecorate(generatorInfo, rng, builder, room)
    if not room then
       return false
    end
