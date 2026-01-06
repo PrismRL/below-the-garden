@@ -9,4 +9,12 @@ function FallSystem:onActorAdded(level, actor)
    level:tryPerform(prism.actions.Fall(actor))
 end
 
+function FallSystem:onComponentAdded(level, actor)
+   level:tryPerform(prism.actions.Fall(actor))
+end
+
+function FallSystem:onComponentRemoved(level, actor)
+   level:tryPerform(prism.actions.Fall(actor))
+end
+
 return FallSystem

@@ -1,3 +1,3 @@
-spectrum.registerAnimation("Wait", function(actor)
-   return spectrum.Animation({ actor:expect(prism.components.Drawable) }, 0.3, "pauseAtEnd")
+spectrum.registerAnimation("Wait", function(time)
+   return spectrum.Animation({ { index = 0, layer = -1 } }, time or 0.3, "pauseAtEnd")
 end)

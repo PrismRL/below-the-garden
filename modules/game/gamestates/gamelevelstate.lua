@@ -98,9 +98,13 @@ function GameLevelState:handleMessage(message)
    -- level or triggering a game over.
 end
 
+function GameLevelState:update(dt)
+   GameLevelState.super.update(self, dt)
+   self.lightSystem:update()
+end
+
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
-   self.lightSystem:update()
    local idle
    local held
    local pocket

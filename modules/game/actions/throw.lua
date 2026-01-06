@@ -47,15 +47,7 @@ function Throw:perform(level, object)
    position = path.path[#path.path]
 
    level:perform(prism.actions.Unequip(self.owner, held))
-
-   level:yield(prism.messages.AnimationMessage {
-      animation = spectrum.animations.Projectile(
-         self.owner:expectPosition(),
-         position,
-         held:expect(prism.components.Drawable)
-      ),
-      blocking = true,
-   })
+   held:give(prism.components.Position(start))
 
    if held:get(prism.components.SlimeProducer) then
       local ox, oy = self.owner:expectPosition():decompose()
@@ -67,11 +59,21 @@ function Throw:perform(level, object)
       end
    end
 
+   local previousMover = held:get(prism.components.Mover)
+   held:give(prism.components.Mover { "fly" })
+   for _, point in ipairs(path:getPath()) do
+      level:moveActor(held, point)
+      level:getSystem(prism.systems.SensesSystem):triggerRebuild(level, self.owner)
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Wait(0.04),
+         blocking = true,
+      })
+   end
+   held:remove(prism.components.Mover)
+   if previousMover then held:give(previousMover) end
+
    local damage = self.owner:expect(prism.components.Thrower):getDamage()
    level:tryPerform(prism.actions.Damage(object, damage))
-   held:give(prism.components.Position(start))
-   level:getSystem(prism.systems.SensesSystem):triggerRebuild(level, self.owner)
-   level:moveActor(held, position)
 
    local explode = held:get(prism.components.ExplodeOnThrow)
    if explode then
