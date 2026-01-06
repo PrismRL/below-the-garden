@@ -8,9 +8,7 @@ function PebbleDecorator.tryDecorate(rng, builder, room)
    local candidates = {}
 
    for x, y in room.tiles:each() do
-      if util.isWalkable(builder, x, y) then
-         candidates[#candidates + 1] = { x = x, y = y }
-      end
+      if util.isWalkable(builder, x, y) then candidates[#candidates + 1] = { x = x, y = y } end
    end
 
    if #candidates == 0 then return end
@@ -20,7 +18,7 @@ function PebbleDecorator.tryDecorate(rng, builder, room)
       candidates[i], candidates[j] = candidates[j], candidates[i]
    end
 
-   local count = rng:random(1, 3)
+   local count = rng:random(1, 2)
 
    if count > 2 then
       local p = candidates[1]

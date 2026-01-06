@@ -9,7 +9,7 @@ prism.registerActor("Wisp", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Wisp"),
       prism.components.Drawable {
-         index = 8,
+         index = 275,
          color = prism.Color4.BLUE,
          layer = 2,
       },

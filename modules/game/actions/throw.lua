@@ -33,19 +33,20 @@ function Throw:perform(level, object)
    if position.x < 1 then position.x = 1 end
    if position.y < 1 then position.y = 1 end
 
-   local path = nil
-   local minimumDistance = 0
+   local start = self.owner:expectPosition()
+   local maximumDistance = self.owner:expect(prism.components.Thrower):getRange()
 
-   while not path and minimumDistance < 32 do
-      path = level:findPath(self.owner:expectPosition(), position, self.owner, throwMask, minimumDistance)
-      minimumDistance = minimumDistance + 1
-   end
-   if not path then return end
+   local path = prism.Bresenham(start.x, start.y, position.x, position.y, function(cx, cy)
+      local distance = start:distance(prism.Vector2(cx, cy))
+      if not level:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then
+         return false -- stop iteration
+      end
+      return true -- continue
+   end)
+   if path:length() == 0 then return end
+   position = path.path[#path.path]
 
    level:perform(prism.actions.Unequip(self.owner, held))
-
-   local maximumDistance = self.owner:expect(prism.components.Thrower):getRange()
-   position = path:length() > maximumDistance and path.path[maximumDistance] or path.path[#path.path]
 
    level:yield(prism.messages.AnimationMessage {
       animation = spectrum.animations.Projectile(

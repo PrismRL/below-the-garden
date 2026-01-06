@@ -10,7 +10,7 @@ local function randomRoom(rng)
       prism.roomgenerators.EllipseRoomGenerator,
       prism.roomgenerators.HallwayLRoomGenerator,
       prism.roomgenerators.RectRoomGenerator,
-      prism.roomgenerators.RingRoomGenerator
+      prism.roomgenerators.RingRoomGenerator,
    }
 
    return rooms[rng:random(#rooms)]:_generate(rng)
@@ -58,10 +58,7 @@ local function tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng)
             local gx = ox + (x - rs.x)
             local gy = oy + (y - rs.y)
 
-            if gx < 2 or gx > LEVELGENBOUNDSX - 1 or
-               gy < 2 or gy > LEVELGENBOUNDSY - 1 then
-               return false
-            end
+            if gx < 2 or gx > LEVELGENBOUNDSX - 1 or gy < 2 or gy > LEVELGENBOUNDSY - 1 then return false end
 
             for _, d in ipairs(prism.Vector2.neighborhood8) do
                if util.isFloor(builder, gx + d.x, gy + d.y) then return false end
@@ -99,7 +96,6 @@ local function tryDoor(builder, room, rs, rf, ax, ay, normal, rdoor, rng)
 
    return true
 end
-
 
 local function tryAccrete(builder, rng)
    local anchors = builder:query(prism.components.DoorProxy):gather()
@@ -162,7 +158,6 @@ local function accrete(rng)
 
       builder:blit(first, x, y)
 
-
       -- accretion loop
       local failures = 0
       while true do
@@ -187,15 +182,19 @@ local function mapdebug(builder, rooms)
    for _, room in ipairs(rooms) do
       if MAPDEBUG then
          for x, y in room.tiles:each() do
-            builder:addActor(prism.Actor.fromComponents{
-               prism.components.Drawable{
-                  index = "!",
-                  color = room.color
+            builder:addActor(
+               prism.Actor.fromComponents {
+                  prism.components.Drawable {
+                     index = "!",
+                     color = room.color,
+                  },
+                  prism.components.Position(),
+                  prism.components.Spawner(),
+                  prism.components.Name("RoomProxy"),
                },
-               prism.components.Position(),
-               prism.components.Spawner(),
-               prism.components.Name("RoomProxy")
-            }, x, y)
+               x,
+               y
+            )
          end
       end
    end
@@ -207,7 +206,6 @@ local function mapdebug(builder, rooms)
    --coroutine.yield(builder)
 end
 
-
 -- Fisher–Yates shuffle using rng
 local function shuffle(t, rng)
    for i = #t, 2, -1 do
@@ -215,7 +213,6 @@ local function shuffle(t, rng)
       t[i], t[j] = t[j], t[i]
    end
 end
-
 
 --- @param seed any
 ---@param w integer
@@ -246,7 +243,7 @@ function FirstThird.generate(seed, w, h, depth, player)
       decorators.MeadowDecorator,
       decorators.PitDecorator,
       decorators.WaterPitDecorator,
-      decorators.TallGrassClearingDecorator
+      decorators.TallGrassClearingDecorator,
    }
 
    -- copy rooms
@@ -313,7 +310,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    end
 
    local importantRooms = rm:getImportantRooms(used)
-   assert(#importantRooms ==  4)
+   assert(#importantRooms == 4)
 
    local room = table.remove(importantRooms, rng:random(#importantRooms))
    used[room] = true
@@ -336,18 +333,16 @@ function FirstThird.generate(seed, w, h, depth, player)
       if canSpawnRoom(room) then
          for _, oroom in ipairs(rooms) do
             if oroom ~= room and not canSpawnRoom(oroom) then
-               local path = prism.astar(room.center, oroom.center, function (x, y)
+               local path = prism.astar(room.center, oroom.center, function(x, y)
                   return util.isFloor(builder, x, y)
                end)
 
                if not path then
-                  mapdebug(builder, {room, oroom})
+                  mapdebug(builder, { room, oroom })
                   coroutine.yield(builder)
                end
 
-               if path:getTotalCost() < 10 then
-                  skipped[room] = true
-               end
+               if path:getTotalCost() < 10 then skipped[room] = true end
             end
          end
       end
@@ -376,13 +371,11 @@ function FirstThird.generate(seed, w, h, depth, player)
                if canSpawnRoom(room) then
                   for _, oroom in ipairs(rooms) do
                      if oroom ~= room and not canSpawnRoom(oroom) then
-                        local path = prism.astar(room.center, oroom.center, function (x, y)
+                        local path = prism.astar(room.center, oroom.center, function(x, y)
                            return util.isFloor(builder, x, y)
                         end)
 
-                        if path:getTotalCost() < 8 then
-                           skipped[room] = true
-                        end
+                        if path:getTotalCost() < 8 then skipped[room] = true end
                      end
                   end
                end
@@ -404,16 +397,17 @@ function FirstThird.generate(seed, w, h, depth, player)
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
       for _, room in ipairs(rooms) do
          if canSpawnRoom(room) then
-            if deco.tryDecorate(rng, builder, room) then used[room] = true break end
+            if deco.tryDecorate(rng, builder, room) then
+               used[room] = true
+               break
+            end
          end
       end
    end
 
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
-      if canSpawnRoom(room) then
-         prism.decorators.SqeetoSwarmDecorator.tryDecorate(rng, builder, room)
-      end
+      if canSpawnRoom(room) then prism.decorators.SqeetoSwarmDecorator.tryDecorate(rng, builder, room) end
    end
    --coroutine.yield(builder)
 
@@ -424,7 +418,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
       if count > 6 then break end
-      prism.decorators.PebbleDecorator.tryDecorate(rng, builder, room)
+      -- prism.decorators.PebbleDecorator.tryDecorate(rng, builder, room)
    end
 
    for x = 1, w do
@@ -436,7 +430,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    local weapons = {
       prism.actors.Sling,
       prism.actors.Sword,
-      prism.actors.Hammer
+      prism.actors.Hammer,
    }
 
    local misc = {
@@ -453,7 +447,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    }
 
    local healing = {
-      prism.actors.Snip
+      prism.actors.Snip,
    }
 
    for i = 1, rng:random(4, 6) do
@@ -492,3 +486,4 @@ function FirstThird.generate(seed, w, h, depth, player)
 end
 
 return FirstThird
+

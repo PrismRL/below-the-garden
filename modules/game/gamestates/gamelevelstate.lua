@@ -165,7 +165,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
       self.targets = {}
       self.selectedAction = prism.actions.Throw
       self.manager:push(
-         spectrum.gamestates.GeneralTargetHandler(self.overlay, self, self.targets, self.selectedAction:getTarget(1))
+         spectrum.gamestates.ThrowTargetHandler(self.overlay, self, self.targets, self.selectedAction:getTarget(1))
       )
    end
 
@@ -360,6 +360,7 @@ function GameLevelState:draw()
    self.overlay:draw()
 
    -- custom love2d drawing goes here!
+   love.graphics.print(love.timer.getFPS())
 end
 
 function GameLevelState:resume()
