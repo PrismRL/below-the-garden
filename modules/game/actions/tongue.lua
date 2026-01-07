@@ -1,4 +1,4 @@
-local DISTANCE = 3
+local DISTANCE = 4
 local TONGUE_MASK = prism.Collision.createBitmaskFromMovetypes { "fly" }
 
 --- @class Tongue : Action
@@ -32,30 +32,44 @@ function Tongue:perform(level, actor, direction)
    direction = direction or (actor:expectPosition() - position):normalize()
    actor = nil
 
-   local distance = 0
-   while not actor and distance < DISTANCE do
-      position = position + direction
-      for _, new in ipairs(level:query():target(target, level, self.owner):at(position:decompose()):gather()) do
-         if not actor then
-            actor = new
-         elseif new:has(prism.components.Health) then
-            actor = new
+   local maxPosition = position + (direction * DISTANCE)
+   local path = prism
+      .Bresenham(position.x + direction.x, position.y + direction.y, maxPosition.x, maxPosition.y, function(cx, cy)
+         for _, new in ipairs(level:query():target(target, level, self.owner):at(cx, cy):gather()) do
+            if not actor then
+               actor = new
+            elseif new:has(prism.components.Health) then
+               actor = new
+            end
          end
-      end
-      distance = distance + 1
-      if not level:getCellPassable(position.x, position.y, TONGUE_MASK) then break end
-   end
+         if not level:getCellPassable(cx, cy, TONGUE_MASK) or actor then return false end
+         return true
+      end)
+      :getPath()
 
    level:yield(prism.messages.AnimationMessage {
       animation = spectrum.animations.FrogTongue(
          direction,
-         distance,
+         #path > 0 and #path + 1 or 0,
          self.owner:has(prism.components.PlayerController) and true or false
       ),
       actor = self.owner,
       blocking = true,
    })
    if not actor then return end
+
+   local previousMover = actor:get(prism.components.Mover)
+   actor:give(prism.components.Mover { "fly" })
+   for i = #path, 1, -1 do
+      level:moveActor(actor, path[i])
+      level:getSystem(prism.systems.SensesSystem):triggerRebuild(level, self.owner)
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Wait(0.03),
+         blocking = true,
+      })
+   end
+   actor:remove(prism.components.Mover)
+   if previousMover then actor:give(previousMover) end
    level:moveActor(actor, self.owner:expectPosition() + direction)
 end
 

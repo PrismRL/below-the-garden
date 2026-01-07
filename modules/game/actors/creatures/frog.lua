@@ -26,6 +26,11 @@ local function makeTongueFrame(direction, length, stage, skipFirst)
          display:put(x + direction.x * 2, y + direction.y * 2, tip, prism.Color4.PEACH)
          display:put(x + direction.x, y + direction.y, full, prism.Color4.PEACH)
       end
+      if stage > 3 and length > 3 then
+         display:put(x + direction.x * 3, y + direction.y * 3, tip, prism.Color4.PEACH)
+         display:put(x + direction.x * 2, y + direction.y * 2, full, prism.Color4.PEACH)
+         display:put(x + direction.x, y + direction.y, full, prism.Color4.PEACH)
+      end
    end
 end
 

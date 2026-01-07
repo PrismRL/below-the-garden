@@ -38,10 +38,8 @@ function Throw:perform(level, object)
 
    local path = prism.Bresenham(start.x, start.y, position.x, position.y, function(cx, cy)
       local distance = start:distance(prism.Vector2(cx, cy))
-      if not level:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then
-         return false -- stop iteration
-      end
-      return true -- continue
+      if not level:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then return false end
+      return true
    end)
    if path:length() == 0 then return end
    position = path.path[#path.path]
