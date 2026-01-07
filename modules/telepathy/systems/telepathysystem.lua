@@ -25,12 +25,12 @@ function TelepathySystem:onSenses(level, actor)
    end
 
    local telepathyComponent = actor:get(prism.components.Telepathy)
-   if telepathyComponent then 
-      range = math.max(range, telepathyComponent:getRange())
-   end
+   if telepathyComponent then range = math.max(range, telepathyComponent:getRange()) end
 
    if range == 0 then return end
    --- @cast telepathyComponent Telepathy
+
+   actor:removeAllRelations(prism.relations.Telepathed)
 
    local actorPos = actor:getPosition()
    if not actorPos then return end
@@ -45,6 +45,7 @@ function TelepathySystem:onSenses(level, actor)
             local dy = otherPos.y - actorPos.y
             if dx * dx + dy * dy <= r2 then
                actor:addRelation(prism.relations.SensesRelation, other)
+               actor:addRelation(prism.relations.TelepathedRelation, other)
             end
          end
       end

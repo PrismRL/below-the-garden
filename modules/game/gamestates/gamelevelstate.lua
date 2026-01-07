@@ -385,6 +385,13 @@ function GameLevelState:draw()
          drawable.color.a = base.a * (1 - alphaLoss)
       end)
       self.display:putSenses(primary, secondary, self.level)
+
+      for entity, _ in pairs(player:getRelations(prism.relations.TelepathedRelation)) do
+         local position = entity:get(prism.components.Position):getVector()
+         if not player:hasRelation(prism.relations.SeesRelation, entity) then
+            self.display:putActor(position.x, position.y, entity, prism.Color4.CORNFLOWER)
+         end
+      end
       self.display:popModifier()
       self.display:endCamera()
 
