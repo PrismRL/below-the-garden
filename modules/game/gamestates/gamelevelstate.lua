@@ -116,9 +116,16 @@ function GameLevelState:updateDecision(dt, owner, decision)
       if slot == "held" then held = equipped end
       if slot == "pocket" then pocket = equipped end
    end
+   self.upon = self.level:query(prism.components.Equipment):at(owner:expectPosition():decompose()):gather()
+   if not self.uponIndex or #self.upon < self.uponIndex then self.uponIndex = 1 end
 
    -- Controls need to be updated each frame.
    controls:update()
+
+   if controls.next.pressed and self.upon and #self.upon > 1 then
+      self.uponIndex = self.uponIndex + 1
+      if self.uponIndex > #self.upon then self.uponIndex = 1 end
+   end
 
    -- Controls are accessed directly via table index.
    if controls.move.pressed then
@@ -136,7 +143,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
    end
 
    if controls.pickup.pressed then
-      local target = self.level:query(prism.components.Equipment):at(owner:getPosition():decompose()):first()
+      local target = self.upon and self.upon[self.uponIndex]
 
       local pickup = prism.actions.Pickup(owner, target)
       if self:setAction(pickup) then return end
@@ -181,6 +188,24 @@ function GameLevelState:updateDecision(dt, owner, decision)
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
+
+   if controls.zoom_in.pressed then
+      settings.scale = settings.scale + 1
+      love.window.setMode(
+         settings.windowWidth * 8 * settings.scale,
+         settings.windowHeight * 8 * settings.scale,
+         { usedpiscale = false }
+      )
+   end
+
+   if controls.zoom_out.pressed then
+      settings.scale = settings.scale - 1
+      love.window.setMode(
+         settings.windowWidth * 8 * settings.scale,
+         settings.windowHeight * 8 * settings.scale,
+         { usedpiscale = false }
+      )
+   end
 end
 
 --- @param item? Actor
@@ -225,7 +250,7 @@ function GameLevelState:putHUD(player)
 
    local equipper = player:expect(prism.components.Equipper)
 
-   local upon = self.level:query(prism.components.Equipment):at(player:expectPosition():decompose()):first()
+   local upon = self.upon and self.upon[self.uponIndex] or nil
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
    local amulet = equipper:get("amulet")
@@ -358,11 +383,14 @@ function GameLevelState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
+   print(settings.scale)
+   love.graphics.push()
    love.graphics.translate(8 * settings.scale, 8 * settings.scale)
    love.graphics.scale(settings.scale, settings.scale)
    self.display:draw()
    love.graphics.translate(-8, -8)
    self.overlay:draw()
+   love.graphics.pop()
 
    -- custom love2d drawing goes here!
    love.graphics.print(love.timer.getFPS())

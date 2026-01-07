@@ -295,7 +295,7 @@ function FirstThird.generate(seed, w, h, depth, player)
    --coroutine.yield(builder)
 
    local rm = prism.levelgen.RoomManager(builder, distanceField)
-   coroutine.yield(builder)
+   -- coroutine.yield(builder)
    rm:createLoop()
    local rooms = rm.rooms
    mapdebug(builder, rooms)
@@ -337,8 +337,9 @@ function FirstThird.generate(seed, w, h, depth, player)
                   return util.isFloor(builder, x, y)
                end)
 
-               if not path then mapdebug(builder, { room, oroom })                   -- coroutine.yield(builder)
-end
+               if not path then
+                  mapdebug(builder, { room, oroom }) -- coroutine.yield(builder)
+               end
 
                if path:getTotalCost() < 10 then skipped[room] = true end
             end
