@@ -9,7 +9,7 @@ prism.registerActor("Wisp", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Wisp"),
       prism.components.Drawable {
-         index = 8,
+         index = 275,
          color = prism.Color4.BLUE,
          layer = 2,
       },
@@ -21,6 +21,6 @@ prism.registerActor("Wisp", function()
       prism.components.Light(prism.Color4.BLUE, 4, prism.lighteffects.Heartbeat()),
       prism.components.IdleAnimation("WispIdle"),
       prism.components.FireflyController(),
-      prism.components.Item(),
+      prism.components.Equipment("held"),
    }
 end)

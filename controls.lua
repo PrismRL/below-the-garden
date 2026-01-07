@@ -25,7 +25,9 @@ return spectrum.Input.Controls {
       restart        = "r",
       next           = "tab",
       back           = "backspace",
-      select         = "return"
+      select         = "return",
+      zoom_in        = "lctrl =",
+      zoom_out        = "lctrl -"
 
    },
    -- Pairs are controls that map to either 4 or 8 directions.

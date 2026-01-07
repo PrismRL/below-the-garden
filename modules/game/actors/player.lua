@@ -4,7 +4,7 @@ prism.registerActor("Player", function()
       prism.components.Drawable { index = 237, color = prism.Color4.BLUE, background = prism.Color4.BLACK, layer = 4 },
       prism.components.ConditionHolder(),
       prism.components.Position(),
-      prism.components.Collider(),
+      prism.components.Collider { allowedMovetypes = { "fly" } },
       prism.components.PlayerController(),
       prism.components.Senses(),
       prism.components.Mover { "walk", "swim" },

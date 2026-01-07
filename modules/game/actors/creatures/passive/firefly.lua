@@ -9,7 +9,7 @@ prism.registerActor("Firefly", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Firefly"),
       prism.components.Drawable {
-         index = 8,
+         index = 275,
          color = prism.Color4.YELLOW,
          layer = 2,
       },

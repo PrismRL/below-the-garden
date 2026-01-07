@@ -1,3 +1,5 @@
 return {
-   scale = 3,
+   scale = 4,
+   windowWidth = 61,
+   windowHeight = 40,
 }

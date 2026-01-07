@@ -1,6 +1,7 @@
 local Animation = spectrum.Animation
 spectrum.registerAnimation("Thrumble", function()
-   local animation = Animation(Animation.buildFrames { range = "269-270", color = prism.Color4.RED }, { 3, 0.2 })
+   local animation =
+      Animation(Animation.buildFrames { range = "269-270", color = prism.Color4.RED, layer = 3 }, { 3, 0.2 })
    animation:update(love.math.random())
    return animation
 end)

@@ -33,28 +33,21 @@ function Throw:perform(level, object)
    if position.x < 1 then position.x = 1 end
    if position.y < 1 then position.y = 1 end
 
-   local path = nil
-   local minimumDistance = 0
+   local start = self.owner:expectPosition()
+   local maximumDistance = self.owner:expect(prism.components.Thrower):getRange()
 
-   while not path and minimumDistance < 32 do
-      path = level:findPath(self.owner:expectPosition(), position, self.owner, throwMask, minimumDistance)
-      minimumDistance = minimumDistance + 1
-   end
-   if not path then return end
+   local path = prism.Bresenham(start.x, start.y, position.x, position.y, function(cx, cy)
+      local distance = start:distance(prism.Vector2(cx, cy))
+      if not level:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then
+         return false -- stop iteration
+      end
+      return true -- continue
+   end)
+   if path:length() == 0 then return end
+   position = path.path[#path.path]
 
    level:perform(prism.actions.Unequip(self.owner, held))
-
-   local maximumDistance = self.owner:expect(prism.components.Thrower):getRange()
-   position = path:length() > maximumDistance and path.path[maximumDistance] or path.path[#path.path]
-
-   level:yield(prism.messages.AnimationMessage {
-      animation = spectrum.animations.Projectile(
-         self.owner:expectPosition(),
-         position,
-         held:expect(prism.components.Drawable)
-      ),
-      blocking = true,
-   })
+   held:give(prism.components.Position(start))
 
    if held:get(prism.components.SlimeProducer) then
       local ox, oy = self.owner:expectPosition():decompose()
@@ -66,9 +59,21 @@ function Throw:perform(level, object)
       end
    end
 
+   local previousMover = held:get(prism.components.Mover)
+   held:give(prism.components.Mover { "fly" })
+   for _, point in ipairs(path:getPath()) do
+      level:moveActor(held, point)
+      level:getSystem(prism.systems.SensesSystem):triggerRebuild(level, self.owner)
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Wait(0.04),
+         blocking = true,
+      })
+   end
+   held:remove(prism.components.Mover)
+   if previousMover then held:give(previousMover) end
+
    local damage = self.owner:expect(prism.components.Thrower):getDamage()
    level:tryPerform(prism.actions.Damage(object, damage))
-   held:give(prism.components.Position(position))
 
    local explode = held:get(prism.components.ExplodeOnThrow)
    if explode then

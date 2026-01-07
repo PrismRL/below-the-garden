@@ -9,7 +9,7 @@ end
 
 function PerformOnBehavior:run(level, actor, controller)
    local instance = self.action(actor, (not self.onOwner) and controller.blackboard["target"] or nil)
-   print(level:canPerform(instance))
+   print("HELLO", level:canPerform(instance))
    if level:canPerform(instance) then return instance end
    return true
 end

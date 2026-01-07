@@ -12,8 +12,10 @@ prism.registerActor("Eye", function()
          index = 273,
          color = prism.Color4.BLUE,
       },
+      prism.components.Mover { "fly" },
       prism.components.Light(prism.Color4.BLUE, 2),
       prism.components.IdleAnimation("EyeIdle"),
       prism.components.Position(),
+      prism.components.EyeController(),
    }
 end)

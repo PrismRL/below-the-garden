@@ -40,7 +40,7 @@ function GeneralTargetHandler:setSelectorPosition()
 end
 
 function GeneralTargetHandler:init()
-   self.super.init(self)
+   GeneralTargetHandler.super.init(self)
    self.curTarget = self.validTargets[1]
    self:setSelectorPosition()
 end
@@ -95,38 +95,56 @@ function GeneralTargetHandler:draw()
    if not self.curTarget or prism.Vector2:is(self.curTarget) and self.curTarget ~= self.selectorPosition then
       self.display:put(x + self.camera.x, y + self.camera.y, 163)
    end
-   --- @type Entity
-   local entity = self.level:getCell(x, y)
-   local actor = self.level:query():at(x, y):first()
-   if actor then entity = actor end
-   -- self.display:putDrawable(23, 23, entity:expect(prism.components.Drawable))
-   -- self.display:print(25, 23, entity:getName(), palette[22], palette[6], 2)
 
    love.graphics.push()
    love.graphics.translate(8, 8)
    self.display:draw()
    love.graphics.pop()
-   -- self.display:print(self.selectorPosition.x, self.selectorPosition.y, "X", prism.Color4.RED)
-   -- local cameraPos = self.selectorPosition
-   --
-   -- self.display:clear()
-   -- -- set the camera position on the display
-   -- local ox, oy = self.display:getCenterOffset(cameraPos:decompose())
-   -- self.display:setCamera(ox, oy)
-   --
-   -- -- draw the level
-   -- local primary, secondary = self.levelState:getSenses()
-   -- self.display:putSenses(primary, secondary)
-   --
-   -- -- put a string to let the player know what's happening
-   -- self.display:print(1, 1, "Select a target!")
-   --
-   -- -- if there's a target then we should draw it's name!
-   -- if self.curTarget then
-   --    local x, y = cameraPos:decompose()
-   --    self.display:print(x + ox + 1, y + oy, Name.get(self.curTarget))
-   -- end
-   -- self.display:draw()
 end
+
+--- @class ThrowTargetHandler : GeneralTargetHandler
+local ThrowTargetHandler = GeneralTargetHandler:extend "ThrowTargetHandler"
+
+function ThrowTargetHandler:init()
+   ThrowTargetHandler.super.init(self)
+   self.maxRange = self.owner:expect(prism.components.Thrower):getRange()
+   self.throwMask = prism.Collision.createBitmaskFromMovetypes { "fly" }
+   self.start = self.owner:expectPosition()
+end
+
+function ThrowTargetHandler:draw()
+   self.levelState:draw()
+   self.display:clear()
+
+   local path = prism.Bresenham(
+      self.start.x,
+      self.start.y,
+      self.selectorPosition.x,
+      self.selectorPosition.y,
+      function(cx, cy)
+         local distance = self.start:distance(prism.Vector2(cx, cy))
+         if
+            not self.level:getCellPassable(cx, cy, self.throwMask)
+            or distance >= self.maxRange
+            or not self.owner:expect(prism.components.Senses).cells:get(cx, cy)
+         then
+            return false -- stop iteration
+         end
+         return true -- continue
+      end
+   )
+   table.remove(path.path, 1)
+   for _, point in ipairs(path:getPath()) do
+      self.display:put(point.x + self.camera.x, point.y + self.camera.y, 11, prism.Color4.TEXT)
+   end
+   local x, y = self.selectorPosition:decompose()
+   self.display:put(x + self.camera.x, y + self.camera.y, 11)
+   love.graphics.push()
+   love.graphics.translate(8, 8)
+   self.display:draw()
+   love.graphics.pop()
+end
+
+prism.register(ThrowTargetHandler)
 
 return GeneralTargetHandler

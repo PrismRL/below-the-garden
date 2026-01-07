@@ -22,7 +22,7 @@ function Attack:perform(level, attacked)
       level:yield(prism.messages.AnimationMessage {
          animation = spectrum.animations.Block(),
          actor = attacked,
-         blocking = true,
+         blocking = false,
          override = true,
       })
       return
@@ -30,6 +30,7 @@ function Attack:perform(level, attacked)
    local attacker = self.owner:expect(prism.components.Attacker)
    local damage, knockback = attacker:getDamageAndKnockback()
 
+   level:tryPerform(prism.actions.Damage(attacked, damage))
    local direction = (attacked:getPosition() - self.owner:getPosition())
    local final = attacked:expectPosition()
    for _ = 1, knockback do
@@ -38,8 +39,6 @@ function Attack:perform(level, attacked)
       final = nextpos
    end
    level:moveActor(attacked, final)
-
-   level:tryPerform(prism.actions.Damage(attacked, damage))
 end
 
 return Attack

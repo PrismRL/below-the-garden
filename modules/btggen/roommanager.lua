@@ -125,7 +125,7 @@ function RoomManager:findRooms(minRoomSize)
       end
    end
 
-      -- after all room growth is complete
+   -- after all room growth is complete
    for _, room in ipairs(rooms) do
       room.center = self:findRoomCenter(room.tiles)
    end
@@ -222,14 +222,12 @@ function RoomManager:getImportantRooms(blacklist)
       if room.center and not blacklist[room] then
          nodes[#nodes + 1] = {
             room = room,
-            pos = room.center
+            pos = room.center,
          }
       end
    end
 
-   if #nodes == 0 then
-      return {}
-   end
+   if #nodes == 0 then return {} end
 
    if #nodes <= 4 then
       local out = {}
@@ -242,13 +240,9 @@ function RoomManager:getImportantRooms(blacklist)
    local dist = {}
 
    local function pathDistance(a, b)
-      local path = prism.astar(
-         a.pos,
-         b.pos,
-         function(x, y)
-            return util.isWalkable(self.builder, x, y)
-         end
-      )
+      local path = prism.astar(a.pos, b.pos, function(x, y)
+         return util.isWalkable(self.builder, x, y)
+      end)
       if not path then return math.huge end
       return #path:getPath()
    end
@@ -278,9 +272,7 @@ function RoomManager:getImportantRooms(blacklist)
       end
    end
 
-   if not a then
-      return { nodes[1].room }
-   end
+   if not a then return { nodes[1].room } end
 
    local c
    local bestScore3 = -1
@@ -326,13 +318,9 @@ function RoomManager:getImportantRooms(blacklist)
       nodes[b].room,
    }
 
-   if c then
-      result[#result + 1] = nodes[c].room
-   end
+   if c then result[#result + 1] = nodes[c].room end
 
-   if d then
-      result[#result + 1] = nodes[d].room
-   end
+   if d then result[#result + 1] = nodes[d].room end
 
    return result
 end
@@ -369,18 +357,14 @@ function RoomManager:getRemovableRooms()
             lowlink[u] = math.min(lowlink[u], lowlink[v])
 
             -- Articulation condition (non-root)
-            if not isRoot and lowlink[v] >= indices[u] then
-               isArticulation[u] = true
-            end
+            if not isRoot and lowlink[v] >= indices[u] then isArticulation[u] = true end
          elseif v ~= parent[u] then
             lowlink[u] = math.min(lowlink[u], indices[v])
          end
       end
 
       -- Root articulation rule
-      if isRoot and childCount > 1 then
-         isArticulation[u] = true
-      end
+      if isRoot and childCount > 1 then isArticulation[u] = true end
    end
 
    dfs(rooms[1])
@@ -388,9 +372,7 @@ function RoomManager:getRemovableRooms()
    local removable = {}
 
    for _, room in ipairs(rooms) do
-      if not isArticulation[room] then
-         removable[#removable + 1] = room
-      end
+      if not isArticulation[room] then removable[#removable + 1] = room end
    end
 
    return removable
@@ -407,18 +389,14 @@ function RoomManager:findLockableRooms(opts)
    local lockable = {}
 
    for _, room in ipairs(self.rooms) do
-      if room.center
-         and (includeHallways or not room.isHallway)
-      then
+      if room.center and (includeHallways or not room.isHallway) then
          local degree = 0
          for _ in pairs(room.neighbors) do
             degree = degree + 1
             if degree > 1 then break end
          end
 
-         if degree == 1 then
-            lockable[#lockable + 1] = room
-         end
+         if degree == 1 then lockable[#lockable + 1] = room end
       end
    end
 
@@ -449,17 +427,9 @@ function RoomManager:createLoop(generationInfo, maxTries)
    end
 
    local function findPath(a, b)
-      local path = prism.astar(
-         a,
-         b,
-         function(x, y)
-            return util.isWalkable(self.builder, x, y)
-         end,
-         nil,
-         nil,
-         nil,
-         prism.Vector2.neighborhood4
-      )
+      local path = prism.astar(a, b, function(x, y)
+         return util.isWalkable(self.builder, x, y)
+      end, nil, nil, nil, prism.Vector2.neighborhood4)
       if not path then return nil end
       return path, #path:getPath()
    end
@@ -489,10 +459,16 @@ function RoomManager:createLoop(generationInfo, maxTries)
                         j = j,
                      }
 
-                     print(string.format(
-                        "[createLoop] pair %d-%d plen=%d dist=%.2f score=%.3f",
-                        i, j, plen, math.sqrt(d2), score
-                     ))
+                     print(
+                        string.format(
+                           "[createLoop] pair %d-%d plen=%d dist=%.2f score=%.3f",
+                           i,
+                           j,
+                           plen,
+                           math.sqrt(d2),
+                           score
+                        )
+                     )
                   end
                end
             end
@@ -509,19 +485,13 @@ function RoomManager:createLoop(generationInfo, maxTries)
       return a.score > b.score
    end)
 
-   print(string.format(
-      "[createLoop] trying top %d candidates",
-      math.min(maxTries, #candidates)
-   ))
+   print(string.format("[createLoop] trying top %d candidates", math.min(maxTries, #candidates)))
 
    for idx = 1, math.min(maxTries, #candidates) do
       local c = candidates[idx]
       local bestA, bestB = c.a, c.b
 
-      print(string.format(
-         "[createLoop] attempt %d: rooms %d-%d score=%.3f",
-         idx, c.i, c.j, c.score
-      ))
+      print(string.format("[createLoop] attempt %d: rooms %d-%d score=%.3f", idx, c.i, c.j, c.score))
 
       local function passable(x, y)
          local isWall = util.isWall(self.builder, x, y)
@@ -532,23 +502,13 @@ function RoomManager:createLoop(generationInfo, maxTries)
          for _, vec in ipairs(prism.Vector2.neighborhood8) do
             local dx, dy = x + vec.x, y + vec.y
             local isFloor = util.isWalkable(self.builder, dx, dy)
-            if isFloor and not (bestA.tiles:get(dx, dy) or bestB.tiles:get(dx, dy)) then
-               return false
-            end
+            if isFloor and not (bestA.tiles:get(dx, dy) or bestB.tiles:get(dx, dy)) then return false end
          end
 
          return (isWall or isRoom) and isBoundsX and isBoundsY
       end
 
-      local path = prism.astar(
-         bestA.center,
-         bestB.center,
-         passable,
-         nil,
-         nil,
-         nil,
-         prism.Vector2.neighborhood4
-      )
+      local path = prism.astar(bestA.center, bestB.center, passable, nil, nil, nil, prism.Vector2.neighborhood4)
 
       if path then
          local cost = path:getTotalCost()
@@ -556,14 +516,9 @@ function RoomManager:createLoop(generationInfo, maxTries)
 
          if cost <= math.huge then
             for _, p in ipairs(path:getPath()) do
-               print(string.format(
-                  "[createLoop] carving tile (%d,%d)",
-                  p.x, p.y
-               ))
+               print(string.format("[createLoop] carving tile (%d,%d)", p.x, p.y))
 
-               if not util.isFloor(self.builder, p.x, p.y) then
-                  self.builder:set(p.x, p.y, prism.cells.Floor())
-               end
+               if not util.isFloor(self.builder, p.x, p.y) then self.builder:set(p.x, p.y, prism.cells.Floor()) end
 
                if not bestA.tiles:get(p.x, p.y) then
                   bestA.tiles:set(p.x, p.y, true)
@@ -575,7 +530,7 @@ function RoomManager:createLoop(generationInfo, maxTries)
             bestB.neighbors[bestA] = true
 
             print("[createLoop] loop created successfully")
-            coroutine.yield(self.builder)
+            -- coroutine.yield(self.builder)
             return true
          else
             print("[createLoop] path too long, skipping")
@@ -588,6 +543,5 @@ function RoomManager:createLoop(generationInfo, maxTries)
    print("[createLoop] all candidates failed")
    return false
 end
-
 
 return RoomManager

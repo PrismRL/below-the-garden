@@ -11,7 +11,7 @@ local function randomRoom(rng)
       prism.roomgenerators.EllipseRoomGenerator,
       prism.roomgenerators.HallwayLRoomGenerator,
       prism.roomgenerators.RectRoomGenerator,
-      prism.roomgenerators.RingRoomGenerator
+      prism.roomgenerators.RingRoomGenerator,
    }
 
    return rooms[rng:random(#rooms)]:_generate(rng)
@@ -172,7 +172,6 @@ local function accrete(generatorInfo, rng)
 
       builder:blit(first, x, y)
 
-
       -- accretion loop
       local failures = 0
       while true do
@@ -197,15 +196,19 @@ local function mapdebug(builder, rooms)
    for _, room in ipairs(rooms) do
       if MAPDEBUG then
          for x, y in room.tiles:each() do
-            builder:addActor(prism.Actor.fromComponents{
-               prism.components.Drawable{
-                  index = "!",
-                  color = room.color
+            builder:addActor(
+               prism.Actor.fromComponents {
+                  prism.components.Drawable {
+                     index = "!",
+                     color = room.color,
+                  },
+                  prism.components.Position(),
+                  prism.components.Spawner(),
+                  prism.components.Name("RoomProxy"),
                },
-               prism.components.Position(),
-               prism.components.Spawner(),
-               prism.components.Name("RoomProxy")
-            }, x, y)
+               x,
+               y
+            )
          end
       end
    end
@@ -216,7 +219,6 @@ local function mapdebug(builder, rooms)
    end
    --coroutine.yield(builder)
 end
-
 
 -- Fisher–Yates shuffle using rng
 local function shuffle(t, rng)
@@ -254,7 +256,7 @@ function FirstThird.generate(generatorInfo, player)
       decorators.MeadowDecorator,
       decorators.PitDecorator,
       decorators.WaterPitDecorator,
-      decorators.TallGrassClearingDecorator
+      decorators.TallGrassClearingDecorator,
    }
 
    -- copy rooms
@@ -321,7 +323,7 @@ function FirstThird.generate(generatorInfo, player)
    end
 
    local importantRooms = rm:getImportantRooms(used)
-   assert(#importantRooms ==  4)
+   assert(#importantRooms == 4)
 
    local room = table.remove(importantRooms, rng:random(#importantRooms))
    used[room] = true
@@ -344,18 +346,15 @@ function FirstThird.generate(generatorInfo, player)
       if canSpawnRoom(room) then
          for _, oroom in ipairs(rooms) do
             if oroom ~= room and not canSpawnRoom(oroom) then
-               local path = prism.astar(room.center, oroom.center, function (x, y)
+               local path = prism.astar(room.center, oroom.center, function(x, y)
                   return util.isFloor(builder, x, y)
                end)
 
                if not path then
-                  mapdebug(builder, {room, oroom})
-                  coroutine.yield(builder)
+                  mapdebug(builder, { room, oroom }) -- coroutine.yield(builder)
                end
 
-               if path:getTotalCost() < 10 then
-                  skipped[room] = true
-               end
+               if path:getTotalCost() < 10 then skipped[room] = true end
             end
          end
       end
@@ -384,13 +383,11 @@ function FirstThird.generate(generatorInfo, player)
                if canSpawnRoom(room) then
                   for _, oroom in ipairs(rooms) do
                      if oroom ~= room and not canSpawnRoom(oroom) then
-                        local path = prism.astar(room.center, oroom.center, function (x, y)
+                        local path = prism.astar(room.center, oroom.center, function(x, y)
                            return util.isFloor(builder, x, y)
                         end)
 
-                        if path:getTotalCost() < 8 then
-                           skipped[room] = true
-                        end
+                        if path:getTotalCost() < 8 then skipped[room] = true end
                      end
                   end
                end
@@ -458,7 +455,7 @@ function FirstThird.generate(generatorInfo, player)
    }
 
    local healing = {
-      prism.actors.Snip
+      prism.actors.Snip,
    }
 
    for i = 1, rng:random(4, 6) do

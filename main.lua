@@ -1,3 +1,5 @@
+local settings = require "settings"
+
 require "debugger"
 require "prism"
 
@@ -27,8 +29,8 @@ spriteAtlas.quadsByName["held"] = spriteAtlas:getQuadByIndex(28)
 spriteAtlas.quadsByName["pocket"] = spriteAtlas:getQuadByIndex(266)
 spriteAtlas.quadsByName["weapon"] = spriteAtlas:getQuadByIndex(157)
 spriteAtlas.quadsByName["amulet"] = spriteAtlas:getQuadByIndex(158)
-local display = spectrum.Display(50, 30, spriteAtlas, prism.Vector2(8, 8))
-local overlay = spectrum.Display(60, 32, spriteAtlas, prism.Vector2(8, 8))
+local display = spectrum.Display(settings.windowWidth - 7, settings.windowHeight - 2, spriteAtlas, prism.Vector2(8, 8))
+local overlay = spectrum.Display(settings.windowWidth, settings.windowHeight, spriteAtlas, prism.Vector2(8, 8))
 
 -- spin up our state machine
 --- @type GameStateManager

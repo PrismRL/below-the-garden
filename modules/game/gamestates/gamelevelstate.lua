@@ -17,7 +17,7 @@ function GameLevelState:__new(display, overlay, testing)
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    self.overlay = overlay
-   self.hudPosition = prism.Vector2(self.overlay.width - 8, 0)
+   self.hudPosition = prism.Vector2(self.overlay.width - 8, 9)
    self.hudPositions = {
       held = self.hudPosition + prism.Vector2(3, 6),
       pocket = self.hudPosition + prism.Vector2(6, 6),
@@ -77,7 +77,8 @@ function GameLevelState:__new(display, overlay, testing)
       prism.systems.ModulateLightSystem(),
       prism.systems.AutoTileSystem(),
       prism.systems.EquipmentSystem(),
-      prism.systems.NestingSystem()
+      prism.systems.NestingSystem(),
+      prism.systems.FallSystem()
    )
    builder:addTurnHandler(require "modules.base.quickturnhandler")
 
@@ -102,9 +103,13 @@ function GameLevelState:handleMessage(message)
    -- level or triggering a game over.
 end
 
+function GameLevelState:update(dt)
+   GameLevelState.super.update(self, dt)
+   self.lightSystem:update()
+end
+
 -- updateDecision is called whenever there's an ActionDecision to handle.
 function GameLevelState:updateDecision(dt, owner, decision)
-   self.lightSystem:update()
    local idle
    local held
    local pocket
@@ -116,9 +121,16 @@ function GameLevelState:updateDecision(dt, owner, decision)
       if slot == "held" then held = equipped end
       if slot == "pocket" then pocket = equipped end
    end
+   self.upon = self.level:query(prism.components.Equipment):at(owner:expectPosition():decompose()):gather()
+   if not self.uponIndex or #self.upon < self.uponIndex then self.uponIndex = 1 end
 
    -- Controls need to be updated each frame.
    controls:update()
+
+   if controls.next.pressed and self.upon and #self.upon > 1 then
+      self.uponIndex = self.uponIndex + 1
+      if self.uponIndex > #self.upon then self.uponIndex = 1 end
+   end
 
    -- Controls are accessed directly via table index.
    if controls.move.pressed then
@@ -136,7 +148,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
    end
 
    if controls.pickup.pressed then
-      local target = self.level:query(prism.components.Equipment):at(owner:getPosition():decompose()):first()
+      local target = self.upon and self.upon[self.uponIndex]
 
       local pickup = prism.actions.Pickup(owner, target)
       if self:setAction(pickup) then return end
@@ -170,7 +182,7 @@ function GameLevelState:updateDecision(dt, owner, decision)
       self.targets = {}
       self.selectedAction = prism.actions.Throw
       self.manager:push(
-         spectrum.gamestates.GeneralTargetHandler(self.overlay, self, self.targets, self.selectedAction:getTarget(1))
+         spectrum.gamestates.ThrowTargetHandler(self.overlay, self, self.targets, self.selectedAction:getTarget(1))
       )
    end
 
@@ -181,6 +193,24 @@ function GameLevelState:updateDecision(dt, owner, decision)
    end
 
    if controls.wait.pressed then self:setAction(prism.actions.Wait(owner)) end
+
+   if controls.zoom_in.pressed then
+      settings.scale = settings.scale + 1
+      love.window.setMode(
+         settings.windowWidth * 8 * settings.scale,
+         settings.windowHeight * 8 * settings.scale,
+         { usedpiscale = false }
+      )
+   end
+
+   if controls.zoom_out.pressed then
+      settings.scale = settings.scale - 1
+      love.window.setMode(
+         settings.windowWidth * 8 * settings.scale,
+         settings.windowHeight * 8 * settings.scale,
+         { usedpiscale = false }
+      )
+   end
 end
 
 --- @param item? Actor
@@ -198,10 +228,10 @@ local windowBorder = { color = prism.Color4.DARK, cornerColor = prism.Color4.PUR
 function GameLevelState:putHUD(player)
    love.graphics.push()
    love.graphics.scale(settings.scale, settings.scale)
-   love.graphics.draw(hud, (self.overlay.width - 8) * self.overlay.cellSize.x, 0)
+   love.graphics.draw(hud, self.hudPosition.x * self.overlay.cellSize.x, self.hudPosition.y * self.overlay.cellSize.y)
    love.graphics.pop()
 
-   self.overlay:border(1, 1, self.overlay.width - 8, self.overlay.height, windowBorder)
+   self.overlay:border(1, 1, self.overlay.width - 7, self.overlay.height, windowBorder)
 
    local positions = self.hudPositions
 
@@ -225,7 +255,7 @@ function GameLevelState:putHUD(player)
 
    local equipper = player:expect(prism.components.Equipper)
 
-   local upon = self.level:query(prism.components.Equipment):at(player:expectPosition():decompose()):first()
+   local upon = self.upon and self.upon[self.uponIndex] or nil
    local held = equipper:get("held")
    local weapon = equipper:get("weapon")
    local amulet = equipper:get("amulet")
@@ -287,8 +317,8 @@ function GameLevelState:draw()
 
       local primary, secondary = self:getSenses()
       -- Render the level using the player’s senses
-      local x, y = self.display:getCenterOffset(player:expectPosition():decompose())
-      self.display:setCamera(x, y)
+      -- local x, y = self.display:getCenterOffset(player:expectPosition():decompose())
+      -- self.display:setCamera(x, y)
       self.display:beginCamera()
       self.display:pushModifier(self.lightPass)
       self.display:pushModifier(function(entity, x, y, drawable)
@@ -358,13 +388,16 @@ function GameLevelState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
+   -- love.graphics.push()
    love.graphics.translate(8 * settings.scale, 8 * settings.scale)
    love.graphics.scale(settings.scale, settings.scale)
    self.display:draw()
    love.graphics.translate(-8, -8)
    self.overlay:draw()
+   -- love.graphics.pop()
 
    -- custom love2d drawing goes here!
+   love.graphics.print(love.timer.getFPS())
 end
 
 function GameLevelState:resume()
