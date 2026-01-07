@@ -31,14 +31,14 @@ end)
 
 prism.registerActor("Poof", function()
    return prism.Actor.fromComponents {
-      prism.components.Name("Snip"),
+      prism.components.Name("Poof"),
       prism.components.Drawable {
          index = 338,
          color = prism.Color4.RED,
          layer = 2,
       },
       prism.components.Mover { "walk" },
-      prism.components.SnipController(),
+      prism.components.PoofController(),
       prism.components.Collider { allowedMovetypes = { "walk", "fly" } },
       prism.components.Position(),
       prism.components.Item(),
@@ -46,5 +46,6 @@ prism.registerActor("Poof", function()
       prism.components.Senses(),
       prism.components.Sight { range = 4, fov = true, darkvision = 0 },
       prism.components.PoofOnThrow(),
+      prism.components.Slow(),
    }
 end)

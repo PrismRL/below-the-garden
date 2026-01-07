@@ -17,7 +17,6 @@ prism.registerActor("Gob", function()
       prism.components.Equipper { "weapon", "held" },
       prism.components.GobController(),
       prism.components.Attacker(1),
-      prism.components.WarmBlooded(),
       prism.components.ThrumbleFaction(),
       prism.components.Health(6),
    }
