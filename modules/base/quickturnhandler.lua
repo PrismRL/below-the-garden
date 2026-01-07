@@ -13,7 +13,7 @@ function QuickTurnHandler:handleTurn(level, actor, controller)
       if removed then
          if actor:has(prism.components.PlayerController) then
             level:yield(prism.messages.AnimationMessage {
-               animation = spectrum.animations.Wait(actor),
+               animation = spectrum.animations.Wait(),
                blocking = true,
                actor = actor,
             })
