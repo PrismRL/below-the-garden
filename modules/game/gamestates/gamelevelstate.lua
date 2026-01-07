@@ -28,6 +28,7 @@ function GameLevelState:__new(display, overlay, testing)
       shift = self.hudPosition + prism.Vector2(2, 4),
       throw = self.hudPosition + prism.Vector2(2, 8),
       upon = self.hudPosition + prism.Vector2(3, 17),
+      cycle = self.hudPosition + prism.Vector2(2, 19),
       drop = self.hudPosition + prism.Vector2(2, 13),
       pickup = self.hudPosition + prism.Vector2(2, 15),
       pickupSlot = self.hudPosition + prism.Vector2(7, 18),
@@ -298,6 +299,10 @@ function GameLevelState:putHUD(player)
 
       self.overlay:print(positions.throw.x, positions.throw.y + (extraAction and 1 or 0), "T", prism.Color4.CORNFLOWER)
       self.overlay:print(positions.throw.x + 2, positions.throw.y + (extraAction and 1 or 0), "thrw", prism.Color4.TEXT)
+   end
+
+   if self.upon and #self.upon > 1 then
+      self.overlay:print(positions.cycle.x, positions.cycle.y, "TAB", prism.Color4.CORNFLOWER)
    end
 end
 
