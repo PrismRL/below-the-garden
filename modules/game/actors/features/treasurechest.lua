@@ -1,4 +1,4 @@
-prism.registerActor("Chest", function()
+prism.registerActor("Chest", function(toSpawn)
    return prism.Actor.fromComponents {
       prism.components.Name("Chest"),
       prism.components.Drawable{
@@ -7,5 +7,6 @@ prism.registerActor("Chest", function()
       },
       prism.components.Position(),
       prism.components.Collider(),
+      prism.components.Chest(toSpawn),
    }
 end)

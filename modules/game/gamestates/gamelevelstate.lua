@@ -136,6 +136,11 @@ function GameLevelState:updateDecision(dt, owner, decision)
    -- Controls are accessed directly via table index.
    if controls.move.pressed then
       local destination = owner:getPosition() + controls.move.vector
+
+      local chest = self.level:query(prism.components.Chest):at(destination:decompose()):first()
+      local open = prism.actions.Open(owner, chest)
+      if self:setAction(open) then return end
+
       local move = prism.actions.Move(owner, destination)
       if self:setAction(move) then return end
 

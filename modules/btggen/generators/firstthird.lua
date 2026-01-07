@@ -335,8 +335,15 @@ function FirstThird.generate(generatorInfo, player)
    room = table.remove(importantRooms, rng:random(#importantRooms))
    builder:addActor(prism.actors.Stairs(), room.center:decompose())
 
+   local chestItems = {
+      prism.actors.Flippers,
+      prism.actors.Shield,
+      prism.actors.RingOfVitality,
+      prism.actors.TiaraOfTelepathy,
+   }
+
    room = table.remove(importantRooms, rng:random(#importantRooms))
-   builder:addActor(prism.actors.Chest(), room.center:decompose())
+   builder:addActor(prism.actors.Chest(chestItems[rng:random(#chestItems)]), room.center:decompose())
 
    local encounterDecorators = {
       prism.decorators.ThrumbleCampDecorator,
