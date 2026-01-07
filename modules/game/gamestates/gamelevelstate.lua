@@ -17,7 +17,7 @@ function GameLevelState:__new(display, overlay, testing)
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    self.overlay = overlay
-   self.hudPosition = prism.Vector2(self.overlay.width - 8, 0)
+   self.hudPosition = prism.Vector2(self.overlay.width - 8, 9)
    self.hudPositions = {
       held = self.hudPosition + prism.Vector2(3, 6),
       pocket = self.hudPosition + prism.Vector2(6, 6),
@@ -223,10 +223,10 @@ local windowBorder = { color = prism.Color4.DARK, cornerColor = prism.Color4.PUR
 function GameLevelState:putHUD(player)
    love.graphics.push()
    love.graphics.scale(settings.scale, settings.scale)
-   love.graphics.draw(hud, (self.overlay.width - 8) * self.overlay.cellSize.x, 0)
+   love.graphics.draw(hud, self.hudPosition.x * self.overlay.cellSize.x, self.hudPosition.y * self.overlay.cellSize.y)
    love.graphics.pop()
 
-   self.overlay:border(1, 1, self.overlay.width - 8, self.overlay.height, windowBorder)
+   self.overlay:border(1, 1, self.overlay.width - 7, self.overlay.height, windowBorder)
 
    local positions = self.hudPositions
 
@@ -383,14 +383,13 @@ function GameLevelState:draw()
    -- offset it for custom non-terminal UI elements. If you do scale the UI
    -- just remember that display:getCellUnderMouse expects the mouse in the
    -- display's local pixel coordinates
-   print(settings.scale)
-   love.graphics.push()
+   -- love.graphics.push()
    love.graphics.translate(8 * settings.scale, 8 * settings.scale)
    love.graphics.scale(settings.scale, settings.scale)
    self.display:draw()
    love.graphics.translate(-8, -8)
    self.overlay:draw()
-   love.graphics.pop()
+   -- love.graphics.pop()
 
    -- custom love2d drawing goes here!
    love.graphics.print(love.timer.getFPS())

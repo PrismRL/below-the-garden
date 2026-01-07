@@ -60,11 +60,7 @@ function DropState:update(dt)
       self.position = new
 
       local slot = grid:get(self.position:decompose())
-      if slot == "pocket" then
-         self.item = self.player:expect(prism.components.Inventory):query():first()
-      else
-         self.item = self.player:expect(prism.components.Equipper):get(slot)
-      end
+      self.item = self.player:expect(prism.components.Equipper):get(slot)
    end
 
    if controls.select.pressed or controls.drop.pressed then
