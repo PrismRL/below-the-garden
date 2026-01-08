@@ -23,7 +23,7 @@ function LastSeenSystem:onTurn(level, actor)
             local olast = friend:get(prism.components.LastSeen)
             if olast then
                olast.position = seenActor:expectPosition()
-               olast.duration = 20
+               olast.duration = 10
             end
          end
       end
