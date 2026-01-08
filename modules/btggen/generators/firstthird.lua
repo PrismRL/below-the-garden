@@ -322,8 +322,9 @@ function FirstThird.generate(generatorInfo, player)
       return not used[room] and not skipped[room]
    end
 
-   local importantRooms = rm:getImportantRooms(used)
-   assert(#importantRooms == 4)
+   print(depth == 1 and 3 or 4)
+   local importantRooms = rm:getImportantRooms(used, depth == 1 and 3 or 4)
+   assert(#importantRooms == (depth == 1 and 3 or 4))
 
    local room = table.remove(importantRooms, rng:random(#importantRooms))
    used[room] = true
@@ -342,8 +343,10 @@ function FirstThird.generate(generatorInfo, player)
       prism.actors.TiaraOfTelepathy,
    }
 
-   room = table.remove(importantRooms, rng:random(#importantRooms))
-   builder:addActor(prism.actors.Chest(chestItems[rng:random(#chestItems)]), room.center:decompose())
+   if depth > 1 then
+      room = table.remove(importantRooms, rng:random(#importantRooms))
+      builder:addActor(prism.actors.Chest(chestItems[rng:random(#chestItems)]), room.center:decompose())
+   end
 
    local encounterDecorators = {
       prism.decorators.ThrumbleCampDecorator,
@@ -368,7 +371,7 @@ function FirstThird.generate(generatorInfo, player)
    end
 
    local encounterRooms = rm:getRemovableRooms()
-   local encounterAttempts = depth < 2 and 1 or 2
+   local encounterAttempts = depth == 1 and 0 or 1
 
    for _ = 1, encounterAttempts do
       print("ENCOUNTER ATTEMPT", _, encounterAttempts, depth)
@@ -410,7 +413,7 @@ function FirstThird.generate(generatorInfo, player)
       prism.decorators.ThrumbleScoutDecorator,
    }
 
-   local encounterAttempts = depth < 2 and 1 or rng:random(2, 3)
+   local encounterAttempts = depth <= 2 and 1 or 2
    for _ = 1, encounterAttempts do
       print("ENCOUNTER ATTEMPT", _, encounterAttempts)
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
@@ -435,7 +438,7 @@ function FirstThird.generate(generatorInfo, player)
    local count = 0
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
-      if count > 6 then break end
+      if count > math.min(6, depth*2) then break end
       prism.decorators.PebbleDecorator.tryDecorate(generatorInfo, rng, builder, room)
    end
 
@@ -471,19 +474,19 @@ function FirstThird.generate(generatorInfo, player)
       prism.decorators.ItemSpawnerDecorator.tryDecorate(generatorInfo, rng, builder, room, nature)
    end
 
-   for i = 1, 2 do
+   for i = 1, math.min(2, depth) do
       local room = rooms[rng:random(1, #rooms)]
       local heal = healing[rng:random(#healing)]
       prism.decorators.ItemSpawnerDecorator.tryDecorate(generatorInfo, rng, builder, room, heal)
    end
 
-   for i = 1, 2 do
+   for i = 1, 1 do
       local room = rooms[rng:random(1, #rooms)]
       local weapon = weapons[rng:random(#weapons)]
       prism.decorators.ItemSpawnerDecorator.tryDecorate(generatorInfo, rng, builder, room, weapon)
    end
 
-   for i = 1, 3 do
+   for i = 1, math.min(2, depth) do
       local room = rooms[rng:random(1, #rooms)]
       local pokemob = pocketmobs[rng:random(#pocketmobs)]
       prism.decorators.ItemSpawnerDecorator.tryDecorate(generatorInfo, rng, builder, room, pokemob)

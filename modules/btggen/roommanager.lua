@@ -209,46 +209,37 @@ function RoomManager:mergeSmallRooms(rooms, minRoomSize)
    return out
 end
 
---- Selects up to 4 rooms whose centers are maximally separated
---- using A* path distance between room centers.
---- @param blacklist table<table, boolean>? Rooms to exclude
---- @return table Array of 1–4 room tables
-function RoomManager:getImportantRooms(blacklist)
+--- @param blacklist table<table, boolean>?
+--- @param count integer? -- default 4
+function RoomManager:getImportantRooms(blacklist, count)
    blacklist = blacklist or {}
+   count = count or 4
 
    local nodes = {}
-
    for _, room in ipairs(self.rooms) do
       if room.center and not blacklist[room] then
-         nodes[#nodes + 1] = {
-            room = room,
-            pos = room.center,
-         }
+         nodes[#nodes + 1] = { room = room, pos = room.center }
       end
    end
 
    if #nodes == 0 then return {} end
-
-   if #nodes <= 4 then
+   if #nodes <= count then
       local out = {}
-      for _, n in ipairs(nodes) do
-         out[#out + 1] = n.room
-      end
+      for _, n in ipairs(nodes) do out[#out + 1] = n.room end
       return out
    end
 
+   ----------------------------------------------------------------
+   -- Precompute distances
+   ----------------------------------------------------------------
    local dist = {}
+   for i = 1, #nodes do dist[i] = {} end
 
    local function pathDistance(a, b)
       local path = prism.astar(a.pos, b.pos, function(x, y)
          return util.isWalkable(self.builder, x, y)
       end)
-      if not path then return math.huge end
-      return #path:getPath()
-   end
-
-   for i = 1, #nodes do
-      dist[i] = {}
+      return path and #path:getPath() or math.huge
    end
 
    for i = 1, #nodes do
@@ -259,71 +250,69 @@ function RoomManager:getImportantRooms(blacklist)
       end
    end
 
-   local a, b
-   local best = -1
+   ----------------------------------------------------------------
+   -- Seed with farthest pair
+   ----------------------------------------------------------------
+   local selected = {}
+   local used = {}
 
+   local best, a, b = -1
    for i = 1, #nodes do
       for j = i + 1, #nodes do
          local d = dist[i][j]
          if d < math.huge and d > best then
-            best = d
-            a, b = i, j
+            best, a, b = d, i, j
          end
       end
    end
 
    if not a then return { nodes[1].room } end
 
-   local c
-   local bestScore3 = -1
+   selected[#selected + 1] = a
+   selected[#selected + 1] = b
+   used[a], used[b] = true, true
 
-   for i = 1, #nodes do
-      if i ~= a and i ~= b then
-         local d1 = dist[i][a] or math.huge
-         local d2 = dist[i][b] or math.huge
+   ----------------------------------------------------------------
+   -- Greedily add remaining rooms
+   ----------------------------------------------------------------
+   while #selected < count do
+      local bestScore = -1
+      local bestIdx
 
-         if d1 < math.huge and d2 < math.huge then
-            local score = (d1 * d1) * (d2 * d2)
-            if score > bestScore3 then
-               bestScore3 = score
-               c = i
-            end
-         end
-      end
-   end
-
-   local d
-   local bestScore4 = -1
-
-   if c then
       for i = 1, #nodes do
-         if i ~= a and i ~= b and i ~= c then
-            local d1 = dist[i][a] or math.huge
-            local d2 = dist[i][b] or math.huge
-            local d3 = dist[i][c] or math.huge
-
-            if d1 < math.huge and d2 < math.huge and d3 < math.huge then
-               local score = (d1 * d1) * (d2 * d2) * (d3 * d3)
-               if score > bestScore4 then
-                  bestScore4 = score
-                  d = i
+         if not used[i] then
+            local score = 1
+            for _, s in ipairs(selected) do
+               local d = dist[i][s]
+               if not d or d == math.huge then
+                  score = -1
+                  break
                end
+               score = score * (d * d)
+            end
+
+            if score > bestScore then
+               bestScore = score
+               bestIdx = i
             end
          end
       end
+
+      if not bestIdx then break end
+      used[bestIdx] = true
+      selected[#selected + 1] = bestIdx
    end
 
-   local result = {
-      nodes[a].room,
-      nodes[b].room,
-   }
-
-   if c then result[#result + 1] = nodes[c].room end
-
-   if d then result[#result + 1] = nodes[d].room end
-
-   return result
+   ----------------------------------------------------------------
+   -- Emit rooms
+   ----------------------------------------------------------------
+   local out = {}
+   for _, i in ipairs(selected) do
+      out[#out + 1] = nodes[i].room
+   end
+   return out
 end
+
 
 --- Identifies rooms whose removal would NOT disconnect the room graph.
 --- Uses articulation-point detection on the room adjacency graph.
