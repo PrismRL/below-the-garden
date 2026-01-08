@@ -38,6 +38,7 @@ function DropState:draw()
 
    self.display:itemBorder(heldPosition.x, heldPosition.y, prism.Color4.DARK)
    self.display:print(positions.shift.x, positions.shift.y, "SHFT", prism.Color4.TEXT)
+   self.display:print(positions.wait.x, positions.wait.y, "X", prism.Color4.TEXT)
    self.display:putFG(positions.throw.x, positions.throw.y, prism.Color4.TEXT, math.huge)
    self.display:putFG(positions.throw.x, positions.throw.y + 1, prism.Color4.TEXT)
    animation:draw(self.display, position:decompose())

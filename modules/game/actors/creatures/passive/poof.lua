@@ -1,12 +1,12 @@
 prism.register(prism.Component:extend "PoofOnThrow")
 prism.register(prism.Component:extend "PoofSmoke")
 
-prism.registerActor("PoofSmoke", function ()
-   return prism.Actor.fromComponents{
+prism.registerActor("PoofSmoke", function()
+   return prism.Actor.fromComponents {
       prism.components.Name("PoofSmoke"),
       prism.components.PoofSmoke(),
       prism.components.Opaque(),
-      prism.components.Drawable{
+      prism.components.Drawable {
          index = 17,
          color = prism.Color4.GREY,
       },
@@ -14,10 +14,10 @@ prism.registerActor("PoofSmoke", function ()
    }
 end)
 
-prism.registerActor("PoofEmitter", function ()
+prism.registerActor("PoofEmitter", function()
    return prism.Actor.fromComponents {
       prism.components.Name("PoofEmitter"),
-      prism.components.SmokeEmitter{
+      prism.components.SmokeEmitter {
          turnsUntilDecay = 3,
          radius = 2,
          decay = 1,
@@ -47,5 +47,6 @@ prism.registerActor("Poof", function()
       prism.components.Sight { range = 4, fov = true, darkvision = 0 },
       prism.components.PoofOnThrow(),
       prism.components.Slow(),
+      prism.components.ConditionHolder(),
    }
 end)

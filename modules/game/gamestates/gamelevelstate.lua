@@ -27,6 +27,7 @@ function GameLevelState:__new(display, overlay, testing)
       attack = self.hudPosition + prism.Vector2(6, 3),
       shift = self.hudPosition + prism.Vector2(2, 4),
       throw = self.hudPosition + prism.Vector2(2, 8),
+      wait = self.hudPosition + prism.Vector2(2, 14),
       upon = self.hudPosition + prism.Vector2(3, 17),
       cycle = self.hudPosition + prism.Vector2(2, 19),
       drop = self.hudPosition + prism.Vector2(2, 13),
@@ -414,7 +415,7 @@ function GameLevelState:draw()
    -- love.graphics.pop()
 
    -- custom love2d drawing goes here!
-   love.graphics.print(love.timer.getFPS())
+   -- love.graphics.print(love.timer.getFPS())
 end
 
 function GameLevelState:resume()

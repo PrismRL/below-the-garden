@@ -60,7 +60,7 @@ function GeneralTargetHandler:update(dt)
       self:setSelectorPosition()
    end
 
-   if controls.select.pressed and self.curTarget then
+   if (controls.select.pressed or controls.throw.pressed) and self.curTarget then
       table.insert(self.targetList, self.curTarget)
       self.manager:pop()
    end
@@ -113,6 +113,7 @@ function ThrowTargetHandler:init()
 end
 
 function ThrowTargetHandler:draw()
+   local positions = self.levelState.hudPositions
    self.levelState:draw()
    self.display:clear()
 
@@ -139,6 +140,9 @@ function ThrowTargetHandler:draw()
    end
    local x, y = self.selectorPosition:decompose()
    self.display:put(x + self.camera.x, y + self.camera.y, 11)
+   self.display:print(positions.shift.x - 1, positions.shift.y - 1, "SHFT", prism.Color4.TEXT)
+   self.display:print(positions.wait.x - 1, positions.wait.y - 1, "X", prism.Color4.TEXT)
+   self.display:print(positions.drop.x - 1, positions.drop.y - 1, "V", prism.Color4.TEXT)
    love.graphics.push()
    love.graphics.translate(8, 8)
    self.display:draw()
