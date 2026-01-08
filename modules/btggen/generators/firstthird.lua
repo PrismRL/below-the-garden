@@ -180,7 +180,7 @@ local function accrete(generatorInfo, rng)
             if failures > 50 then break end
          else
             failures = 0
-            --if MAPDEBUG then coroutine.yield(builder) end
+            coroutine.yield(builder)
          end
       end
 
@@ -281,7 +281,7 @@ function FirstThird.generate(generatorInfo, player)
          local room = undecoratedRooms[i]
          print(decorator.className)
          if decorator.tryDecorate(generatorInfo, rng, builder, room) then
-            --coroutine.yield(builder)
+            coroutine.yield(builder)
             table.remove(undecoratedRooms, i)
             decorated = true
             break
@@ -384,7 +384,7 @@ function FirstThird.generate(generatorInfo, player)
       for i = 1, #encounterRooms do
          local room = encounterRooms[i]
          if canSpawnRoom(room) and decorator.tryDecorate(generatorInfo, rng, builder, room) then
-            --coroutine.yield(builder)
+            coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
             hard[room] = true
@@ -419,6 +419,7 @@ function FirstThird.generate(generatorInfo, player)
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
       for _, room in ipairs(rooms) do
          if canSpawnRoom(room) then
+            coroutine.yield(builder)
             if deco.tryDecorate(generatorInfo, rng, builder, room) then used[room] = true break end
          end
       end
@@ -430,7 +431,7 @@ function FirstThird.generate(generatorInfo, player)
          prism.decorators.SqeetoSwarmDecorator.tryDecorate(generatorInfo, rng, builder, room)
       end
    end
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.SqeetoThinningDecorator.tryDecorate(generatorInfo, rng, builder)
    --coroutine.yield(builder)
