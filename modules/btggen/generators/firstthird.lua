@@ -69,10 +69,7 @@ local function tryDoor(generatorInfo, builder, room, rs, rf, ax, ay, normal, rdo
             local gx = ox + (x - rs.x)
             local gy = oy + (y - rs.y)
 
-            if gx < 2 or gx > generatorInfo.w - 1 or
-               gy < 2 or gy > generatorInfo.h - 1 then
-               return false
-            end
+            if gx < 2 or gx > generatorInfo.w - 1 or gy < 2 or gy > generatorInfo.h - 1 then return false end
 
             for _, d in ipairs(prism.Vector2.neighborhood8) do
                if util.isFloor(builder, gx + d.x, gy + d.y) then return false end
@@ -110,7 +107,6 @@ local function tryDoor(generatorInfo, builder, room, rs, rf, ax, ay, normal, rdo
 
    return true
 end
-
 
 local function tryAccrete(generatorInfo, builder, rng)
    local anchors = builder:query(prism.components.DoorProxy):gather()
@@ -281,7 +277,7 @@ function FirstThird.generate(generatorInfo, player)
          local room = undecoratedRooms[i]
          print(decorator.className)
          if decorator.tryDecorate(generatorInfo, rng, builder, room) then
-            coroutine.yield(builder)
+            -- coroutine.yield(builder)
             table.remove(undecoratedRooms, i)
             decorated = true
             break
@@ -308,7 +304,7 @@ function FirstThird.generate(generatorInfo, player)
    --coroutine.yield(builder)
 
    local rm = prism.levelgen.RoomManager(builder, distanceField)
-   coroutine.yield(builder)
+   -- coroutine.yield(builder)
    rm:createLoop(generatorInfo)
    local rooms = rm.rooms
    mapdebug(builder, rooms)
@@ -384,7 +380,7 @@ function FirstThird.generate(generatorInfo, player)
       for i = 1, #encounterRooms do
          local room = encounterRooms[i]
          if canSpawnRoom(room) and decorator.tryDecorate(generatorInfo, rng, builder, room) then
-            coroutine.yield(builder)
+            -- coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
             hard[room] = true
@@ -419,8 +415,11 @@ function FirstThird.generate(generatorInfo, player)
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
       for _, room in ipairs(rooms) do
          if canSpawnRoom(room) then
-            coroutine.yield(builder)
-            if deco.tryDecorate(generatorInfo, rng, builder, room) then used[room] = true break end
+            -- coroutine.yield(builder)
+            if deco.tryDecorate(generatorInfo, rng, builder, room) then
+               used[room] = true
+               break
+            end
          end
       end
    end
@@ -431,7 +430,7 @@ function FirstThird.generate(generatorInfo, player)
          prism.decorators.SqeetoSwarmDecorator.tryDecorate(generatorInfo, rng, builder, room)
       end
    end
-   coroutine.yield(builder)
+   -- coroutine.yield(builder)
 
    prism.decorators.SqeetoThinningDecorator.tryDecorate(generatorInfo, rng, builder)
    --coroutine.yield(builder)
@@ -439,7 +438,7 @@ function FirstThird.generate(generatorInfo, player)
    local count = 0
    -- Easy spawns: remaining unused rooms
    for _, room in ipairs(rooms) do
-      if count > math.min(6, depth*2) then break end
+      if count > math.min(6, depth * 2) then break end
       prism.decorators.PebbleDecorator.tryDecorate(generatorInfo, rng, builder, room)
    end
 
@@ -452,7 +451,7 @@ function FirstThird.generate(generatorInfo, player)
    local weapons = {
       prism.actors.Sling,
       prism.actors.Sword,
-      prism.actors.Hammer
+      prism.actors.Hammer,
    }
 
    local natural = {

@@ -5,5 +5,6 @@ prism.registerActor("Stairs", function()
       prism.components.Position(),
       prism.components.Stair(),
       prism.components.Collider(),
+      prism.components.Remembered(),
    }
 end)

@@ -24,5 +24,6 @@ prism.registerActor("Snip", function()
       prism.components.Senses(),
       prism.components.Sight { range = 4, fov = true, darkvision = 2 / 16 },
       prism.components.Eatable(1),
+      prism.components.Attacker(1),
    }
 end)

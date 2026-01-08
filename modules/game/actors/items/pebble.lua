@@ -8,5 +8,6 @@ prism.registerActor("Pebble", function()
       prism.components.Item(),
       prism.components.Equipment("held"),
       prism.components.Position(),
+      prism.components.Attacker(1),
    }
 end)

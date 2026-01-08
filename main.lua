@@ -46,17 +46,17 @@ function love.load(args)
    local testing = args[1] == "-t"
    local map = args[1] == "-m"
    if testing then
-      manager:push(spectrum.gamestates.GameLevelState(GAME:generate(GAME.depth), display, overlay, testing))
+      manager:push(spectrum.gamestates.GameLevelState(prism.LevelBuilder(), display, overlay, testing))
    elseif map then
       MAPDEBUG = true
 
       manager:push(spectrum.gamestates.MapGeneratorState(function()
-            prism.generators.FirstThird.generate({
-               seed = love.timer.getTime(),
-               w = 60,
-               h = 30,
-               depth = 1,
-            }, prism.actors.Player())
+         prism.generators.FirstThird.generate({
+            seed = love.timer.getTime(),
+            w = 60,
+            h = 30,
+            depth = 1,
+         }, prism.actors.Player())
       end, nil, overlay))
    else
       manager:push(spectrum.gamestates.GameStartState(display, overlay))

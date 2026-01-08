@@ -18,7 +18,7 @@ prism.registerActor("Thrumble", function()
       },
       prism.components.Mover { "walk" },
       prism.components.Position(),
-      prism.components.Collider(),
+      prism.components.Collider { allowedMovetypes = { "fly" } },
       prism.components.Senses(),
       prism.components.Sight { fov = true, range = 12 },
       prism.components.Inventory { limitCount = 1, limitWeight = 1, limitVolume = 1 },

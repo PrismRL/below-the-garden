@@ -75,7 +75,7 @@ prism.registerActor("Frog", function()
    local equipper = prism.components.Equipper { "held" }
    equipper.equipped["held"] = prism.actors.FrogTongue()
 
-   return prism.Actor.fromComponents {
+   local frog = prism.Actor.fromComponents {
       prism.components.Name("Frog"),
       prism.components.Drawable { index = 293, layer = 3 },
       prism.components.IdleAnimation("FrogIdle"),
@@ -87,10 +87,12 @@ prism.registerActor("Frog", function()
       prism.components.FrogController(),
       prism.components.Health(6),
       prism.components.Attacker(1),
-      prism.components.Slow(),
       prism.components.ConditionHolder(),
       prism.components.Tonguer(),
       equipper,
       prism.components.Nesting(prism.components.FrogHome),
    }
+
+   frog:addRelation(prism.relations.EquippedRelation, equipper.equipped["held"])
+   return frog
 end)

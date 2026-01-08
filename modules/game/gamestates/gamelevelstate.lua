@@ -77,6 +77,9 @@ function GameLevelState:__new(builder, display, overlay, testing)
    -- Initialize with the created level and display, the heavy lifting is done by
    -- the parent class.
    self.super.__new(self, builder:build(prism.cells.Wall), display)
+   local width, height = self.level.map.w, self.level.map.h
+   local displayWidth, displayHeight = self.display.width, self.display.height
+   self.display:setCamera(math.floor(displayWidth / 2 - width / 2), math.floor(displayHeight / 2 - height / 2))
 end
 
 function GameLevelState:handleMessage(message)
@@ -387,9 +390,10 @@ function GameLevelState:draw()
       self.display:putSenses(primary, secondary, self.level)
 
       for entity, _ in pairs(player:getRelations(prism.relations.TelepathedRelation)) do
-         local position = entity:get(prism.components.Position):getVector()
-         if not player:hasRelation(prism.relations.SeesRelation, entity) then
-            self.display:putActor(position.x, position.y, entity, prism.Color4.CORNFLOWER)
+         local position = entity:get(prism.components.Position)
+         if position and not player:hasRelation(prism.relations.SeesRelation, entity) then
+            --- @cast entity Actor
+            self.display:putActor(position:getVector().x, position:getVector().y, entity, prism.Color4.CORNFLOWER)
          end
       end
       self.display:popModifier()

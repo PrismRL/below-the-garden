@@ -36,9 +36,18 @@ function Throw:perform(level, object)
    local start = self.owner:expectPosition()
    local maximumDistance = self.owner:expect(prism.components.Thrower):getRange()
 
+   local hitActor = nil
+
    local path = prism.Bresenham(start.x, start.y, position.x, position.y, function(cx, cy)
+      if hitActor then return false end
+
       local distance = start:distance(prism.Vector2(cx, cy))
-      if not level:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then return false end
+      local at = level:query(prism.components.Health):at(cx, cy):first()
+      if at ~= self.owner then hitActor = at end
+
+      if not level.map:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance or hitActor then
+         return true
+      end
       return true
    end)
    if path:length() == 0 then return end
@@ -59,7 +68,7 @@ function Throw:perform(level, object)
 
    local previousMover = held:get(prism.components.Mover)
    held:give(prism.components.Mover { "fly" })
-   for _, point in ipairs(path:getPath()) do
+   for i, point in ipairs(path:getPath()) do
       level:moveActor(held, point)
       level:getSystem(prism.systems.SensesSystem):triggerRebuild(level, self.owner)
       level:yield(prism.messages.AnimationMessage {
@@ -67,11 +76,13 @@ function Throw:perform(level, object)
          blocking = true,
       })
    end
+   if held:has(prism.components.Attacker) and hitActor then
+      local damage = self.owner:expect(prism.components.Thrower):getDamage()
+         + held:expect(prism.components.Attacker).damage
+      if hitActor then level:tryPerform(prism.actions.Damage(hitActor, damage)) end
+   end
    held:remove(prism.components.Mover)
    if previousMover then held:give(previousMover) end
-
-   local damage = self.owner:expect(prism.components.Thrower):getDamage()
-   level:tryPerform(prism.actions.Damage(object, damage))
 
    local explode = held:get(prism.components.ExplodeOnThrow)
    if explode then

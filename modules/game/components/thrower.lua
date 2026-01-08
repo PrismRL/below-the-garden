@@ -35,7 +35,7 @@ end
 function Thrower:getDamage()
    local modifiers = prism.components.ConditionHolder.getActorModifiers(self.owner, prism.modifiers.ThrowDamageModifier)
 
-   local damage = 1
+   local damage = 0
    for _, modifier in ipairs(modifiers) do
       damage = damage + modifier.damage
    end
