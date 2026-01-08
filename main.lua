@@ -21,6 +21,8 @@ prism.loadModule("modules/levelgen")
 prism.loadModule("modules/btggen")
 prism.loadModule("modules/smoke")
 
+GAME = prism.Game(love.timer.getTime())
+
 prism.logger.setOptions { level = "debug" }
 
 -- Load a sprite atlas and configure the terminal-style display,
@@ -44,7 +46,7 @@ function love.load(args)
    local testing = args[1] == "-t"
    local map = args[1] == "-m"
    if testing then
-      manager:push(spectrum.gamestates.GameLevelState(display, overlay, testing))
+      manager:push(spectrum.gamestates.GameLevelState(GAME:generate(GAME.depth), display, overlay, testing))
    elseif map then
       MAPDEBUG = true
 

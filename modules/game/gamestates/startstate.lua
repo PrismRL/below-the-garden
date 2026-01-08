@@ -32,7 +32,7 @@ function GameStartState:draw()
 end
 
 function GameStartState:keypressed()
-   self.manager:enter(spectrum.gamestates.GameLevelState(self.display, self.overlay))
+   self.manager:enter(spectrum.gamestates.GameLevelState(GAME:generate(GAME.depth), self.display, self.overlay))
 end
 
 return GameStartState

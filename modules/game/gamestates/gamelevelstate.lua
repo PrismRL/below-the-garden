@@ -5,14 +5,15 @@ local settings = require "settings"
 --- A custom game level state responsible for initializing the level map,
 --- handling input, and drawing the state to the screen.
 ---
---- @overload fun(display: Display, overlay: Display): GameLevelState
+--- @overload fun(builder: LevelBuilder, display: Display, overlay: Display): GameLevelState
 local GameLevelState = spectrum.gamestates.LevelState:extend "GameLevelState"
 
 local hud = love.graphics.newImage("display/hud.png")
 
+--- @param builder LevelBuilder
 --- @param display Display
 --- @param overlay Display
-function GameLevelState:__new(display, overlay, testing)
+function GameLevelState:__new(builder, display, overlay, testing)
    -- Construct a simple test map using MapBuilder.
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
@@ -42,7 +43,6 @@ function GameLevelState:__new(display, overlay, testing)
    }
 
    local player = prism.actors.Player()
-   local builder
    if testing then
       builder = prism.LevelBuilder()
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
@@ -54,15 +54,6 @@ function GameLevelState:__new(display, overlay, testing)
       builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
       builder:addActor(prism.actors.Player(), 16, 16)
       builder:addActor(prism.actors.Torch(), 12, 12)
-   else
-      assert(player)
-      print("Player", player)
-      builder = prism.generators.FirstThird.generate({
-         seed = love.timer.getTime(),
-         w = 50,
-         h = 30,
-         depth = 1,
-      }, player)
    end
 
    -- Add systems
@@ -96,7 +87,10 @@ function GameLevelState:handleMessage(message)
       self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
    end
 
-   if prism.messages.DescendMessage:is(message) then self.manager:enter(GameLevelState(self.display, self.overlay)) end
+   if prism.messages.DescendMessage:is(message) then 
+      GAME.depth = GAME.depth + 1
+      self.manager:enter(GameLevelState(GAME:generate(GAME.depth), self.display, self.overlay))
+   end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
    -- here.

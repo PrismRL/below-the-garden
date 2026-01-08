@@ -1,3 +1,6 @@
+local path = ...
+local basePath = path:match("^(.*)%.") or ""
+
 prism.Collision.assignNextAvailableMovetype("walk")
 prism.Collision.assignNextAvailableMovetype("fly")
 prism.Collision.assignNextAvailableMovetype("swim")
@@ -7,3 +10,6 @@ prism.register(prism.Component:extend "Prism")
 prism.register(prism.Component:extend "Stair")
 prism.register(prism.Component:extend "Tonguer")
 prism.register(prism.Component:extend "Void")
+
+--- @module "modules.game.game"
+prism.Game = require(basePath .. ".game")

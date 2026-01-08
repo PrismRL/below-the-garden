@@ -41,6 +41,7 @@ function Equip:perform(level, actor)
 
    print "REMOVING + RELATION"
    actor:remove(prism.components.Position)
+   self.owner:addRelation(prism.relations.EquippedRelation, actor)
    self.owner:addRelation(prism.relations.LitByRelation, actor)
 
    local conditions = self.owner:get(prism.components.ConditionHolder)
