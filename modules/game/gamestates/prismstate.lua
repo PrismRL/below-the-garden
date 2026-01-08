@@ -59,7 +59,7 @@ local function makeWhiteFlashDrawer(display, startTime, flashDuration, holdRatio
    local w = display.width
    local h = display.height
 
-   holdRatio = holdRatio or 0.25
+   holdRatio = holdRatio or 0.35
 
    local holdTime = flashDuration * holdRatio
    local fadeTime = (flashDuration - holdTime) * 0.5
@@ -89,7 +89,7 @@ local function makeWhiteFlashDrawer(display, startTime, flashDuration, holdRatio
 end
 
 local function makeShatterTextDrawer(display, x, y, startTime, flashDuration, holdRatio)
-   holdRatio = holdRatio or 0.25
+   holdRatio = holdRatio or 0.35
 
    local holdTime = flashDuration * holdRatio
    local fadeTime = (flashDuration - holdTime) * 0.5

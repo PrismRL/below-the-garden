@@ -109,6 +109,10 @@ function Throw:perform(level, object)
       level:addActor(prism.actors.PoofEmitter(), position:decompose())
       level:removeActor(held)
    end
+
+   if held:get(prism.components.SlimeProducer) then
+      level:removeActor(held)
+   end
 end
 
 return Throw
