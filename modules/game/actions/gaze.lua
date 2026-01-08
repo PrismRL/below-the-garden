@@ -15,6 +15,7 @@ function Gaze:perform(level, prismItem)
    level:perform(prism.actions.Unequip(self.owner, prismItem))
    self.owner:expect(prism.components.ConditionHolder):add(prism.condition.Condition(prism.modifiers.HealthModifier(1)))
    self.owner:expect(prism.components.Health):heal(math.huge)
+   level:yield(prism.messages.GazeMessage(self.owner))
 end
 
 return Gaze

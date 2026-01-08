@@ -86,6 +86,10 @@ function GameLevelState:handleMessage(message)
       self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
    end
 
+   if prism.messages.GazeMessage:is(message) then
+      self.manager:push(spectrum.gamestates.PrismState(self, self.overlay))
+   end
+
    if prism.messages.DescendMessage:is(message) then
       --- @cast message DescendMessage
       GAME.depth = GAME.depth + 1

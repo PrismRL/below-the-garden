@@ -10,7 +10,10 @@ FrogTree.children = {
       prism.nodes.PerformOnBehavior(prism.actions.Tongue),
       prism.nodes.MoveTowardTargetBehavior(1),
    },
-   prism.nodes.ReturnHomeBehavior(1),
+   BT.Sequence {
+      prism.nodes.ReturnHomeBehavior(1),
+      prism.nodes.MoveTowardTargetBehavior,
+   },
    prism.nodes.WaitBehavior,
 }
 

@@ -2,7 +2,6 @@ local util = prism.levelgen.util
 
 local GlowStalkDecorator = prism.levelgen.Decorator:extend "GlowStalkDecorator"
 
-local MAX_TOTAL     = 20
 local CLUMP_RADIUS  = 5
 local MIN_SEED_DIST = 3
 local ATTEMPTS      = 1000
@@ -25,6 +24,12 @@ local function findGlowStalkSpot(builder, wallDistanceField, lightDistanceField,
 end
 
 function GlowStalkDecorator.tryDecorate(generatorInfo, rng, builder, _)
+   local baseW = 50
+   local baseH = 30
+   local baseMax = 20
+
+   local MAX_TOTAL = baseMax * (generatorInfo.w * generatorInfo.h) / (baseW * baseH)
+
    local wallDistanceField = util.buildWallDistanceField(builder)
 
    local lightQuery = builder:query(prism.components.Light)

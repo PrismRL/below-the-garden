@@ -5,12 +5,18 @@ local BT = prism.BehaviorTree
 
 GobTree.children = {
    BT.Sequence {
+      prism.BehaviorTree.Node(function (self, level, actor, controller)
+         return not actor:expect(prism.components.Equipper):get("held")
+      end),
       prism.nodes.FindEnemyBehavior,
       prism.nodes.PerformOnBehavior(prism.actions.Steal),
-      prism.nodes.PerformOnBehavior(prism.actions.Attack),
       prism.nodes.MoveTowardTargetBehavior(1),
    },
-   prism.nodes.ReturnHomeBehavior(1),
+   BT.Sequence {
+      prism.nodes.DropWeaponBehavior("held"),
+      prism.nodes.ReturnHomeBehavior(1),
+      prism.nodes.MoveTowardTargetBehavior,
+   },
    prism.nodes.WaitBehavior,
 }
 
