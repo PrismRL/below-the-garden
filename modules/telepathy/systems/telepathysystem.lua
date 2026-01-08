@@ -30,7 +30,7 @@ function TelepathySystem:onSenses(level, actor)
    if range == 0 then return end
    --- @cast telepathyComponent Telepathy
 
-   actor:removeAllRelations(prism.relations.Telepathed)
+   actor:removeAllRelations(prism.relations.TelepathedRelation)
 
    local actorPos = actor:getPosition()
    if not actorPos then return end
