@@ -2,9 +2,7 @@
 local FindWeaponBehavior = prism.BehaviorTree.Node:extend("FindWeaponBehavior")
 
 function FindWeaponBehavior:run(level, actor, controller)
-   if actor:expect(prism.components.Equipper):get("weapon") then
-      return false
-   end
+   if actor:expect(prism.components.Equipper):get("weapon") then return false end
 
    local senses = actor:expect(prism.components.Senses)
 

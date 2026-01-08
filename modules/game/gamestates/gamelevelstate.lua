@@ -29,12 +29,12 @@ function GameLevelState:__new(builder, display, overlay, testing)
       shift = self.hudPosition + prism.Vector2(2, 4),
       throw = self.hudPosition + prism.Vector2(2, 8),
       wait = self.hudPosition + prism.Vector2(2, 14),
-      upon = self.hudPosition + prism.Vector2(3, 17),
-      cycle = self.hudPosition + prism.Vector2(2, 19),
+      upon = self.hudPosition + prism.Vector2(3, 18),
       drop = self.hudPosition + prism.Vector2(2, 13),
-      pickup = self.hudPosition + prism.Vector2(2, 15),
-      pickupSlot = self.hudPosition + prism.Vector2(7, 18),
-      pickupSwap = self.hudPosition + prism.Vector2(6, 17),
+      pickup = self.hudPosition + prism.Vector2(2, 16),
+      pickupSwap = self.hudPosition + prism.Vector2(6, 18),
+      pickupSlot = self.hudPosition + prism.Vector2(7, 19),
+      cycle = self.hudPosition + prism.Vector2(2, 20),
    }
 
    self.useActions = {
@@ -42,7 +42,6 @@ function GameLevelState:__new(builder, display, overlay, testing)
       prism.actions.Gaze,
    }
 
-   local player = prism.actors.Player()
    if testing then
       builder = prism.LevelBuilder()
       builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
@@ -87,8 +86,10 @@ function GameLevelState:handleMessage(message)
       self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
    end
 
-   if prism.messages.DescendMessage:is(message) then 
+   if prism.messages.DescendMessage:is(message) then
+      --- @cast message DescendMessage
       GAME.depth = GAME.depth + 1
+      self.level:removeActor(message.actor)
       self.manager:enter(GameLevelState(GAME:generate(GAME.depth), self.display, self.overlay))
    end
    -- Handle any messages sent to the level state from the level. LevelState

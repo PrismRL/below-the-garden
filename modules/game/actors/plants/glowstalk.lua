@@ -1,5 +1,5 @@
 prism.registerActor("Glowstalk", function()
-   local baseLight = prism.components.Light(prism.Color4.LIME, 5, prism.lighteffects.Sin())
+   local baseLight = prism.components.Light(prism.Color4.GREEN * 1.5, 5, prism.lighteffects.Sin())
    local offLight = baseLight:clone()
    --- @cast offLight Light
    offLight.color = baseLight:getColor() / 2
