@@ -13,5 +13,6 @@ prism.registerActor("Torch", function()
          6,
          prism.lighteffects.Flicker { speed = 2, colorShift = 0.1 }
       ),
+      prism.components.Torch(),
    }
 end)

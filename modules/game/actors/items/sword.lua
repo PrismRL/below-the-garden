@@ -7,5 +7,6 @@ prism.registerActor("Sword", function()
       },
       prism.components.Equipment("weapon", prism.condition.Condition(prism.modifiers.AttackModifier(2))),
       prism.components.Position(),
+      prism.components.Weapon(),
    }
 end)
