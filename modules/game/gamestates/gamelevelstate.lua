@@ -70,7 +70,8 @@ function GameLevelState:__new(builder, display, overlay, testing)
       prism.systems.AutoTileSystem(),
       prism.systems.EquipmentSystem(),
       prism.systems.NestingSystem(),
-      prism.systems.FallSystem()
+      prism.systems.FallSystem(),
+      prism.systems.WanderSystem()
    )
    builder:addTurnHandler(require "modules.base.quickturnhandler")
 
