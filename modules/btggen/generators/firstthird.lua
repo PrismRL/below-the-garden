@@ -417,7 +417,7 @@ function FirstThird.generate(generatorInfo, player)
       for _, room in ipairs(rooms) do
          if canSpawnRoom(room) then
             -- coroutine.yield(builder)
-            if prism.decorators.GobLair.tryDecorate(generatorInfo, rng, builder, room) then
+            if deco.tryDecorate(generatorInfo, rng, builder, room) then
                used[room] = true
                break
             end

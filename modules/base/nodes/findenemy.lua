@@ -50,9 +50,6 @@ function FindEnemyBehavior:run(level, actor, controller)
       end
    end
 
-   if closest then
-      print(not not closest, prism.components.Name.get(closest))
-   end
    controller.blackboard["target"] = closest
    return not not closest
 end
