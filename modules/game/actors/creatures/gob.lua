@@ -29,6 +29,7 @@ prism.registerActor("Gob", function()
       prism.components.Attacker(1),
       prism.components.Health(6),
       prism.components.Nesting(prism.components.GobHome),
-      prism.components.Wanderer(15)
+      prism.components.Wanderer(15),
+      prism.components.GobFaction(),
    }
 end)
