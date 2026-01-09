@@ -45,9 +45,7 @@ function Throw:perform(level, object)
       local at = level:query(prism.components.Health):at(cx, cy):first()
       if at ~= self.owner then hitActor = at end
 
-      if not level.map:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance or hitActor then
-         return true
-      end
+      if not level.map:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then return false end
       return true
    end)
    if path:length() == 0 then return end
@@ -110,9 +108,7 @@ function Throw:perform(level, object)
       level:removeActor(held)
    end
 
-   if held:get(prism.components.SlimeProducer) then
-      level:removeActor(held)
-   end
+   if held:get(prism.components.SlimeProducer) then level:removeActor(held) end
 end
 
 return Throw
