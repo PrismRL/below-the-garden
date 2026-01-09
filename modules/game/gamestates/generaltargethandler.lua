@@ -19,8 +19,8 @@ function GeneralTargetHandler:getValidTargets()
    end
 
    table.sort(valid, function(a, b)
-      if a:has(prism.components.Controller) and (not b:has(prism.components.Controller)) then return true end
-      if b:has(prism.components.Controller) and (not a:has(prism.components.Controller)) then return false end
+      if a:has(prism.components.Health) and (not b:has(prism.components.Health)) then return true end
+      if b:has(prism.components.Health) and (not a:has(prism.components.Health)) then return false end
       return a:getName() < b:getName()
    end)
 
