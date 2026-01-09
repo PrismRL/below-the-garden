@@ -1,3 +1,13 @@
+prism.register(prism.Component:extend "GobHome")
+
+prism.registerActor("GobHome", function()
+   return prism.Actor.fromComponents {
+      prism.components.Name("GobHome"),
+      prism.components.GobHome(),
+      prism.components.Position()
+   }
+end)
+
 prism.registerActor("Gob", function()
    return prism.Actor.fromComponents {
       prism.components.Name("Gob"),
@@ -19,5 +29,6 @@ prism.registerActor("Gob", function()
       prism.components.Attacker(1),
       prism.components.ThrumbleFaction(),
       prism.components.Health(6),
+      prism.components.Nesting(prism.components.GobHome)
    }
 end)

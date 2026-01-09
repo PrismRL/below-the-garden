@@ -4,7 +4,14 @@ local util = prism.levelgen.util
 local FireflyDecorator = prism.levelgen.Decorator:extend "FireflyDecorator"
 
 function FireflyDecorator.tryDecorate(generatorInfo, rng, builder)
-   local count = 8
+   local maxCount = 8
+   local maxW, maxH = 50, 30
+
+   local w = math.min(generatorInfo.w, maxW)
+   local h = math.min(generatorInfo.h, maxH)
+
+   local areaRatio = (w * h) / (maxW * maxH)
+   local count = math.floor(maxCount * areaRatio + 0.5)
    local placed = false
 
    for _ = 1, count do
