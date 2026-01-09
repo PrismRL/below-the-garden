@@ -19,12 +19,14 @@ end
 ---@param possibleEnemy Actor
 function Faction.isEnemy(owner, possibleEnemy)
    local factionComp = owner:get(prism.components.Faction)
-   if not factionComp then return true end
+   print("SELF FACTION COMP")
+   if not factionComp then return false end
    if not factionComp.set then factionComp:buildSet() end
 
    local otherFactionComp = possibleEnemy:get(prism.components.Faction)
    if not otherFactionComp then return false end
 
+   print(factionComp.className, factionComp.set[otherFactionComp.className])
    return factionComp.set[otherFactionComp.className]
 end
 

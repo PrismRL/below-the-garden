@@ -19,6 +19,7 @@ function FindEnemyBehavior:run(level, actor, controller)
       :iter()
    do
       if candidate ~= actor and prism.components.Faction.isEnemy(actor, candidate) then
+         print("CANDIDATE: ", prism.components.Name.get(candidate))
          local distance = actor:getRange(candidate)
 
          local maxAllowed =
@@ -47,6 +48,10 @@ function FindEnemyBehavior:run(level, actor, controller)
       if lseen then
          if lseen.position then closest = lseen.position end
       end
+   end
+
+   if closest then
+      print(not not closest, prism.components.Name.get(closest))
    end
    controller.blackboard["target"] = closest
    return not not closest

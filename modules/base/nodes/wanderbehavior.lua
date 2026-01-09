@@ -6,14 +6,15 @@ function WanderBehavior:run(level, actor, controller)
    if not mover then return end
 
    local mask = mover.mask
-   
+
    local origin = actor:expectPosition()
    local wander = actor:get(prism.components.Wanderer)
+   print("WOAH", wander, wander.goal)
    if not wander or not wander.goal then return end
 
    local path = level:findPath(origin, wander.goal, actor, mask)
    print("PATH", path)
-   if not path or #path:getPath() == 9 then return false end
+   if not path then return false end
 
    print "ACTION"
    local action = prism.actions.Move(actor, path:pop())

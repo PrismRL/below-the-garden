@@ -22,14 +22,13 @@ prism.registerActor("Gob", function()
       prism.components.Position(),
       prism.components.Collider(),
       prism.components.Senses(),
-      prism.components.Sight { fov = true, range = 12 },
+      prism.components.LightSight { fov = true, range = 12, darkvision = 0 },
       prism.components.Inventory { limitCount = 1, limitWeight = 1, limitVolume = 1 },
       prism.components.Equipper { "weapon", "held" },
       prism.components.GobController(),
       prism.components.Attacker(1),
-      prism.components.ThrumbleFaction(),
       prism.components.Health(6),
       prism.components.Nesting(prism.components.GobHome),
-      prism.components.Wanderer(5)
+      prism.components.Wanderer(15)
    }
 end)

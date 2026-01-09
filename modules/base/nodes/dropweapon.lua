@@ -12,7 +12,10 @@ function DropWeaponBehavior:run(level, actor)
       local distance = actor:getRange(home)
       if distance <= 2 then
          local equipper = actor:expect(prism.components.Equipper)
-         return level:tryPerform(prism.actions.Drop(actor, equipper:get(self.slot or "weapon")))
+         if level:canPerform(prism.actions.Drop(actor, equipper:get(self.slot or "weapon"))) then
+            print "DROPPING"
+            return prism.actions.Drop(actor, equipper:get(self.slot or "weapon"))
+         end
       end
    end
 
