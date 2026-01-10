@@ -337,6 +337,7 @@ function FirstThird.generate(generatorInfo, player)
       prism.actors.Shield,
       prism.actors.RingOfVitality,
       prism.actors.TiaraOfTelepathy,
+      prism.actors.UndyingHelm,
    }
 
    if depth > 1 then
