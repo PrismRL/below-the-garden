@@ -406,7 +406,8 @@ function FirstThird.generate(generatorInfo, player)
    end
 
    local mediumEncounterDecorators = {
-
+      prism.decorators.FrogDecorator,
+      prism.decorators.ThrumbleScoutDecorator,
       prism.decorators.GobLair,
    }
 
