@@ -33,7 +33,9 @@ function RoomManager:findRoomCenter(tiles)
       end
    end
 
-   return bestX and prism.Vector2(bestX, bestY) or nil
+   if bestX then
+      return prism.Vector2(bestX, bestY), bestDist
+   end
 end
 
 function RoomManager:findRooms(minRoomSize)
@@ -127,7 +129,7 @@ function RoomManager:findRooms(minRoomSize)
 
    -- after all room growth is complete
    for _, room in ipairs(rooms) do
-      room.center = self:findRoomCenter(room.tiles)
+      room.center, room.d = self:findRoomCenter(room.tiles)
    end
 
    return rooms

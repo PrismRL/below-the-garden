@@ -326,11 +326,23 @@ function FirstThird.generate(generatorInfo, player)
    used[room] = true
    builder:addActor(player, room.center:decompose())
 
-   room = table.remove(importantRooms, rng:random(#importantRooms))
-   builder:addActor(prism.actors.Prism(), room.center:decompose())
+   if depth ~= 6 then
+      room = table.remove(importantRooms, rng:random(#importantRooms))
+      builder:addActor(prism.actors.Prism(), room.center:decompose())
 
-   room = table.remove(importantRooms, rng:random(#importantRooms))
-   builder:addActor(prism.actors.Stairs(), room.center:decompose())
+      room = table.remove(importantRooms, rng:random(#importantRooms))
+      builder:addActor(prism.actors.Stairs(), room.center:decompose())
+   else
+      local best, bestD = nil, 0
+      for _, room in ipairs(rooms) do
+         if room.d >= bestD and canSpawnRoom(room) then
+            best = room
+            bestD = room.d
+         end
+      end
+
+      builder:addActor(prism.actors.Crystal(), best.center:decompose())
+   end
 
    local chestItems = {
       prism.actors.Flippers,
