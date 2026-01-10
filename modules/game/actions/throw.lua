@@ -42,10 +42,11 @@ function Throw:perform(level, object)
       if hitActor then return false end
 
       local distance = start:distance(prism.Vector2(cx, cy))
+
+      if not level.map:getCellPassable(cx, cy, throwMask) or distance > maximumDistance then return false end
+
       local at = level:query(prism.components.Health):at(cx, cy):first()
       if at ~= self.owner then hitActor = at end
-
-      if not level.map:getCellPassable(cx, cy, throwMask) or distance >= maximumDistance then return false end
       return true
    end)
    if path:length() == 0 then return end
