@@ -17,6 +17,8 @@ function PitDecorator.tryDecorate(generatorInfo, rng, builder, room)
    local minFloorRatio = 0.30
    local maxNoiseRerolls = 5
 
+   print "YAYAYYA"
+   print(room.size, minRoomSize)
    if room.size <= minRoomSize then return end
 
    local cx, cy = room.center:decompose()

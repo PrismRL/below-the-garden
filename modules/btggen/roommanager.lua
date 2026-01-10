@@ -8,6 +8,8 @@ local util = prism.levelgen.util
 local RoomManager = prism.Object:extend "RoomManager"
 
 function RoomManager:__new(builder, wallDistanceField)
+   print(builder, wallDistanceField)
+   assert(wallDistanceField)
    self.builder = builder
    self.wallDistanceField = wallDistanceField
 

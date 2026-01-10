@@ -51,7 +51,7 @@ function love.load(args)
       MAPDEBUG = true
 
       manager:push(spectrum.gamestates.MapGeneratorState(function()
-         prism.generators.FirstThird.generate({
+         prism.generators.PrismRoom.generate({
             seed = love.timer.getTime(),
             w = 60,
             h = 30,
