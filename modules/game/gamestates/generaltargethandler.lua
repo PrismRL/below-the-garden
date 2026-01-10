@@ -125,9 +125,12 @@ function ThrowTargetHandler:draw()
       function(cx, cy)
          local distance = self.start:distance(prism.Vector2(cx, cy))
          if
-            not self.level:getCellPassable(cx, cy, self.throwMask)
-            or distance >= self.maxRange
-            or not self.owner:expect(prism.components.Senses).cells:get(cx, cy)
+            not self.start:equals(cx, cy)
+            and (
+               not self.level:getCellPassable(cx, cy, self.throwMask)
+               or distance >= self.maxRange
+               or not self.owner:expect(prism.components.Senses).cells:get(cx, cy)
+            )
          then
             return false -- stop iteration
          end

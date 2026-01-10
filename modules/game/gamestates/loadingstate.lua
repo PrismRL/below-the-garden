@@ -13,7 +13,7 @@ function LoadingState:__new(generator, display, overlay)
    self.display = display
    self.overlay = overlay
    self.timer = 0
-   self.index = 0
+   self.index = 1
 end
 
 function LoadingState:update(dt)

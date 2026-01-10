@@ -99,7 +99,9 @@ function GameLevelState:handleMessage(message)
       --- @cast message DescendMessage
       GAME.depth = GAME.depth + 1
       self.level:removeActor(message.actor)
-      self.manager:enter(GameLevelState(GAME:generate(GAME.depth), self.display, self.overlay))
+      self.manager:enter(spectrum.gamestates.LoadingState(function()
+         return GAME:generate(GAME.depth)
+      end, self.display, self.overlay))
    end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
