@@ -91,7 +91,8 @@ function GameLevelState:handleMessage(message)
    end
 
    if prism.messages.GazeMessage:is(message) then
-      self.manager:push(spectrum.gamestates.PrismState(self, self.overlay))
+      --- @cast message GazeMessage
+      self.manager:push(spectrum.gamestates.PrismState(self, self.overlay, message.final))
    end
 
    if prism.messages.DescendMessage:is(message) then
@@ -155,6 +156,11 @@ function GameLevelState:updateDecision(dt, owner, decision)
       local stair = self.level:query(prism.components.Stair):at(destination:decompose()):first()
       local descend = prism.actions.Descend(owner, stair)
       if self:setAction(descend) then return end
+
+      local crystal = self.level:query(prism.components.Crystal):at(destination:decompose()):first()
+      print(crystal)
+      local win = prism.actions.Win(owner, crystal)
+      if self:setAction(win) then return end
    end
 
    if controls.pickup.pressed then

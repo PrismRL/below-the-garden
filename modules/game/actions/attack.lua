@@ -31,14 +31,20 @@ function Attack:perform(level, attacked)
    local damage, knockback = attacker:getDamageAndKnockback()
 
    level:tryPerform(prism.actions.Damage(attacked, damage))
-   local direction = (attacked:getPosition() - self.owner:getPosition())
-   local final = attacked:expectPosition()
-   for _ = 1, knockback do
-      local nextpos = final + direction
-      if not level:getCellPassable(nextpos.x, nextpos.y, mask) then break end
-      final = nextpos
+   if knockback > 0 then
+      local direction = (attacked:getPosition() - self.owner:getPosition())
+      local final = attacked:expectPosition()
+      for _ = 1, knockback do
+         local nextpos = final + direction
+         if not level:getCellPassable(nextpos.x, nextpos.y, mask) then break end
+         final = nextpos
+      end
+      level:moveActor(attacked, final)
+      level:yield(prism.messages.AnimationMessage {
+         animation = spectrum.animations.Wait(0.3),
+         blocking = true,
+      })
    end
-   level:moveActor(attacked, final)
 end
 
 return Attack

@@ -21,13 +21,9 @@ local function makePrismNoiseDrawer(display)
 
       for x = 1, w do
          for y = 1, h do
-            local n = love.math.noise(
-               x * scale,
-               y * scale,
-               t * timeScale
-            )
+            local n = love.math.noise(x * scale, y * scale, t * timeScale)
 
-            local color = prism.Color4.PURPLE:copy()
+            local color = prism.Color4.PRISM:copy()
             color.a = n * fade
             display:putBG(x, y, color)
          end
@@ -44,15 +40,7 @@ local function makeTypewriterDrawer(display, text, x, y, charDelay)
       if count <= 0 then return end
       if count > len then count = len end
 
-      display:print(
-         x,
-         y,
-         text:sub(1, count),
-         prism.Color4.WHITE,
-         nil,
-         nil,
-         "center"
-      )
+      display:print(x, y, text:sub(1, count), prism.Color4.WHITE, nil, nil, "center")
    end
 end
 local function makeWhiteFlashDrawer(display, startTime, flashDuration, holdRatio)
@@ -113,56 +101,34 @@ local function makeShatterTextDrawer(display, x, y, startTime, flashDuration, ho
       local bg = prism.Color4.WHITE:copy()
       bg.a = a
 
-      display:print(
-         x,
-         y,
-         "It shatters.",
-         fg,
-         bg,
-         nil,
-         "center"
-      )
+      display:print(x, y, "It shatters.", fg, bg, nil, "center")
    end
 end
 
-function PrismState:__new(prevState, display)
+function PrismState:__new(prevState, display, final)
    self.prevState = prevState
    self.display = display
+   self.final = final
    self.t = 0
 
    local cy = math.floor(display.height / 2)
 
    self.drawPrismNoise = makePrismNoiseDrawer(display)
-   self.drawTypewriter = makeTypewriterDrawer(
-      display,
-      "You gaze upon the prism.",
-      1,
-      cy,
-      0.045
-   )
+   self.drawTypewriter = makeTypewriterDrawer(display, "You gaze upon the prism.", 1, cy, 0.045)
 
    self.shatterTime = 2.0
    self.flashDuration = 0.18
 
-   self.drawWhiteFlash = makeWhiteFlashDrawer(
-      display,
-      self.shatterTime,
-      self.flashDuration * 3
-   )
+   self.drawWhiteFlash = makeWhiteFlashDrawer(display, self.shatterTime, self.flashDuration * 3)
 
-   self.drawShatterText = makeShatterTextDrawer(
-      display,
-      1,
-      cy + 2,
-      self.shatterTime,
-      self.flashDuration * 3
-   )
+   self.drawShatterText = makeShatterTextDrawer(display, 1, cy + 2, self.shatterTime, self.flashDuration * 3)
 end
 
 function PrismState:update(dt)
    self.t = self.t + dt
 
    if self.t >= 3 then
+      if self.final then love.event.quit() end
       self.manager:pop()
    end
 end

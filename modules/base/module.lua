@@ -39,3 +39,4 @@ Color4.GREEN = Color4.fromHex(0x58ae67)
 Color4.CORNFLOWER = Color4.fromHex(0x8aa1f6)
 Color4.RED = Color4.fromHex(0xfe5876)
 Color4.TEXT = Color4.fromHex(0x76775b)
+Color4.PRISM = (Color4.CORNFLOWER + Color4.PURPLE) / 2

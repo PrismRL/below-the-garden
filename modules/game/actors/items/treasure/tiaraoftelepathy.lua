@@ -5,7 +5,7 @@ prism.registerActor("TiaraOfTelepathy", function()
       prism.components.Position(),
       prism.components.Drawable {
          index = 337,
-         color = prism.Color4.WHITE,
+         color = prism.Color4.CORNFLOWER,
       },
    }
 end)
