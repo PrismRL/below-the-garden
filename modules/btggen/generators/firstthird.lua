@@ -136,7 +136,7 @@ local function tryAccrete(generatorInfo, builder, rng)
 
          for _, rdoor in ipairs(rdoors) do
             if tryDoor(generatorInfo, builder, room, rs, rf, ax, ay, normal, rdoor, rng) then
-               --coroutine.yield(builder)
+               coroutine.yield(builder)
                return true
             end
          end
@@ -208,12 +208,12 @@ local function mapdebug(builder, rooms)
          end
       end
    end
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    for _, spawner in ipairs(builder:query(prism.components.Spawner):gather()) do
       builder:removeActor(spawner)
    end
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 end
 
 -- Fisher–Yates shuffle using rng
@@ -235,11 +235,11 @@ function FirstThird.generate(generatorInfo, player)
    for _, proxy in pairs(builder:query(prism.components.DoorProxy):gather()) do
       builder:removeActor(proxy)
    end
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.ErosionDecorator.tryDecorate(generatorInfo, rng, builder)
    builder:rectangle("line", 1, 1, generatorInfo.w, generatorInfo.h, prism.cells.Wall)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    local distanceField = util.buildWallDistanceField(builder)
    local rooms = prism.levelgen.RoomManager(builder, distanceField).rooms
@@ -277,7 +277,7 @@ function FirstThird.generate(generatorInfo, player)
          local room = undecoratedRooms[i]
          print(decorator.className)
          if decorator.tryDecorate(generatorInfo, rng, builder, room) then
-            -- coroutine.yield(builder)
+            coroutine.yield(builder)
             table.remove(undecoratedRooms, i)
             decorated = true
             break
@@ -289,22 +289,22 @@ function FirstThird.generate(generatorInfo, player)
    end
 
    prism.decorators.BridgeToFloorDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.TallGrassNearWallsDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.GrassSpreadDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.GlowStalkDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.PruneMisalignedDoorsDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    local rm = prism.levelgen.RoomManager(builder, distanceField)
-   -- coroutine.yield(builder)
+   coroutine.yield(builder)
    rm:createLoop(generatorInfo)
    local rooms = rm.rooms
    mapdebug(builder, rooms)
@@ -337,6 +337,7 @@ function FirstThird.generate(generatorInfo, player)
       prism.actors.Shield,
       prism.actors.RingOfVitality,
       prism.actors.TiaraOfTelepathy,
+      prism.actors.UndyingHelm,
    }
 
    if depth > 1 then
@@ -380,7 +381,7 @@ function FirstThird.generate(generatorInfo, player)
       for i = 1, #encounterRooms do
          local room = encounterRooms[i]
          if canSpawnRoom(room) and decorator.tryDecorate(generatorInfo, rng, builder, room) then
-            -- coroutine.yield(builder)
+            coroutine.yield(builder)
             table.remove(encounterRooms, i)
             used[room] = true
             hard[room] = true
@@ -415,7 +416,7 @@ function FirstThird.generate(generatorInfo, player)
       local deco = mediumEncounterDecorators[rng:random(#mediumEncounterDecorators)]
       for _, room in ipairs(rooms) do
          if canSpawnRoom(room) then
-            -- coroutine.yield(builder)
+            coroutine.yield(builder)
             if deco.tryDecorate(generatorInfo, rng, builder, room) then
                used[room] = true
                break
@@ -430,10 +431,10 @@ function FirstThird.generate(generatorInfo, player)
          prism.decorators.SqeetoSwarmDecorator.tryDecorate(generatorInfo, rng, builder, room)
       end
    end
-   -- coroutine.yield(builder)
+   coroutine.yield(builder)
 
    prism.decorators.SqeetoThinningDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    local count = 0
    -- Easy spawns: remaining unused rooms
@@ -498,7 +499,7 @@ function FirstThird.generate(generatorInfo, player)
    end
 
    prism.decorators.FireflyDecorator.tryDecorate(generatorInfo, rng, builder)
-   --coroutine.yield(builder)
+   coroutine.yield(builder)
 
    return builder
 end

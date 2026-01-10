@@ -52,7 +52,7 @@ function GameLevelState:__new(builder, display, overlay, testing)
       -- Add a pit area to the southeast
       builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
       builder:addActor(prism.actors.Player(), 16, 16)
-      builder:addActor(prism.actors.Torch(), 12, 12)
+      -- builder:addActor(prism.actors.HelmLight(), 12, 12)
    end
 
    -- Add systems
@@ -87,7 +87,7 @@ function GameLevelState:handleMessage(message)
    self.super.handleMessage(self, message)
 
    if prism.messages.LoseMessage:is(message) then
-      self.manager:enter(spectrum.gamestates.GameOverState(self.overlay))
+      self.manager:enter(spectrum.gamestates.GameOverState(self.display, self.overlay))
    end
 
    if prism.messages.GazeMessage:is(message) then
@@ -99,7 +99,9 @@ function GameLevelState:handleMessage(message)
       --- @cast message DescendMessage
       GAME.depth = GAME.depth + 1
       self.level:removeActor(message.actor)
-      self.manager:enter(GameLevelState(GAME:generate(GAME.depth), self.display, self.overlay))
+      self.manager:enter(spectrum.gamestates.LoadingState(function()
+         return GAME:generate(GAME.depth)
+      end, self.display, self.overlay))
    end
    -- Handle any messages sent to the level state from the level. LevelState
    -- handles a few built-in messages for you, like the decision you fill out
