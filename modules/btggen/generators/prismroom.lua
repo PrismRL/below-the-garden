@@ -6,11 +6,9 @@ local PrismRoom = prism.levelgen.Generator:extend "PrismRoom"
 function PrismRoom.generate(generatorInfo, player)
    local seed = generatorInfo.seed
    local w, h = generatorInfo.w, generatorInfo.h
-   local depth = generatorInfo.depth
 
    local rng = prism.RNG(seed)
    local builder = prism.LevelBuilder()
-
 
    builder:rectangle("fill", 10, 2, generatorInfo.w - 10, generatorInfo.h - 1, prism.cells.Floor)
    coroutine.yield(builder)
@@ -26,14 +24,23 @@ function PrismRoom.generate(generatorInfo, player)
    prism.decorators.PitDecorator.tryDecorate(generatorInfo, rng, builder, room)
    coroutine.yield(builder)
 
-   prism.decorators.GlowStalkDecorator.tryDecorate(generatorInfo, rng, builder)
+   --prism.decorators.GlowStalkDecorator.tryDecorate(generatorInfo, rng, builder)
    coroutine.yield(builder)
 
-   local wallDistanceField = util.buildWallDistanceField(builder)
+   local wallDistanceField = util.buildDistanceField(builder, function (builder, x, y)
+      return not util.isWalkable(builder, x, y)
+   end,
+   function (builder, x, y)
+      return util.isFloor(builder, x, y)
+   end)
    local rm = prism.levelgen.RoomManager(builder, wallDistanceField)
    local im = rm:getImportantRooms()
    
-   builder:addActor(player, im[1].center:decompose())
+   for i = 1, 3 do
+      prism.decorators.SunlightDecorator.tryDecorate(generatorInfo, rng, builder, rm.rooms[rng:random(#rm.rooms)])
+   end
+
+   --builder:addActor(player, im[1].center:decompose())
    coroutine.yield(builder)
 
    local best, bestD = nil, 0
@@ -49,6 +56,33 @@ function PrismRoom.generate(generatorInfo, player)
    builder:addActor(prism.actors.Crystal(), best:decompose())
    coroutine.yield(builder)
    
+      -- Distance field from the crystal
+   local crystalDistanceField = util.buildDistanceField(
+      builder,
+      function(builder, x, y)
+         return x == best.x and y == best.y
+      end,
+      util.isWalkable
+   )
+
+   -- Find furthest walkable tile from the crystal
+   local bestPlayerPos, bestDist = nil, 0
+   for x = 1, w do
+      for y = 1, h do
+         if util.isWalkable(builder, x, y) then
+            local d = crystalDistanceField:get(x, y)
+            if d and d > bestDist then
+               bestPlayerPos = prism.Vector2(x, y)
+               bestDist = d
+            end
+         end
+      end
+   end
+
+   builder:addActor(player, bestPlayerPos:decompose())
+   builder:addActor(prism.actors.Torch(), bestPlayerPos:decompose())
+   coroutine.yield(builder)
+
    prism.decorators.BridgeToFloorDecorator.tryDecorate(generatorInfo, rng, builder)
    --coroutine.yield(builder)
 
@@ -69,6 +103,7 @@ function PrismRoom.generate(generatorInfo, player)
          if not builder:get(x, y) then builder:set(x, y, prism.cells.Wall()) end
       end
    end
+   coroutine.yield(builder)
 
    prism.decorators.FireflyDecorator.tryDecorate(generatorInfo, rng, builder)
    --coroutine.yield(builder)
