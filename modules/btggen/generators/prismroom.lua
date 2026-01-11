@@ -10,7 +10,33 @@ function PrismRoom.generate(generatorInfo, player)
    local rng = prism.RNG(seed)
    local builder = prism.LevelBuilder()
 
-   builder:rectangle("fill", 10, 2, generatorInfo.w - 10, generatorInfo.h - 1, prism.cells.Floor)
+   local cx = math.floor(w * 0.5)
+   local cy = math.floor(h * 0.3)
+
+   local rx = math.floor((h - 5) * 0.25)
+   local ry = rx
+
+   builder:ellipse(
+      "fill",
+      cx,
+      cy,
+      rx,
+      ry,
+      prism.cells.Floor
+   )
+
+   coroutine.yield(builder)
+
+   local path = prism.astar((prism.Vector2(w, h)/2):floor(), prism.Vector2(cx, cy), function (x, y)
+      return true
+   end,
+   function (x, y)
+      return util.isFloor(builder, x, y) and 1 or love.math.noise(x, y) * 3
+   end)
+
+   for i = 1, #path.path do
+      builder:set(path.path[i].x, path.path[i].y, prism.cells.Floor())
+   end
    coroutine.yield(builder)
 
    local wallDistanceField = util.buildWallDistanceField(builder)
@@ -21,7 +47,7 @@ function PrismRoom.generate(generatorInfo, player)
    builder:rectangle("line", 1, 1, generatorInfo.w, generatorInfo.h, prism.cells.Wall)
    coroutine.yield(builder)
    
-   prism.decorators.PitDecorator.tryDecorate(generatorInfo, rng, builder, room)
+   prism.decorators.WaterPitDecorator.tryDecorate(generatorInfo, rng, builder, room)
    coroutine.yield(builder)
 
    --prism.decorators.GlowStalkDecorator.tryDecorate(generatorInfo, rng, builder)

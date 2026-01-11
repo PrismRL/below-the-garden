@@ -85,6 +85,7 @@ prism.registerActor("Frog", function()
       prism.components.Senses(),
       prism.components.LightSight { range = 4, fov = false, darkvision = 0 },
       prism.components.FrogController(),
+      prism.components.FrogFaction(),
       prism.components.Health(6),
       prism.components.Attacker(1),
       prism.components.ConditionHolder(),
