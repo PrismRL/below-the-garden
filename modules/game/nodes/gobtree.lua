@@ -7,14 +7,16 @@ GobTree.children = {
    BT.Sequence {
       prism.nodes.FindIntruderBehavior(4, true),
       BT.Selector {
-         prism.nodes.FindWeaponBehavior,
-         prism.nodes.PerformOnBehavior(prism.actions.Pickup),
-         prism.nodes.MoveTowardTargetBehavior,
-      },
-      BT.Sequence {
-         prism.nodes.PerformOnBehavior(prism.actions.Attack),
-         prism.nodes.MoveTowardTargetBehavior(1),
-      },
+         BT.Sequence {
+            prism.nodes.FindWeaponBehavior,
+            prism.nodes.PerformOnBehavior(prism.actions.Pickup),
+            prism.nodes.MoveTowardTargetBehavior,
+         },
+         BT.Sequence {
+            prism.nodes.PerformOnBehavior(prism.actions.Attack),
+            prism.nodes.MoveTowardTargetBehavior(1),
+         },
+      }
    },
    BT.Sequence {
       prism.BehaviorTree.Node(function (self, level, actor, controller)
