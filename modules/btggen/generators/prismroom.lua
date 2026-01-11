@@ -27,15 +27,23 @@ function PrismRoom.generate(generatorInfo, player)
 
    coroutine.yield(builder)
 
-   local path = prism.astar((prism.Vector2(w, h)/2):floor(), prism.Vector2(cx, cy), function (x, y)
-      return true
-   end,
-   function (x, y)
-      return util.isFloor(builder, x, y) and 1 or love.math.noise(x, y) * 3
-   end)
+   print()
+   local offset = rng:random() * 1000
+   local path = prism.astar((prism.Vector2(w/2, h-1)):floor(), prism.Vector2(cx, cy),
+      function (x, y)
+         return true
+      end,
+      function (x, y)
+         return util.isFloor(builder, x, y) and 1 or love.math.noise(x/5 + offset, y/5 + offset) * 3
+      end,
+      nil,
+      nil,
+      prism.Vector2.neighborhood4
+   )
 
    for i = 1, #path.path do
-      builder:set(path.path[i].x, path.path[i].y, prism.cells.Floor())
+      print "YAH"
+      builder:rectangle("fill", path.path[i].x, path.path[i].y, path.path[i].x + 1, path.path[i].y + 1, prism.cells.Floor)
    end
    coroutine.yield(builder)
 
