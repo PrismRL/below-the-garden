@@ -1,3 +1,5 @@
+local hud = love.graphics.newImage("display/target.png")
+local settings = require "settings"
 local controls = require "controls"
 local Name = prism.components.Name
 
@@ -146,9 +148,19 @@ function ThrowTargetHandler:draw()
    self.display:print(positions.shift.x - 1, positions.shift.y - 1, "SHFT", prism.Color4.TEXT)
    self.display:print(positions.wait.x - 1, positions.wait.y - 1, "X", prism.Color4.TEXT)
    self.display:print(positions.drop.x - 1, positions.drop.y - 1, "V", prism.Color4.TEXT)
+
    love.graphics.push()
    love.graphics.translate(8, 8)
    self.display:draw()
+   love.graphics.pop()
+
+   love.graphics.push()
+   -- love.graphics.scale(settings.scale, settings.scale)
+   love.graphics.draw(
+      hud,
+      (positions.cycle.x - 2) * self.display.cellSize.x,
+      positions.cycle.y * self.display.cellSize.y
+   )
    love.graphics.pop()
 end
 

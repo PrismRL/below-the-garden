@@ -24,7 +24,7 @@ return spectrum.Input.Controls {
       quit           = "q",
       restart        = "r",
       next           = "tab",
-      back           = "backspace",
+      back           = { "backspace", "escape" },
       select         = "return",
       zoom_in        = "lctrl =",
       zoom_out        = "lctrl -"
