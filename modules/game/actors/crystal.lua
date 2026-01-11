@@ -23,6 +23,7 @@ prism.registerActor("Crystal", function()
          layer = 3,
       },
       prism.components.Crystal(),
+      prism.components.IdleAnimation("CrystalIdle"),
       prism.components.Collider { size = 3 },
       prism.components.Light(prism.Color4.PRISM, 24, prism.lighteffects.Heartbeat { sharpness = 10, amplitude = 0.5 }),
    }
