@@ -28,7 +28,7 @@ function Damage:perform(level, damage, skip)
             blocking = true,
          })
          level:removeActor(light)
-         health.hp = 1
+         health.hp = 5
          level:tryPerform(prism.actions.Unequip(self.owner, self.owner:expect(prism.components.Equipper):get("amulet")))
       else
          level:perform(prism.actions.Die(self.owner))
