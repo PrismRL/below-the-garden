@@ -407,8 +407,8 @@ function FirstThird.generate(generatorInfo, player)
 
    local mediumEncounterDecorators = {
       prism.decorators.FrogDecorator,
-      --prism.decorators.ThrumbleScoutDecorator,
-      --prism.decorators.GobLair,
+      prism.decorators.ThrumbleScoutDecorator,
+      prism.decorators.GobLair,
    }
 
    local encounterAttempts = depth <= 2 and 1 or 2
