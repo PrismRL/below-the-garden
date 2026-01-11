@@ -18,7 +18,7 @@ prism.registerActor("PoofEmitter", function()
    return prism.Actor.fromComponents {
       prism.components.Name("PoofEmitter"),
       prism.components.SmokeEmitter {
-         turnsUntilDecay = 3,
+         turnsUntilDecay = 6,
          radius = 2,
          decay = 1,
          actor = prism.actors.PoofSmoke,
