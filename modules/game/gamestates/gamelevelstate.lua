@@ -18,7 +18,7 @@ function GameLevelState:__new(builder, display, overlay, testing)
    -- In a complete game, you'd likely extract this logic to a separate module
    -- and pass in an existing player object between levels.
    self.overlay = overlay
-   self.hudPosition = prism.Vector2(self.overlay.width - 8, 9)
+   self.hudPosition = prism.Vector2(self.overlay.width - 8, 0)
    self.hudPositions = {
       held = self.hudPosition + prism.Vector2(3, 6),
       pocket = self.hudPosition + prism.Vector2(6, 6),
@@ -43,15 +43,7 @@ function GameLevelState:__new(builder, display, overlay, testing)
    }
 
    if testing then
-      builder = prism.LevelBuilder()
-      builder:rectangle("line", 0, 0, 32, 32, prism.cells.Wall)
-      -- Fill the interior with floor tiles
-      builder:rectangle("fill", 1, 1, 31, 31, prism.cells.Floor)
-      -- Add a small block of walls within the map
-      builder:rectangle("fill", 5, 5, 7, 7, prism.cells.Wall)
-      -- Add a pit area to the southeast
-      builder:rectangle("fill", 20, 20, 25, 25, prism.cells.Pit)
-      builder:addActor(prism.actors.Player(), 16, 16)
+      builder = prism.LevelBuilder.fromLz4("finale.lz4")
       -- builder:addActor(prism.actors.HelmLight(), 12, 12)
    end
 
