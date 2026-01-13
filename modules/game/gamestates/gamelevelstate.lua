@@ -242,6 +242,7 @@ function GameLevelState:putHUD(player)
    love.graphics.pop()
 
    self.overlay:border(1, 1, self.overlay.width - 7, self.overlay.height, windowBorder)
+   self.overlay:print(3, 1, "floor " .. (GAME.depth == 6 and "???" or GAME.depth), prism.Color4.TEXT)
 
    local positions = self.hudPositions
 

@@ -18,7 +18,7 @@ end
 
 function LoadingState:update(dt)
    self.timer = self.timer + dt
-   if self.timer > 0.5 then self.timer = 0 end
+   if self.timer >= 0.45 then self.timer = 0 end
    self.index = math.floor(self.timer * 6 + 1)
    local success, builder = coroutine.resume(self.co)
    if not success then error(builder .. "\n" .. debug.traceback(self.co)) end
