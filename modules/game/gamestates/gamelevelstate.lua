@@ -40,6 +40,8 @@ function GameLevelState:__new(builder, display, overlay, testing)
    self.useActions = {
       prism.actions.Eat,
       prism.actions.Gaze,
+      prism.actions.Snuff,
+      prism.actions.Ignite,
    }
 
    if testing then
@@ -294,7 +296,12 @@ function GameLevelState:putHUD(player)
       local extraAction = false
       for _, action in ipairs(self.useActions) do
          if action:validateTarget(1, self.level, player, held) then
-            self.overlay:print(positions.throw.x, positions.throw.y, "P", prism.Color4.CORNFLOWER)
+            self.overlay:print(
+               positions.throw.x,
+               positions.throw.y,
+               "P",
+               self.level:canPerform(action(player, held)) and prism.Color4.CORNFLOWER or prism.Color4.TEXT
+            )
             self.overlay:print(positions.throw.x + 2, positions.throw.y, action.name, prism.Color4.TEXT)
             extraAction = true
             break

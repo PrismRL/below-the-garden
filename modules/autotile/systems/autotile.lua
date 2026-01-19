@@ -4,10 +4,12 @@ local AutoTileSystem = prism.System:extend("AutoTileSystem")
 --- @param level Level
 function AutoTileSystem:initialize(level)
    for x, y, cell in level:eachCell() do
-      local autotile = cell:get(prism.components.AutoTile)
-      if autotile then
-         ---@cast autotile AutoTile
-         cell:give(self:getDrawableFor(x, y, autotile))
+      if cell then
+         local autotile = cell:get(prism.components.AutoTile)
+         if autotile then
+            ---@cast autotile AutoTile
+            cell:give(self:getDrawableFor(x, y, autotile))
+         end
       end
    end
 end

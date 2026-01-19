@@ -13,7 +13,7 @@ function Game:generate(depth)
          w = 50,
          h = 30,
          depth = depth,
-      }, self.player)  
+      }, self.player)
    end
    local w = 30 + (math.min(depth, 3) - 1) * 10
 

@@ -25,5 +25,6 @@ prism.registerActor("Fire", function()
       prism.components.IdleAnimation("Fire"),
       prism.components.Camp(),
       prism.components.Light((prism.Color4.GOLD + prism.Color4.GOLD) / 1.5, 7, prism.lighteffects.Flicker()),
+      prism.components.Fire(),
    }
 end)

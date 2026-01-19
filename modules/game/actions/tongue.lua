@@ -17,7 +17,7 @@ local target = prism
       return moveable and position.x == other.x or position.y == other.y
    end)
 
-Tongue.targets = { target, prism.Target():isVector2():optional() }
+Tongue.targets = { prism.Target():isVector2():optional(), target }
 
 function Tongue:canPerform(level, actor, direction)
    local tongue = self.owner:expect(prism.components.Equipper):get("held")
@@ -27,7 +27,7 @@ end
 --- @param level Level
 --- @param direction? Vector2
 --- @param actor? Actor
-function Tongue:perform(level, actor, direction)
+function Tongue:perform(level, direction, actor)
    local position = self.owner:expectPosition()
    direction = direction or (actor:expectPosition() - position):normalize()
    actor = nil
