@@ -29,8 +29,10 @@ end
 --- @param actor? Actor
 function Tongue:perform(level, direction, actor)
    local position = self.owner:expectPosition()
+   --- @diagnostic disable-next-line
    direction = direction or (actor:expectPosition() - position):normalize()
    actor = nil
+   --- @cast actor Actor
 
    local maxPosition = position + (direction * DISTANCE)
    local path = prism
@@ -46,6 +48,8 @@ function Tongue:perform(level, direction, actor)
          return true
       end)
       :getPath()
+
+   if #path == 0 then return end
 
    level:yield(prism.messages.AnimationMessage {
       animation = spectrum.animations.FrogTongue(
@@ -71,6 +75,9 @@ function Tongue:perform(level, direction, actor)
    actor:remove(prism.components.Mover)
    if previousMover then actor:give(previousMover) end
    level:moveActor(actor, self.owner:expectPosition() + direction)
+
+   local conditions = actor:get(prism.components.ConditionHolder)
+   if conditions then conditions:add(prism.conditions.Stunned()) end
 end
 
 return Tongue
