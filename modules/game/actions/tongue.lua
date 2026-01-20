@@ -52,15 +52,20 @@ function Tongue:perform(level, direction, actor)
    if #path == 0 then return end
 
    level:yield(prism.messages.AnimationMessage {
-      animation = spectrum.animations.FrogTongue(
+      animation = spectrum.animations.Tongue(
          direction,
          #path > 0 and #path + 1 or 0,
+         (actor and actor:has(prism.components.ConditionHolder) and actor) or nil,
          self.owner:has(prism.components.PlayerController) and true or false
       ),
       actor = self.owner,
       blocking = true,
    })
+
    if not actor then return end
+
+   local conditions = actor:get(prism.components.ConditionHolder)
+   if conditions then conditions:add(prism.conditions.Stunned()) end
 
    local previousMover = actor:get(prism.components.Mover)
    actor:give(prism.components.Mover { "fly" })
@@ -75,9 +80,6 @@ function Tongue:perform(level, direction, actor)
    actor:remove(prism.components.Mover)
    if previousMover then actor:give(previousMover) end
    level:moveActor(actor, self.owner:expectPosition() + direction)
-
-   local conditions = actor:get(prism.components.ConditionHolder)
-   if conditions then conditions:add(prism.conditions.Stunned()) end
 end
 
 return Tongue

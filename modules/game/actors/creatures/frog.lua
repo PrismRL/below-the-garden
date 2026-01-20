@@ -1,4 +1,4 @@
-local function makeTongueFrame(direction, length, stage, skipFirst)
+local function makeTongueFrame(direction, length, stage, actor, skipFirst)
    -- direction: Vector2
    -- stage: 1 = base, 2..length = extending, length+1 = full, length+2.. = retracting
    return function(display, x, y)
@@ -31,27 +31,31 @@ local function makeTongueFrame(direction, length, stage, skipFirst)
          display:put(x + direction.x * 2, y + direction.y * 2, full, prism.Color4.PEACH)
          display:put(x + direction.x, y + direction.y, full, prism.Color4.PEACH)
       end
+
+      if actor then
+         local position = actor:expectPosition()
+         display:put(position.x, position.y - 1, "*", prism.Color4.BLUE)
+      end
    end
 end
 
-spectrum.registerAnimation("FrogTongue", function(direction, length, skipFirst)
+spectrum.registerAnimation("Tongue", function(direction, length, actor, skipFirst)
    local frames = {}
    local times = {}
 
    -- Extend
    for stage = 1, length do
-      table.insert(frames, makeTongueFrame(direction, length, stage, skipFirst))
+      table.insert(frames, makeTongueFrame(direction, length, stage, nil, skipFirst))
       table.insert(times, 0.05)
    end
    -- Full
-   table.insert(frames, makeTongueFrame(direction, length, length + 1, skipFirst))
+   table.insert(frames, makeTongueFrame(direction, length, length + 1, actor, skipFirst))
    table.insert(times, 0.5)
    -- Retract
    for stage = length, 1, -1 do
-      table.insert(frames, makeTongueFrame(direction, length, stage, skipFirst))
+      table.insert(frames, makeTongueFrame(direction, length, stage, nil, skipFirst))
       table.insert(times, 0.05)
    end
-
    return spectrum.Animation(frames, times, "pauseAtEnd")
 end)
 
