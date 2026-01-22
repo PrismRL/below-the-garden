@@ -23,6 +23,22 @@ ThrumbleTree.children = {
       prism.nodes.ReturnHomeBehavior(1),
       prism.nodes.MoveTowardTargetBehavior,
    },
+   BT.Sequence {
+      BT.Node(function(self, level, actor)
+         local log = actor:getRelation(prism.relations.Home)
+         if not log then return false end
+         return not log:has(prism.components.Lit)
+      end),
+      BT.Node(function(self, level, actor, controller)
+         local home = actor:getRelation(prism.relations.Home)
+         if not home then return false end
+         local ignite = prism.actions.Ignite(actor, home)
+         if level:canPerform(ignite) then return ignite end
+         return false
+      end),
+      prism.nodes.ReturnHomeBehavior(1),
+      prism.nodes.MoveTowardTargetBehavior,
+   },
    prism.nodes.WaitBehavior,
 }
 

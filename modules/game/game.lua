@@ -2,7 +2,7 @@ local Game = prism.Object:extend "Game"
 
 function Game:__new(seed)
    self.player = prism.actors.Player()
-   self.depth = 1
+   self.depth = 2
    self.rng = prism.RNG(seed)
 end
 

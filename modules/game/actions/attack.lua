@@ -5,7 +5,6 @@ local AttackTarget = prism.Target(prism.components.Health):range(1)
 local Attack = prism.Action:extend("Attack")
 Attack.targets = { AttackTarget }
 Attack.requiredComponents = { prism.components.Attacker }
-local mask = prism.Collision.createBitmaskFromMovetypes { "fly" }
 
 --- @param level Level
 --- @param attacked Actor
@@ -28,23 +27,17 @@ function Attack:perform(level, attacked)
       return
    end
    local attacker = self.owner:expect(prism.components.Attacker)
-   local damage, knockback = attacker:getDamageAndKnockback()
+   local damage, stunChance = attacker:getDamageAndStunChance()
 
-   level:tryPerform(prism.actions.Damage(attacked, damage))
-   if knockback > 0 then
-      local direction = (attacked:getPosition() - self.owner:getPosition())
-      local final = attacked:expectPosition()
-      for _ = 1, knockback do
-         local nextpos = final + direction
-         if not level:getCellPassable(nextpos.x, nextpos.y, mask) then break end
-         final = nextpos
-      end
-      level:moveActor(attacked, final)
+   if stunChance > level.RNG:random() then
+      attacked:expect(prism.components.ConditionHolder):add(prism.conditions.Stunned())
       level:yield(prism.messages.AnimationMessage {
-         animation = spectrum.animations.Wait(0.3),
-         blocking = true,
+         animation = spectrum.animations.Stun(),
+         actor = attacked,
+         y = -1,
       })
    end
+   level:tryPerform(prism.actions.Damage(attacked, damage))
 end
 
 return Attack

@@ -20,7 +20,7 @@ function ReturnHomeBehavior:run(level, actor, controller)
       if self.distanceToHome == 0 then
          target = home:expectPosition()
       else
-         local vec = prism.Vector2.neighborhood8[level.RNG:random(1, 8)]
+         local vec = prism.Vector2.neighborhood8[level.RNG:random(2, 8)]
          target = home:expectPosition() + vec
       end
 

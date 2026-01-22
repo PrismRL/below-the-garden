@@ -21,12 +21,12 @@ prism.registerActor("Torch", function()
          color = prism.Color4.GOLD,
       },
       prism.components.Position(),
-      prism.components.Ignitable(light),
       prism.components.Item(),
       prism.components.Equipment("held"),
       prism.components.Light(prism.Color4.GOLD, 6, prism.lighteffects.Flicker { speed = 2, colorShift = 0.1 }),
       prism.components.Torch(),
       prism.components.Snuffable("Stick"),
       prism.components.Attacker(1),
+      prism.components.Fire(),
    }
 end)

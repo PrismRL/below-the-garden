@@ -103,6 +103,12 @@ function Throw:perform(level, object)
       level:removeActor(held)
    end
 
+   if held:has(prism.components.Snuffs) then
+      level:query():at(position:decompose()):each(function(other)
+         level:tryPerform(prism.actions.Snuff(held, other))
+      end)
+   end
+
    local poof = held:get(prism.components.PoofOnThrow)
    if poof then
       level:addActor(prism.actors.PoofEmitter(), position:decompose())

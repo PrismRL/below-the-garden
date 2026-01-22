@@ -40,8 +40,8 @@ function GameLevelState:__new(builder, display, overlay, testing)
    self.useActions = {
       prism.actions.Eat,
       prism.actions.Gaze,
-      prism.actions.Snuff,
-      prism.actions.Ignite,
+      prism.actions.SnuffHeld,
+      prism.actions.IgniteHeld,
    }
 
    if testing then
@@ -141,6 +141,10 @@ function GameLevelState:updateDecision(dt, owner, decision)
       local chest = self.level:query(prism.components.Chest):at(destination:decompose()):first()
       local open = prism.actions.Open(owner, chest)
       if self:setAction(open) then return end
+
+      local fire = self.level:query(prism.components.Ignitable):at(destination:decompose()):first()
+      local ignite = prism.actions.Ignite(owner, fire)
+      if self:setAction(ignite) then return end
 
       local move = prism.actions.Move(owner, destination)
       if self:setAction(move) then return end
@@ -257,7 +261,7 @@ function GameLevelState:putHUD(player)
       prism.Color4.BLACK
    )
 
-   local attack = player:expect(prism.components.Attacker):getDamageAndKnockback()
+   local attack = player:expect(prism.components.Attacker):getDamageAndStunChance()
    self.overlay:print(
       positions.attack.x,
       positions.attack.y,

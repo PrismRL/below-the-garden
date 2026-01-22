@@ -20,7 +20,7 @@ function Damage:perform(level, damage, skip)
 
    if health.hp <= 0 then
       health.hp = 0
-      if prism.components.ConditionHolder.actorHas(self.owner, prism.conditions.Undying) then
+      if prism.components.ConditionHolder.entityHas(self.owner, prism.conditions.Undying) then
          local light = prism.actors.HelmLight()
          level:addActor(light, self.owner:expectPosition():decompose())
          level:yield(prism.messages.AnimationMessage {

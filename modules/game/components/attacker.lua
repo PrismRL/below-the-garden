@@ -2,12 +2,12 @@ local ConditionHolder = prism.components.ConditionHolder
 
 --- @class AttackModifier : ConditionModifier
 --- @field damage integer
---- @field knockback integer
+--- @field stunChance integer
 local AttackModifier = prism.condition.ConditionModifier:extend "AttackModifier"
 
-function AttackModifier:__new(damage, knockback)
+function AttackModifier:__new(damage, stunChance)
    self.damage = damage or 0
-   self.knockback = knockback or 0
+   self.stunChance = stunChance or 0
 end
 
 prism.register(AttackModifier)
@@ -22,14 +22,14 @@ function Attacker:__new(damage, knockback)
    self.knockback = knockback or 0
 end
 
-function Attacker:getDamageAndKnockback()
+function Attacker:getDamageAndStunChance()
    local modifiers = ConditionHolder.getActorModifiers(self.owner, AttackModifier)
 
    local damage = self.damage
    local knockback = self.knockback
    for _, modifier in ipairs(modifiers) do
       damage = damage + modifier.damage
-      knockback = knockback + modifier.knockback
+      knockback = knockback + modifier.stunChance
    end
 
    return damage, knockback

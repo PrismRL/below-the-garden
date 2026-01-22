@@ -28,15 +28,18 @@ function Move:perform(level, destination)
    local slimeProducer = self.owner:get(prism.components.SlimeProducer)
    local mover = self.owner:expect(prism.components.Mover)
    local direction = destination - self.owner:expectPosition()
+   local canFly = prism.Collision.checkBitmaskOverlap(mover.mask, fly:getMask())
 
    local modified = false
-   while not slimeProducer and level:query(prism.components.Slime):at(destination:decompose()):first() do
-      local x, y = (destination + direction):decompose()
-      if level:getCellPassableByActor(x, y, self.owner, mover.mask) then
-         modified = true
-         destination = destination + direction
-      else
-         break
+   if not canFly then
+      while not slimeProducer and level:query(prism.components.Slime):at(destination:decompose()):first() do
+         local x, y = (destination + direction):decompose()
+         if level:getCellPassableByActor(x, y, self.owner, mover.mask) then
+            modified = true
+            destination = destination + direction
+         else
+            break
+         end
       end
    end
 
@@ -63,6 +66,10 @@ function Move:perform(level, destination)
 
    if slimeProducer then level:addActor(prism.actors.Slime(6), self.owner:expectPosition():decompose()) end
    level:moveActor(self.owner, destination)
+
+   for actor, _ in level:query(prism.components.Fire):at(destination:decompose()):iter() do
+      if not actor:has(prism.components.Equipment) then level:tryPerform(prism.actions.Damage(self.owner, 1)) end
+   end
 end
 
 return Move

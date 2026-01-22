@@ -11,7 +11,12 @@ function MoveTowardTargetBehavior:run(level, actor, controller)
    local target = controller.blackboard["target"]
    if prism.Actor:is(target) then target = target:expectPosition() end
    local mover = actor:expect(prism.components.Mover)
-   local path = level:findPath(actor:getPosition(), target, actor, mover.mask, self.minDistance)
+   local path = level:findPath(actor:getPosition(), target, actor, mover.mask, self.minDistance, nil, function(x, y)
+      for other, _ in level:query(prism.components.Fire):at(x, y):iter() do
+         if not other:has(prism.components.Equipment) then return 100 end
+      end
+      return 1
+   end)
    if not path then return false end
 
    local action = prism.actions.Move(actor, path:pop())

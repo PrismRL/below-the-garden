@@ -14,6 +14,8 @@ prism.register(prism.Component:extend "Weapon")
 prism.register(prism.Component:extend "Torch")
 prism.register(prism.Component:extend "Crystal")
 prism.register(prism.Component:extend "Fire")
+prism.register(prism.Component:extend "Lit")
+prism.register(prism.Component:extend "Snuffs")
 
 --- @module "modules.game.game"
 prism.Game = require(basePath .. ".game")

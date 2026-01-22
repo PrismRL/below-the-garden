@@ -6,12 +6,17 @@ prism.registerActor("Log", function()
          color = prism.Color4.BROWN,
       },
       prism.components.Position(),
+      prism.components.Ignitable("Fire", 0, -1),
+      prism.components.Camp(),
    }
 end)
 local Animation = spectrum.Animation
 
 spectrum.registerAnimation("Fire", function()
-   return Animation({ { index = 240, color = prism.Color4.GOLD }, { index = 272, color = prism.Color4.GOLD } }, 0.5)
+   return Animation(
+      { { index = 240, color = prism.Color4.GOLD, layer = 3 }, { index = 272, color = prism.Color4.GOLD, layer = 3 } },
+      0.5
+   )
 end)
 
 prism.registerActor("Fire", function()
@@ -23,8 +28,8 @@ prism.registerActor("Fire", function()
       },
       prism.components.Position(),
       prism.components.IdleAnimation("Fire"),
-      prism.components.Camp(),
       prism.components.Light((prism.Color4.GOLD + prism.Color4.GOLD) / 1.5, 7, prism.lighteffects.Flicker()),
       prism.components.Fire(),
+      prism.components.Snuffable(),
    }
 end)
