@@ -35,7 +35,7 @@ function WanderSystem:onTurn(level, actor)
 
    local candidates = {}
 
-   prism.bfs(origin,
+   prism.breadthFirstSearch(origin,
       function(x, y, depth)
          return level:getCellPassableByActor(x, y, actor, mask)
             and depth <= math.floor(wander._cooldown/2)

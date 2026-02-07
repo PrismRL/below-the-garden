@@ -14,6 +14,6 @@ prism.registerActor("ScoutTorch", function()
       prism.components.IdleAnimation("ScoutTorch"),
       prism.components.Position(),
       prism.components.Camp(),
-      prism.components.Light(prism.Color4.GOLD, 7, prism.lighteffects.Flicker()),
+      prism.components.Light(prism.Color4.GOLD, 7, prism.lighteffects.FlickerEffect()),
    }
 end)

@@ -28,7 +28,7 @@ prism.registerActor("Fire", function()
       },
       prism.components.Position(),
       prism.components.IdleAnimation("Fire"),
-      prism.components.Light((prism.Color4.GOLD + prism.Color4.GOLD) / 1.5, 7, prism.lighteffects.Flicker()),
+      prism.components.Light((prism.Color4.GOLD + prism.Color4.GOLD) / 1.5, 7, prism.lighteffects.FlickerEffect()),
       prism.components.Fire(),
       prism.components.Snuffable(),
    }

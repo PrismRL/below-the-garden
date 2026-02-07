@@ -5,7 +5,7 @@ prism.registerActor("HelmLight", function()
       prism.components.Light(
          prism.Color4.GOLD,
          8,
-         prism.lighteffects.Sin { spatialScale = 0, amplitude = 0.3, speed = 30, noiseScale = 0 }
+         prism.lighteffects.SineEffect { spatialScale = 0, amplitude = 0.3, speed = 30, noiseScale = 0 }
       ),
    }
 end)

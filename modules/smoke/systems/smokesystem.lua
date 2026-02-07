@@ -35,7 +35,7 @@ function SmokeSystem:onTurn(level, actor)
    local emittersToRemove = {}
 
    for emitterActor, emitter in level:query(prism.components.SmokeEmitter):iter() do
-      prism.bfs(
+      prism.breadthFirstSearch(
          emitterActor:expectPosition(),
          function(x, y, depth)
             return level:getCellPassable(x, y, smokeMask)

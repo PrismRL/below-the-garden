@@ -35,9 +35,7 @@ function RoomManager:findRoomCenter(tiles)
       end
    end
 
-   if bestX then
-      return prism.Vector2(bestX, bestY), bestDist
-   end
+   if bestX then return prism.Vector2(bestX, bestY), bestDist end
 end
 
 function RoomManager:findRooms(minRoomSize)
@@ -54,7 +52,7 @@ function RoomManager:findRooms(minRoomSize)
             local tiles = prism.SparseGrid()
             local count = 0
 
-            prism.bfs(prism.Vector2(x, y), function(bx, by)
+            prism.breadthFirstSearch(prism.Vector2(x, y), function(bx, by)
                return self:isRoomTile(bx, by) and not claimed:get(bx, by)
             end, function(bx, by)
                tiles:set(bx, by, true)
@@ -110,7 +108,7 @@ function RoomManager:findRooms(minRoomSize)
             local tiles = prism.SparseGrid()
             local count = 0
 
-            prism.bfs(prism.Vector2(x, y), function(bx, by)
+            prism.breadthFirstSearch(prism.Vector2(x, y), function(bx, by)
                return util.isFloor(self.builder, bx, by) and not claimed:get(bx, by)
             end, function(bx, by)
                tiles:set(bx, by, true)
@@ -221,15 +219,15 @@ function RoomManager:getImportantRooms(blacklist, count)
 
    local nodes = {}
    for _, room in ipairs(self.rooms) do
-      if room.center and not blacklist[room] then
-         nodes[#nodes + 1] = { room = room, pos = room.center }
-      end
+      if room.center and not blacklist[room] then nodes[#nodes + 1] = { room = room, pos = room.center } end
    end
 
    if #nodes == 0 then return {} end
    if #nodes <= count then
       local out = {}
-      for _, n in ipairs(nodes) do out[#out + 1] = n.room end
+      for _, n in ipairs(nodes) do
+         out[#out + 1] = n.room
+      end
       return out
    end
 
@@ -237,7 +235,9 @@ function RoomManager:getImportantRooms(blacklist, count)
    -- Precompute distances
    ----------------------------------------------------------------
    local dist = {}
-   for i = 1, #nodes do dist[i] = {} end
+   for i = 1, #nodes do
+      dist[i] = {}
+   end
 
    local function pathDistance(a, b)
       local path = prism.astar(a.pos, b.pos, function(x, y)
@@ -316,7 +316,6 @@ function RoomManager:getImportantRooms(blacklist, count)
    end
    return out
 end
-
 
 --- Identifies rooms whose removal would NOT disconnect the room graph.
 --- Uses articulation-point detection on the room adjacency graph.
@@ -523,7 +522,7 @@ function RoomManager:createLoop(generationInfo, maxTries)
             bestB.neighbors[bestA] = true
 
             print("[createLoop] loop created successfully")
-            -- coroutine.yield(self.builder)
+            coroutine.yield(self.builder)
             return true
          else
             print("[createLoop] path too long, skipping")

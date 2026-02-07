@@ -18,7 +18,7 @@ prism.registerActor("Wisp", function()
       prism.components.Mover { "fly" },
       prism.components.Position(),
       prism.components.Collider { allowedMovetypes = { "walk", "fly", "swim" } },
-      prism.components.Light(prism.Color4.BLUE, 4, prism.lighteffects.Heartbeat()),
+      prism.components.Light(prism.Color4.BLUE, 4, prism.lighteffects.HeartbeatEffect()),
       prism.components.IdleAnimation("WispIdle"),
       prism.components.FireflyController(),
       prism.components.Equipment("held"),

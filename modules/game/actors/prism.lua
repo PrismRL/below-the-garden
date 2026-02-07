@@ -7,6 +7,10 @@ prism.registerActor("Prism", function()
       prism.components.Item(),
       prism.components.Equipment("held"),
       prism.components.Prism(),
-      prism.components.Light(prism.Color4.PRISM, 12, prism.lighteffects.Heartbeat { sharpness = 10, amplitude = 0.5 }),
+      prism.components.Light(
+         prism.Color4.PRISM,
+         12,
+         prism.lighteffects.HeartbeatEffect { sharpness = 10, amplitude = 0.5 }
+      ),
    }
 end)

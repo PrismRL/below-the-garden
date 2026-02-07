@@ -77,7 +77,7 @@ function PitDecorator.tryDecorate(generatorInfo, rng, builder, room)
          local island = prism.SparseGrid()
          local count = 0
 
-         prism.bfs(prism.Vector2(x, y), passable, function(ix, iy)
+         prism.breadthFirstSearch(prism.Vector2(x, y), passable, function(ix, iy)
             visited:set(ix, iy, true)
             island:set(ix, iy, true)
             count = count + 1

@@ -26,7 +26,7 @@ prism.registerActor("Torch", function()
       prism.components.Light(
          (prism.Color4.GOLD + prism.Color4.GOLD) / 2,
          6,
-         prism.lighteffects.Flicker { speed = 2, colorShift = 0.1 }
+         prism.lighteffects.FlickerEffect { speed = 2, colorShift = 0.1 }
       ),
       prism.components.Torch(),
       prism.components.Snuffable("Stick"),

@@ -75,6 +75,8 @@ function GameLevelState:__new(builder, display, overlay, testing)
    local width, height = self.level.map.w, self.level.map.h
    local displayWidth, displayHeight = self.display.width, self.display.height
    self.display:setCamera(math.floor(displayWidth / 2 - width / 2), math.floor(displayHeight / 2 - height / 2))
+   self.lightPass = spectrum.passes.SightLightPass(self.lightSystem)
+   self.display:pushPass(self.lightPass)
 end
 
 function GameLevelState:handleMessage(message)
@@ -327,7 +329,6 @@ function GameLevelState:putHUD(player)
    end
 end
 
-local dummy = prism.Color4()
 function GameLevelState:draw()
    self.display:clear()
    self.overlay:clear()
@@ -346,61 +347,9 @@ function GameLevelState:draw()
       -- local x, y = self.display:getCenterOffset(player:expectPosition():decompose())
       -- self.display:setCamera(x, y)
       self.display:beginCamera()
-      self.display:pushModifier(self.lightPass)
-      self.display:pushModifier(function(entity, x, y, drawable)
-         --- @cast entity Entity
-         --- @cast x integer
-         --- @cast y integer
-         --- @cast drawable Drawable
-         local sight = player:get(prism.components.Sight)
-         local darkvision = sight and sight.darkvision or 0
-
-         local light = self.lightSystem:getRTValuePerspective(x, y, player)
-         light = light or dummy
-
-         -- Preserve original color
-         local base = drawable.color:copy()
-         local baseBackground = drawable.background:copy()
-
-         -- Apply lighting normally
-         if prism.Actor:is(entity) then
-            local value = math.min(light:average(), 1)
-            drawable.color = drawable.color * value
-            drawable.background = drawable.background * value
-         else
-            drawable.color.r = drawable.color.r * light.r
-            drawable.color.g = drawable.color.g * light.g
-            drawable.color.b = drawable.color.b * light.b
-
-            drawable.background.r = drawable.background.r * light.r
-            drawable.background.g = drawable.background.g * light.g
-            drawable.background.b = drawable.background.b * light.b
-         end
-
-         -- Linear darkness (no perceptual luminance)
-         local brightness = drawable.color:average()
-         local darkness = math.min(math.max(1 - brightness, 0), 1)
-         darkness = math.max(darkness - darkvision, 0)
-
-         -- Knee at 0.25: everything below stays bright
-         if darkness <= 0.6 then
-            darkness = 0
-         else
-            -- Remap [0.25 .. 1] → [0 .. 1]
-            darkness = (darkness - 0.6) / 0.4
-         end
-
-         -- Shape the curve (optional but recommended)
-         local restore = math.pow(darkness, 1.5)
-         local alphaLoss = darkness * 0.70
-
-         -- Lerp back toward base color
-         drawable.color = drawable.color:lerp(base, restore)
-         drawable.background = drawable.background:lerp(baseBackground, restore)
-         -- Fade opacity as darkness increases
-         drawable.color.a = base.a * (1 - alphaLoss)
-      end)
+      self.lightPass:setPlayer(player)
       self.display:putSenses(primary, secondary, self.level)
+      -- self.display:putLevel(self.level)
 
       for entity, _ in pairs(player:getRelations(prism.relations.TelepathedRelation)) do
          local position = entity:get(prism.components.Position)
@@ -409,7 +358,6 @@ function GameLevelState:draw()
             self.display:putActor(position:getVector().x, position:getVector().y, entity, prism.Color4.CORNFLOWER)
          end
       end
-      self.display:popModifier()
       self.display:endCamera()
 
       self:putHUD(player)

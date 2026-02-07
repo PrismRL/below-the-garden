@@ -8,9 +8,7 @@ local util = {}
 function util.isWall(builder, x, y)
    if not builder:get(x, y) then return true end
    if builder:get(x, y):getCollisionMask() == 0 then return true end
-   if builder:query(prism.components.Collider, prism.components.Opaque):at(x, y):first() then
-      return true
-   end
+   if builder:query(prism.components.Collider, prism.components.Opaque):at(x, y):first() then return true end
    return false
 end
 
@@ -171,7 +169,7 @@ function util.buildDistanceField(builder, isSource, isPassable, neighborhood)
       end
    end
 
-   return prism.djisktra(sources, function(x, y)
+   return prism.dijkstra(sources, function(x, y)
       return isPassable(builder, x, y)
    end, neighborhood)
 end
